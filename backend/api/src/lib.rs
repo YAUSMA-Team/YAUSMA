@@ -1,15 +1,26 @@
+use ::serde::{Deserialize, Serialize};
 use rocket::{
-    Build, Rocket, get,
-    http::{ContentType, Status},
-    post, routes,
-    serde::json::Json,
+    Build, Rocket, State, get, http::Status, post, response::status, routes, serde::json::Json,
 };
-use rocket_okapi::{okapi::openapi3::OpenApi, openapi, openapi_get_spec};
+use rocket_okapi::{
+    okapi::{openapi3::OpenApi, schemars},
+    openapi, openapi_get_spec,
+};
+type DB = State<sled::Db>;
 
+#[derive(Serialize, Deserialize, schemars::JsonSchema)]
+pub struct UserCredentials {
+    pub username_sha: String,
+    pub password_sha: String,
+}
 #[openapi(tag = "User")]
-#[post("/login")]
-pub async fn login() -> &'static str {
-    "Hello, world!"
+#[post("/login", data = "<creds>")]
+pub async fn login(db: &DB, creds: Json<UserCredentials>) -> Result<(), status::Conflict<String>> {
+    // if db.contains_key(creds.username_sha)? {
+    //     return Err(status::Conflict("Username is already taken".into()));
+    // }
+    // creds.username_sha
+    Ok(())
 }
 
 #[openapi(tag = "User")]
@@ -41,5 +52,7 @@ pub fn get_spec() -> OpenApi {
 }
 
 pub async fn launch() -> Rocket<Build> {
-    rocket::build().mount("/", routes![get_prices, get_news, delete, signup, login])
+    rocket::build()
+        .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
+        .mount("/", routes![get_prices, get_news, delete, signup, login])
 }

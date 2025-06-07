@@ -61,11 +61,30 @@ paths:
       tags:
       - User
       operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+        required: true
       responses:
         '200':
+          description: ''
+        '409':
           description: ''
           content:
             text/plain:
               schema:
                 type: string
-components: {}
+components:
+  schemas:
+    UserCredentials:
+      type: object
+      required:
+      - password_sha
+      - username_sha
+      properties:
+        username_sha:
+          type: string
+        password_sha:
+          type: string
