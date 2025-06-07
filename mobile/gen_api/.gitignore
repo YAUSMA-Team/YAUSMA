@@ -5,8 +5,6 @@
 build/
 pubspec.lock  # Except for application packages
 
-./gen_api
-
 doc/api/
 
 # IntelliJ
