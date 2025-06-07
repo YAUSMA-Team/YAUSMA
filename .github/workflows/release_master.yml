@@ -1,0 +1,32 @@
+# .github/workflows/release_master.yml
+name: Release Master
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: nixos-23.11  # Official NixOS runner
+    steps:
+      - uses: actions/checkout@v4
+
+      # No need for Nix installation - it's preinstalled on NixOS runners
+      - run: cd mobile
+      - run: nix develop . --command flutter pub get
+      - run: nix develop . --command flutter build apk --debug
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-debug.apk
+
+      - uses: softprops/action-gh-release@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          tag: latest-master
+          prerelease: true
+          files: build/app/outputs/flutter-apk/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

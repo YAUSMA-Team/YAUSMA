@@ -31,25 +31,36 @@
           abiVersions = [ "armeabi-v7a" "arm64-v8a" ];
         };
         androidSdk = androidComposition.androidsdk;
+        commonBuildInputs = with pkgs; [
+          # Chore
+          just
+          parallel
+          openapi-generator-cli
+        ];
       in {
-        devShell = with pkgs;
-          mkShell rec {
+        # devShell.default = with pkgs;
+        #   mkShell { inherit (buildInputs) commonBuildInputs; };
+
+        devShells.default = with pkgs;
+          mkShell {
             ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
             buildInputs = [
+              # Backend
+              rust
+
               # Mobile
               flutter
               androidSdk # The customized SDK that we've made above
               jdk17
-
-              # Backend
-              rust
-
-              # Chore
-              just
-              parallel
-              openapi-generator-cli
-            ];
+            ] ++ commonBuildInputs;
           };
+
+        # devShell."backend" = with pkgs;
+        #   mkShell rec {
+        #     inherit (buildInputs) commonBuildInputs;
+        #     buildInputs = [
+        #     ];
+        #   };
       });
 }
 
