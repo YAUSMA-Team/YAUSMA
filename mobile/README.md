@@ -7,3 +7,6 @@
 1. `flutter run`
 
 
+# TODO:
+
+Run locally

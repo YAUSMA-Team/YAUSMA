@@ -4,3 +4,10 @@ parallel:
   echo task 2 start; sleep 3; echo task 2 done
   echo task 3 start; sleep 3; echo task 3 done
   echo task 4 start; sleep 3; echo task 4 done
+
+# TODO:
+dev mobile:
+  # Start backend in background
+   
+# TODO:
+dev web:
