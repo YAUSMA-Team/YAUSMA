@@ -1,0 +1,71 @@
+openapi: 3.0.0
+info:
+  title: api
+  version: 0.1.0
+paths:
+  /get/prices:
+    get:
+      tags:
+      - Data
+      description: Get prices
+      operationId: get_prices
+      responses:
+        default:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                  format: uint32
+                  minimum: 0.0
+  /get/news:
+    get:
+      tags:
+      - Data
+      operationId: get_news
+      responses:
+        '200':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+  /user/delete:
+    post:
+      tags:
+      - User
+      operationId: delete
+      responses:
+        '200':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+  /signup:
+    post:
+      tags:
+      - User
+      operationId: signup
+      responses:
+        '200':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+  /login:
+    post:
+      tags:
+      - User
+      operationId: login
+      responses:
+        '200':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}
