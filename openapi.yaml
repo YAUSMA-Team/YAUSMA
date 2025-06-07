@@ -3,12 +3,12 @@ info:
   title: api
   version: 0.1.0
 paths:
-  /get/prices:
+  /get/charts:
     get:
       tags:
       - Data
       description: Get prices
-      operationId: get_prices
+      operationId: get_charts
       responses:
         default:
           description: ''

@@ -5,7 +5,7 @@
 build/
 pubspec.lock  # Except for application packages
 
-./gen_api
+gen_api/
 
 doc/api/
 

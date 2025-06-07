@@ -26,6 +26,16 @@ fn main() {
     } else {
         eprintln!("Error:\n{}", String::from_utf8_lossy(&output.stderr));
     }
+    // let output = Command::new("openapi-generator-cli")
+    //     .args(["generate", "-i", "../openapi.yaml", "-g", "dart", "-o", "../mobile/api"])
+    //     .output()
+    //     .expect("Failed verify generated openapi.yaml. Likely something is wrong with endpoints in rust. Or you don't have openapi-generator-cli installed");
+    // if output.status.success() {
+    //     println!("Output:\n{}", String::from_utf8_lossy(&output.stdout));
+    // } else {
+    //     eprintln!("Error:\n{}", String::from_utf8_lossy(&output.stderr));
+    // }
+
     println!("cargo:rerun-if-changed=src/main.rs"); // Rebuild on changes
     println!("cargo:rerun-if-changed=src/build.rs"); // Rebuild on changes
     // println!("cargo:rerun-if-changed=../openapi.yaml"); // Rebuild on changes

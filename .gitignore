@@ -1,6 +1,9 @@
 # Devenv
 .devenv*
 devenv.local.nix
+mobile/build
+backend/target
+web/node_modules
 
 # direnv
 .direnv

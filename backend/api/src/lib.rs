@@ -42,17 +42,17 @@ pub async fn get_news() -> &'static str {
 }
 /// Get prices
 #[openapi(tag = "Data")]
-#[get("/get/prices")]
-pub async fn get_prices() -> (Status, Json<Vec<u32>>) {
+#[get("/get/charts")]
+pub async fn get_charts() -> (Status, Json<Vec<u32>>) {
     (Status::Ok, Json(vec![1, 2, 3]))
 }
 
 pub fn get_spec() -> OpenApi {
-    openapi_get_spec![get_prices, get_news, delete, signup, login]
+    openapi_get_spec![get_charts, get_news, delete, signup, login]
 }
 
 pub async fn launch() -> Rocket<Build> {
     rocket::build()
         .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
-        .mount("/", routes![get_prices, get_news, delete, signup, login])
+        .mount("/", routes![get_charts, get_news, delete, signup, login])
 }
