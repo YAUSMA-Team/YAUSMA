@@ -205,22 +205,22 @@ class HorizontalCardList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Example of how to use API:
-    final api_instance = DataApi();
-    try {
-      final result = api_instance.getCharts();
-      print(result);
-    } catch (e) {
-      print('Exception when calling DataApi->getCharts: $e\n');
-    }
+    // final api_instance = DataApi();
+    // try {
+    //   final result = api_instance.getCharts();
+    //   print(result);
+    // } catch (e) {
+    //   print('Exception when calling DataApi->getCharts: $e\n');
+    // }
 
-    final usr_api = UserApi();
-    try {
-      final result = usr_api
-          .login(UserCredentials(usernameSha: "test", passwordSha: "psswd"));
-      print(result);
-    } catch (e) {
-      print('Exception when calling DataApi->getCharts: $e\n');
-    }
+    // final usr_api = UserApi();
+    // try {
+    //   final result = usr_api
+    //       .login(UserCredentials(usernameSha: "test", passwordSha: "psswd"));
+    //   print(result);
+    // } catch (e) {
+    //   print('Exception when calling DataApi->getCharts: $e\n');
+    // }
 
     return Container(
       height: 50, // Set a height for the horizontal list
