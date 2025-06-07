@@ -21,6 +21,7 @@ jobs:
 
       # No need for Nix installation - it's preinstalled on NixOS runners
       # - run: cd mobile && nix develop . --command flutter pub get
+      - run: cd mobile && just gen-client
       - run: cd mobile && nix develop . --command flutter build apk --debug
 
       - uses: actions/upload-artifact@v4
