@@ -1,0 +1,16 @@
+{
+  "name": "server",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@popov/dbil": "npm:@jsr/popov__dbil",
+    "hono": "^4.7.10"
+  }
+}
