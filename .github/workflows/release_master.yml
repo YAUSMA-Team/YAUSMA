@@ -32,8 +32,9 @@ jobs:
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/master'
         with:
-          tag: latest-master
+          tag_name: latest-master
           prerelease: true
           files: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          body: "Auto-generated release from master branch"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
