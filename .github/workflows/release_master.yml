@@ -8,9 +8,16 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: nixos-23.11  # Official NixOS runner
+    runs-on: ubuntu-latest
+    # TODO: Use if we get nixos workers
+    # runs-on: nixos-23.11  # Official NixOS runner
     steps:
       - uses: actions/checkout@v4
+      # Nix setup
+      - uses: cachix/install-nix-action@v20
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
 
       # No need for Nix installation - it's preinstalled on NixOS runners
       - run: cd mobile
