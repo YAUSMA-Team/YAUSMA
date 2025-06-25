@@ -13,3 +13,10 @@ tokio = { version = "1.45.1", features = ["full"] }
 schemars = "0.9.0"
 serde = { version = "1.0.219", features = ["derive"] }
 lazy_static = "1.5.0"
+thiserror = "2.0.12"
+bincode = "2.0.1"
+derive_more = { version = "2.0.1", features = [ "full" ] }
+
+# [dependencies.rocket_auth2]
+# version = "0.6.1"
+# features = ["sled"]

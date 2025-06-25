@@ -70,21 +70,21 @@ paths:
       responses:
         '200':
           description: ''
+        '404':
+          description: Unauthorized access
+        '500':
+          description: Internal server error
         '409':
-          description: ''
-          content:
-            text/plain:
-              schema:
-                type: string
+          description: Email already registered
 components:
   schemas:
     UserCredentials:
       type: object
       required:
-      - password_sha
-      - username_sha
+      - email
+      - password_hash
       properties:
-        username_sha:
+        email:
           type: string
-        password_sha:
+        password_hash:
           type: string

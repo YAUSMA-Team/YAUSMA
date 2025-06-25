@@ -13,6 +13,7 @@ api = { path = "./api" }
 rocket = { version = "0.5.1", features = ["secrets"] }
 rocket_okapi = "0.9.0"
 
+
 [build-dependencies]
 api = { path = "./api" }
 rocket_okapi = "0.9.0"

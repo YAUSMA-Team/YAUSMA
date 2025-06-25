@@ -1,7 +1,7 @@
 {
   description = "Flutter 3.13.x";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/23.11";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
@@ -52,6 +52,9 @@
               flutter
               androidSdk # The customized SDK that we've made above
               jdk17
+
+              # Web
+              deno
             ] ++ commonBuildInputs;
           };
 
