@@ -52,8 +52,43 @@ class Stock {
   final String name;
   final double currentPrice;
   final double change;
+  final double high;
+  final double low;
+  final String volume;
+  final String sector;
+  final String description;
 
-  Stock(this.symbol, this.name, this.currentPrice, this.change);
+  Stock(
+    this.symbol,
+    this.name,
+    this.currentPrice,
+    this.change, {
+    this.high = 0,
+    this.low = 0,
+    this.volume = '',
+    this.sector = '',
+    this.description = '',
+  });
+}
+
+class NewsArticle {
+  final String id;
+  final String title;
+  final String summary;
+  final String source;
+  final String content;
+  final String date;
+  final String? imageUrl;
+
+  const NewsArticle({
+    required this.id,
+    required this.title,
+    required this.summary,
+    required this.source,
+    required this.content,
+    required this.date,
+    this.imageUrl,
+  });
 }
 
 class StockMarketApp extends StatelessWidget {
@@ -289,8 +324,56 @@ class StocksOverviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Stocks Overview Page - TODO: Implement'),
+    final stocks = [
+      Stock('AAPL', 'Apple Inc.', 189.34, 1.23,
+          high: 190.45, low: 187.56, volume: '45.6M', sector: 'Technology'),
+      Stock('MSFT', 'Microsoft Corp.', 420.69, 0.87,
+          high: 422.50, low: 418.30, volume: '32.1M', sector: 'Technology'),
+      Stock('AMZN', 'Amazon.com Inc.', 185.25, -0.34,
+          high: 187.40, low: 184.10, volume: '28.9M', sector: 'Consumer'),
+      Stock('GOOGL', 'Alphabet Inc.', 145.67, -0.45,
+          high: 147.20, low: 144.80, volume: '18.3M', sector: 'Technology'),
+      Stock('TSLA', 'Tesla Inc.', 245.12, 5.67,
+          high: 248.90, low: 240.50, volume: '52.7M', sector: 'Automotive'),
+    ];
+
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Stock Market Overview',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
+        ...stocks.map((stock) => Card(
+              margin:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ListTile(
+                title: Text(stock.name),
+                subtitle: Text(stock.sector),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('\$${stock.currentPrice}'),
+                    Text(
+                      '${stock.change > 0 ? '+' : ''}${stock.change}%',
+                      style: TextStyle(
+                        color: stock.change > 0 ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StockDetailPage(stock: stock),
+                  ),
+                ),
+              ),
+            )),
+      ],
     );
   }
 }
@@ -300,54 +383,163 @@ class NewsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: const [
-        NewsCard(
-          title: 'Market Rally Continues',
-          summary: 'Stocks rise for third consecutive day...',
-          source: 'Financial Times',
-        ),
-        NewsCard(
+    final newsArticles = [
+      const NewsArticle(
+        id: '1',
+        title: 'Market Rally Continues',
+        summary: 'Stocks rise for third consecutive day...',
+        source: 'Financial Times',
+        content:
+            'Global markets continued their upward trend for the third consecutive day, with the S&P 500 gaining 1.2% and the NASDAQ up 1.8%. Analysts attribute the rally to positive earnings reports from major tech companies and easing inflation concerns. The Dow Jones Industrial Average also rose 0.8%, marking its best performance this month.',
+        date: '2023, 6, 15, 10, 30',
+        // imageUrl: 'https://example.com/news1.jpg',
+      ),
+      const NewsArticle(
+          id: '2',
           title: 'Tech Stocks Lead Gains',
           summary: 'Major tech companies report strong earnings...',
           source: 'Wall Street Journal',
+          content:
+              'Technology stocks outperformed the broader market yesterday, with the tech-heavy NASDAQ index closing up 2.3%. Apple, Microsoft, and Alphabet all reported better-than-expected quarterly earnings, driving the sector higher. Analysts suggest this could signal a rotation back into growth stocks after months of underperformance.',
+          date: '2023, 6, 14, 15, 45'),
+      const NewsArticle(
+          id: '3',
+          title: 'Tech Stocks Lead Gains',
+          summary: 'Major tech companies report strong earnings...',
+          source: 'Wall Street Journal',
+          content:
+              'Technology stocks outperformed the broader market yesterday, with the tech-heavy NASDAQ index closing up 2.3%. Apple, Microsoft, and Alphabet all reported better-than-expected quarterly earnings, driving the sector higher. Analysts suggest this could signal a rotation back into growth stocks after months of underperformance.',
+          date: '2023, 6, 14, 15, 45'),
+    ];
+
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Latest Market News',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
+        ...newsArticles.map((article) => NewsCard(
+              article: article,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewsDetailPage(article: article),
+                ),
+              ),
+            )),
       ],
     );
   }
 }
 
 class NewsCard extends StatelessWidget {
-  final String title;
-  final String summary;
-  final String source;
+  final NewsArticle article;
+  final VoidCallback onTap;
 
   const NewsCard({
     super.key,
-    required this.title,
-    required this.summary,
-    required this.source,
+    required this.article,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (article.imageUrl != null)
+                Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(article.imageUrl!),
+                      fit: BoxFit.cover,
+                    ),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Text(
+                article.title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                article.summary,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    article.source,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  Text(
+                    'Published: ${article.date}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class NewsDetailPage extends StatelessWidget {
+  final NewsArticle article;
+
+  const NewsDetailPage({super.key, required this.article});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(article.source),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge,
+              article.title,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            Text(summary),
-            const SizedBox(height: 8),
             Text(
-              source,
+              'Published: ${article.date.toString().substring(0, 16)}',
               style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
+            if (article.imageUrl != null)
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(article.imageUrl!),
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              article.content,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
         ),
@@ -391,10 +583,32 @@ class PortfolioPage extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
-        ...appState.currentUser!.portfolio.map((stock) => ListTile(
-              title: Text(stock.name),
-              subtitle: Text(stock.symbol),
-              trailing: Text('\$${stock.currentPrice}'),
+        ...appState.currentUser!.portfolio.map((stock) => Card(
+              margin:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ListTile(
+                title: Text(stock.name),
+                subtitle: Text(stock.symbol),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('\$${stock.currentPrice}'),
+                    Text(
+                      '${stock.change > 0 ? '+' : ''}${stock.change}%',
+                      style: TextStyle(
+                        color: stock.change > 0 ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StockDetailPage(stock: stock),
+                  ),
+                ),
+              ),
             )),
       ],
     );
@@ -420,12 +634,19 @@ class ProVersionPage extends StatelessWidget {
           const Text('• Real-time alerts'),
           const Text('• Advanced charts'),
           const Text('• Portfolio analytics'),
+          const Text('• Unlimited watchlists'),
+          const Text('• Premium research reports'),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
               // TODO: Implement purchase flow
             },
             child: const Text('Subscribe for \$9.99/month'),
+          ),
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: () {},
+            child: const Text('Restore Purchase'),
           ),
         ],
       ),
@@ -445,81 +666,128 @@ class StockDetailPage extends StatelessWidget {
         title: Text(stock.symbol),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                stock.name,
-                style: Theme.of(context).textTheme.headlineSmall,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              stock.name,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '\$${stock.currentPrice}',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+            Text(
+              '${stock.change > 0 ? '+' : ''}${stock.change}%',
+              style: TextStyle(
+                color: stock.change > 0 ? Colors.green : Colors.red,
+                fontSize: 18,
               ),
-              const SizedBox(height: 8),
-              Text(
-                '\$${stock.currentPrice}',
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              Text(
-                '${stock.change > 0 ? '+' : ''}${stock.change}%',
-                style: TextStyle(
-                  color: stock.change > 0 ? Colors.green : Colors.red,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Price Chart',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                height: 200,
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Price Chart',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
                 color: Colors.grey[200],
-                child: const Center(
-                  child: Text('Chart Placeholder'),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: const Center(
+                child: Text('Interactive Chart Placeholder'),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Key Information',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Table(
+              border: TableBorder.all(color: Colors.grey),
+              children: [
+                TableRow(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('High'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('\$${stock.high}'),
+                    ),
+                  ],
                 ),
-              ),
+                TableRow(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Low'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('\$${stock.low}'),
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Volume'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(stock.volume),
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Sector'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(stock.sector),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            if (stock.description.isNotEmpty) ...[
               const SizedBox(height: 24),
               const Text(
-                'Key Information',
+                'Company Description',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              Table(
-                children: const [
-                  TableRow(
-                    children: [
-                      Text('High'),
-                      Text('\$190.45'),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Text('Low'),
-                      Text('\$187.56'),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Text('Volume'),
-                      Text('45.6M'),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Related News',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const NewsCard(
-                title: 'Apple announces new products',
-                summary: 'Company unveils latest iPhone and Mac models...',
-                source: 'TechCrunch',
-              ),
+              Text(stock.description),
             ],
-          ),
+            const SizedBox(height: 24),
+            const Text(
+              'Related News',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            NewsCard(
+              article: const NewsArticle(
+                id: '4',
+                title: 'Apple announces record quarterly earnings',
+                summary: 'Company beats analyst expectations...',
+                source: 'CNBC',
+                content: 'Detailed content about Apple earnings...',
+                date: '2023, 6, 10, 9, 15',
+              ),
+              onTap: () {},
+            ),
+          ],
         ),
       ),
     );
@@ -566,6 +834,9 @@ class _LoginPageState extends State<LoginPage> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
                   }
+                  if (!value.contains('@')) {
+                    return 'Please enter a valid email';
+                  }
                   return null;
                 },
               ),
@@ -576,6 +847,9 @@ class _LoginPageState extends State<LoginPage> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
                   }
                   return null;
                 },
@@ -623,8 +897,34 @@ class RegisterPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Register'),
       ),
-      body: const Center(
-        child: Text('Registration Form - TODO: Implement'),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const TextField(
+              decoration: InputDecoration(labelText: 'Full Name'),
+            ),
+            const TextField(
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            const TextField(
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            const TextField(
+              decoration: InputDecoration(labelText: 'Confirm Password'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Implement registration
+                Navigator.pop(context);
+              },
+              child: const Text('Register'),
+            ),
+          ],
+        ),
       ),
     );
   }
