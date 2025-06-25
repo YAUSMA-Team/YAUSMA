@@ -49,13 +49,21 @@ paths:
       tags:
       - User
       operationId: signup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+        required: true
       responses:
         '200':
           description: ''
-          content:
-            text/plain:
-              schema:
-                type: string
+        '404':
+          description: Unauthorized access
+        '500':
+          description: Internal server error
+        '409':
+          description: Email already registered
   /login:
     post:
       tags:

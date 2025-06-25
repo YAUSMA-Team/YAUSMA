@@ -20,7 +20,7 @@ use rocket_okapi::{
 };
 type DB = State<sled::Db>;
 
-#[derive(Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
 pub struct UserCredentials {
     pub email: String,
     pub password_hash: String,
@@ -32,7 +32,31 @@ pub struct UserCredentials {
 pub async fn login(
     db: &State<sled::Db>,
     creds: Json<UserCredentials>,
-    cookies: &CookieJar<'_>,
+    // cookies: &CookieJar<'_>,
+) -> Result<(), BackendError> {
+    let users_tree = db.open_tree("users")?;
+
+    dbg!(&creds);
+    let Some(password) = users_tree.get(&creds.email)? else {
+        dbg!("Does not exist");
+        return Err(BackendError::EmailExists("Username does not exist".into()));
+    };
+
+    dbg!(&password);
+    if password != dbg!(creds.password_hash.as_bytes()) {
+        return Err(BackendError::EmailExists("Incorrect password".into()));
+    }
+
+    Ok(())
+}
+
+#[openapi(tag = "User")]
+#[post("/signup", data = "<creds>")]
+// pub async fn login(db: &DB, creds: Json<UserCredentials>) -> &'static str {
+pub async fn signup(
+    db: &State<sled::Db>,
+    creds: Json<UserCredentials>,
+    // cookies: &CookieJar<'_>,
 ) -> Result<(), BackendError> {
     let users_tree = db.open_tree("users")?;
     if users_tree.contains_key(&creds.email)? {
@@ -40,12 +64,6 @@ pub async fn login(
     }
     users_tree.insert(creds.email.clone(), creds.password_hash.as_bytes())?;
     Ok(())
-}
-
-#[openapi(tag = "User")]
-#[post("/signup")]
-pub async fn signup() -> &'static str {
-    "Hello, world!"
 }
 
 #[openapi(tag = "User")]

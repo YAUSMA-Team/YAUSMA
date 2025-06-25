@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+var client = ApiClient(basePath: "http://192.168.0.58:8000");
 
 void main() => runApp(
       ChangeNotifierProvider(
@@ -805,6 +808,8 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _email = "";
+  String _password = "";
 
   @override
   void dispose() {
@@ -832,11 +837,12 @@ class _LoginPageState extends State<LoginPage> {
                 decoration: const InputDecoration(labelText: 'Email'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
+                    return 'Please enter email';
                   }
                   if (!value.contains('@')) {
                     return 'Please enter a valid email';
                   }
+                  this._email = value ?? "";
                   return null;
                 },
               ),
@@ -846,18 +852,40 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
+                    return 'Please enter password';
                   }
                   if (value.length < 6) {
                     return 'Password must be at least 6 characters';
                   }
+                  this._password = value ?? "";
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    var res = await UserApi(client).loginWithHttpInfo(
+                        UserCredentials(
+                            email: this._email, passwordHash: this._password));
+
+                    var r = res.body;
+                    print('BEFORE $r');
+
+                    if (res.statusCode != 200) {
+                      Fluttertoast.showToast(
+                        msg: res.body,
+                        toastLength: Toast.LENGTH_SHORT, // 2 seconds
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 2, // duration for iOS/web
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        fontSize: 16.0,
+                      );
+
+                      return;
+                    }
+
                     appState.login(User(
                       _emailController.text,
                       'Test User',
@@ -888,44 +916,130 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
   @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    // Dispose controllers when the widget is disposed
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const TextField(
-              decoration: InputDecoration(labelText: 'Full Name'),
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: confirmPasswordController,
+                  decoration:
+                      const InputDecoration(labelText: 'Confirm Password'),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    if (passwordController.text != value) {
+                      return 'Passwords do not match';
+                    }
+
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      // Access the input values
+                      final email = emailController.text;
+                      final password = passwordController.text;
+                      final confirmPassword = confirmPasswordController.text;
+
+                      // TODO: Implement registration logic here
+                      print('Email: $email');
+                      print('Password: $password');
+                      print('Confirm Password: $confirmPassword');
+
+                      var res = await UserApi(client).signupWithHttpInfo(
+                          UserCredentials(
+                              email: email, passwordHash: password));
+
+                      var r = res.body;
+                      print('Res: $r');
+
+                      if (res.statusCode != 200) {
+                        Fluttertoast.showToast(
+                          msg: res.body,
+                          toastLength: Toast.LENGTH_SHORT, // 2 seconds
+                          gravity: ToastGravity.BOTTOM,
+                          timeInSecForIosWeb: 2, // duration for iOS/web
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0,
+                        );
+                        return;
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    }
+                  },
+                  child: const Text('Register'),
+                ),
+              ],
             ),
-            const TextField(
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            const TextField(
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const TextField(
-              decoration: InputDecoration(labelText: 'Confirm Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Implement registration
-                Navigator.pop(context);
-              },
-              child: const Text('Register'),
-            ),
-          ],
-        ),
-      ),
+          )),
     );
   }
 }

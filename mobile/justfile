@@ -1,2 +1,6 @@
 client-gen:
     openapi-generator-cli generate -i ../openapi.yaml -g dart -o ./gen_api
+
+dev: client-gen
+    flutter run
+    
