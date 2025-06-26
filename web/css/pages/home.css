@@ -250,6 +250,10 @@
     background: var(--bg-secondary);
 }
 
+.market-overview-section .section-title {
+    color: #000000 !important; /* Force black color permanently */
+}
+
 .market-overview-card {
     background: white;
     border-radius: 1rem;
@@ -584,6 +588,14 @@
 
 [data-theme="dark"] .market-item:hover {
     background: rgba(26, 32, 44, 1);
+}
+
+[data-theme="dark"] .market-overview-section {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .market-overview-section .section-title {
+    color: #000000 !important; /* Keep black even in dark theme */
 }
 
 [data-theme="dark"] .market-overview-card {
