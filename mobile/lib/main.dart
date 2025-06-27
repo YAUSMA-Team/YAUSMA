@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 var client = ApiClient(basePath: "http://192.168.0.58:8000");
 
@@ -281,44 +282,58 @@ class StockQuickView extends StatelessWidget {
       Stock('GOOGL', 'Alphabet Inc.', 145.67, -0.45),
       Stock('TSLA', 'Tesla Inc.', 245.12, 5.67),
     ];
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Top Movers',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            ...topStocks.map((stock) => ListTile(
-                  title: Text(stock.symbol),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('\$${stock.currentPrice}'),
-                      Text(
-                        '${stock.change > 0 ? '+' : ''}${stock.change}%',
-                        style: TextStyle(
-                          color: stock.change > 0 ? Colors.green : Colors.red,
+    return FutureBuilder<List<MarketOverviewItem>>(
+        future: DataApi(client)
+            .getMarketOverview()
+            .then((value) => value ?? []), // call your async function here
+        builder: (context, snapshot) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Top Movers',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  ...(snapshot.data ?? []).map((stock) => Card(
+                        // ...stocks.map((stock) => Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: ListTile(
+                          title: Text(stock.name),
+                          subtitle: Text(stock.sector),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text('${stock.currentPrice}'),
+                              Text(
+                                '${stock.change > 0 ? '+' : ''}${stock.change}%',
+                                style: TextStyle(
+                                  color: stock.change > 0
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  StockDetailPage(stock: stock),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => StockDetailPage(stock: stock),
-                    ),
-                  ),
-                )),
-          ],
-        ),
-      ),
-    );
+                      )),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }
 
@@ -328,18 +343,6 @@ class StocksOverviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stocks = [
-      Stock('AAPL', 'Apple Inc.', 189.34, 1.23,
-          high: 190.45, low: 187.56, volume: '45.6M', sector: 'Technology'),
-      Stock('MSFT', 'Microsoft Corp.', 420.69, 0.87,
-          high: 422.50, low: 418.30, volume: '32.1M', sector: 'Technology'),
-      Stock('AMZN', 'Amazon.com Inc.', 185.25, -0.34,
-          high: 187.40, low: 184.10, volume: '28.9M', sector: 'Consumer'),
-      Stock('GOOGL', 'Alphabet Inc.', 145.67, -0.45,
-          high: 147.20, low: 144.80, volume: '18.3M', sector: 'Technology'),
-      Stock('TSLA', 'Tesla Inc.', 245.12, 5.67,
-          high: 248.90, low: 240.50, volume: '52.7M', sector: 'Automotive'),
-    ];
     return FutureBuilder<List<MarketOverviewItem>>(
         future: DataApi(client)
             .getMarketOverview()
@@ -360,56 +363,29 @@ class StocksOverviewPage extends StatelessWidget {
                         horizontal: 16.0, vertical: 8.0),
                     child: ListTile(
                       title: Text(stock.name),
-                      subtitle: Text(stock.group),
+                      subtitle: Text(stock.sector),
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text('${stock.currentPrice}'),
                           Text(
-                            '${stock.diff > 0 ? '+' : ''}${stock.diff}%',
+                            '${stock.change > 0 ? '+' : ''}${stock.change}%',
                             style: TextStyle(
-                              color: stock.diff > 0 ? Colors.green : Colors.red,
+                              color:
+                                  stock.change > 0 ? Colors.green : Colors.red,
                             ),
                           ),
                         ],
                       ),
-                      // onTap: () => Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => StockDetailPage(stock: stock),
-                      //   ),
-                      // ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StockDetailPage(stock: stock),
+                        ),
+                      ),
                     ),
                   )),
-              // ...stocks.map((stock) => Card(
-              //       margin: const EdgeInsets.symmetric(
-              //           horizontal: 16.0, vertical: 8.0),
-              //       child: ListTile(
-              //         title: Text(stock.name),
-              //         subtitle: Text(stock.sector),
-              //         trailing: Column(
-              //           mainAxisAlignment: MainAxisAlignment.center,
-              //           crossAxisAlignment: CrossAxisAlignment.end,
-              //           children: [
-              //             Text('\$${stock.currentPrice}'),
-              //             Text(
-              //               '${stock.change > 0 ? '+' : ''}${stock.change}%',
-              //               style: TextStyle(
-              //                 color:
-              //                     stock.change > 0 ? Colors.green : Colors.red,
-              //               ),
-              //             ),
-              //           ],
-              //         ),
-              //         onTap: () => Navigator.push(
-              //           context,
-              //           MaterialPageRoute(
-              //             builder: (context) => StockDetailPage(stock: stock),
-              //           ),
-              //         ),
-              //       ),
-              //     )),
             ],
           );
         });
@@ -451,31 +427,32 @@ class NewsPage extends StatelessWidget {
           date: '2023, 6, 14, 15, 45'),
     ];
 
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Latest Market News',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-        ),
-        ...newsArticles.map((article) => NewsCard(
-              article: article,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NewsDetailPage(article: article),
+    return FutureBuilder<List<NewsItem>>(
+        future: DataApi(client)
+            .getNews()
+            .then((value) => value ?? []), // call your async function here
+        builder: (context, snapshot) {
+          return ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Latest Market News',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
-            )),
-      ],
-    );
+              ...(snapshot.data ?? []).map((news) => NewsCard(
+                    article: news,
+                    onTap: () => {},
+                  )),
+            ],
+          );
+        });
   }
 }
 
 class NewsCard extends StatelessWidget {
-  final NewsArticle article;
+  final NewsItem article;
   final VoidCallback onTap;
 
   const NewsCard({
@@ -487,54 +464,80 @@ class NewsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (article.imageUrl != null)
-                Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(article.imageUrl!),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Text(
-                article.title,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                article.summary,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    article.source,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  Text(
-                    'Published: ${article.date}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      child: ListTile(
+        leading: const Icon(Icons.link), // External link icon
+        title: Text(article.title),
+        subtitle: Text(article.publisher),
+        trailing:
+            const Icon(Icons.open_in_new), // Optional: Indicates external link
+        onTap: () async {
+          await launchUrl(Uri.parse(article.source_));
+          // if (await canLaunchUrl(Uri.parse(article.source_))) {
+          // } else {
+          //   var src = article.source_;
+          //   Fluttertoast.showToast(
+          //     msg: 'Could not launch $src',
+          //     toastLength: Toast.LENGTH_SHORT, // 2 seconds
+          //     gravity: ToastGravity.BOTTOM,
+          //     timeInSecForIosWeb: 2, // duration for iOS/web
+          //     backgroundColor: Colors.red,
+          //     textColor: Colors.white,
+          //     fontSize: 16.0,
+          //   );
+          // }
+        },
       ),
     );
+
+    // return Card(
+    //   margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    //   child: InkWell(
+    //     onTap: onTap,
+    //     child: Padding(
+    //       padding: const EdgeInsets.all(12.0),
+    //       child: Column(
+    //         crossAxisAlignment: CrossAxisAlignment.start,
+    //         children: [
+    //           // if (article.imageUrl != null)
+    //           //   Container(
+    //           //     height: 150,
+    //           //     decoration: BoxDecoration(
+    //           //       image: DecorationImage(
+    //           //         image: NetworkImage(article.imageUrl!),
+    //           //         fit: BoxFit.cover,
+    //           //       ),
+    //           //       borderRadius: BorderRadius.circular(4.0),
+    //           //     ),
+    //           //   ),
+    //           const SizedBox(height: 8),
+    //           Text(
+    //             article.title,
+    //             style: Theme.of(context).textTheme.titleLarge,
+    //           ),
+    //           const SizedBox(height: 4),
+    //           // Text(
+    //           //   article.summary,
+    //           //   style: Theme.of(context).textTheme.bodyMedium,
+    //           // ),
+    //           const SizedBox(height: 8),
+    //           Row(
+    //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //             children: [
+    //               // Text(
+    //               //   article.source,
+    //               //   style: Theme.of(context).textTheme.bodySmall,
+    //               // ),
+    //               Text(
+    //                 'Published: ${article.date}',
+    //                 style: Theme.of(context).textTheme.bodySmall,
+    //               ),
+    //             ],
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 }
 
@@ -622,33 +625,34 @@ class PortfolioPage extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
-        ...appState.currentUser!.portfolio.map((stock) => Card(
-              margin:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: ListTile(
-                title: Text(stock.name),
-                subtitle: Text(stock.symbol),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('\$${stock.currentPrice}'),
-                    Text(
-                      '${stock.change > 0 ? '+' : ''}${stock.change}%',
-                      style: TextStyle(
-                        color: stock.change > 0 ? Colors.green : Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StockDetailPage(stock: stock),
-                  ),
-                ),
-              ),
-            )),
+        Text('Nothing here yet.'),
+        // ...appState.currentUser!.portfolio.map((stock) => Card(
+        //       margin:
+        //           const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        //       child: ListTile(
+        //         title: Text(stock.name),
+        //         subtitle: Text(stock.symbol),
+        //         trailing: Column(
+        //           mainAxisAlignment: MainAxisAlignment.center,
+        //           crossAxisAlignment: CrossAxisAlignment.end,
+        //           children: [
+        //             Text('\$${stock.currentPrice}'),
+        //             Text(
+        //               '${stock.change > 0 ? '+' : ''}${stock.change}%',
+        //               style: TextStyle(
+        //                 color: stock.change > 0 ? Colors.green : Colors.red,
+        //               ),
+        //             ),
+        //           ],
+        //         ),
+        //         // onTap: () => Navigator.push(
+        //         //   context,
+        //         //   MaterialPageRoute(
+        //         //     builder: (context) => StockDetailPage(stock: stock),
+        //         //   ),
+        //         // ),
+        //       ),
+        //     )),
       ],
     );
   }
@@ -664,23 +668,34 @@ class ProVersionPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Upgrade to Pro Version',
+            'Upgrade to Ulta-Pro-Global-Elite-Boss-Mega-Max Version',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const Text('Get advanced features:'),
+          const Text('Get no advanced features:'),
           const SizedBox(height: 8),
-          const Text('• Real-time alerts'),
-          const Text('• Advanced charts'),
-          const Text('• Portfolio analytics'),
-          const Text('• Unlimited watchlists'),
-          const Text('• Premium research reports'),
+          const Text('• Pay us money (does not work lol)'),
+          const Text('• We will give you nothing in return'),
+          const Text('• Just use Ghostfolio'),
+          const Text('• What are you even doing here?'),
+          const Text('• Help meeee!!!'),
+          const Text('• THEY KEEP ME HERE AGAINST MY WILL!!!'),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
+              Fluttertoast.showToast(
+                msg:
+                    "Thank you for wasting money on us. We are absolutely not sorry",
+                toastLength: Toast.LENGTH_LONG, // 2 seconds
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 4, // duration for iOS/web
+                backgroundColor: Colors.pink,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
               // TODO: Implement purchase flow
             },
-            child: const Text('Subscribe for \$9.99/month'),
+            child: const Text('Subscribe only for 1.99 BTC/month'),
           ),
           const SizedBox(height: 16),
           TextButton(
@@ -694,7 +709,7 @@ class ProVersionPage extends StatelessWidget {
 }
 
 class StockDetailPage extends StatelessWidget {
-  final Stock stock;
+  final MarketOverviewItem stock;
 
   const StockDetailPage({super.key, required this.stock});
 
@@ -702,7 +717,7 @@ class StockDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(stock.symbol),
+        title: Text(stock.name),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -782,7 +797,7 @@ class StockDetailPage extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(stock.volume),
+                      child: Text(stock.volume.toString()),
                     ),
                   ],
                 ),
@@ -800,32 +815,26 @@ class StockDetailPage extends StatelessWidget {
                 ),
               ],
             ),
-            if (stock.description.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              const Text(
-                'Company Description',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(stock.description),
-            ],
+            // if (stock.description.isNotEmpty) ...[
+            //   const SizedBox(height: 24),
+            //   const Text(
+            //     'Company Description',
+            //     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            //   ),
+            //   const SizedBox(height: 8),
+            //   Text(stock.description),
+            // ],
             const SizedBox(height: 24),
             const Text(
               'Related News',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            NewsCard(
-              article: const NewsArticle(
-                id: '4',
-                title: 'Apple announces record quarterly earnings',
-                summary: 'Company beats analyst expectations...',
-                source: 'CNBC',
-                content: 'Detailed content about Apple earnings...',
-                date: '2023, 6, 10, 9, 15',
-              ),
-              onTap: () {},
-            ),
+            if (stock.newsArticle != null)
+              NewsCard(
+                article: stock.newsArticle!,
+                onTap: () {},
+              )
           ],
         ),
       ),
@@ -990,13 +999,14 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 TextFormField(
                   controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(
+                      labelText: 'Email (accepted only fake ones)'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'Ghosts cant register, bud';
                     }
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return 'You will need to have atleast @ to bypass this form';
                     }
                     return null;
                   },
@@ -1007,10 +1017,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
+                      return 'Please enter your password (123456 is fine)';
                     }
                     if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return 'Password must be at least 6 characters (just use 123456)';
                     }
                     return null;
                   },

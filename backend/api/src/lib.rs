@@ -18,7 +18,7 @@ use rocket_okapi::{
     openapi, openapi_get_spec,
     response::{OpenApiResponder, OpenApiResponderInner},
 };
-use yahoo_finance_api::YahooConnector;
+use yahoo_finance_api::{Quote, YahooConnector};
 type DB = State<sled::Db>;
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
@@ -74,12 +74,6 @@ pub async fn delete() -> &'static str {
 }
 
 #[openapi(tag = "Data")]
-#[get("/get/news")]
-pub async fn get_news() -> &'static str {
-    "Hello, world!"
-}
-
-#[openapi(tag = "Data")]
 #[get("/api/portfolio", data = "<token>")]
 pub async fn get_portfolio(token: Json<String>) -> &'static str {
     "Hello, world!"
@@ -95,9 +89,14 @@ pub async fn get_charts() -> (Status, Json<Vec<u32>>) {
 pub struct MarketOverviewItem {
     pub name: String,
     pub short: String,
-    pub group: String,
+    pub sector: String,
     pub current_price: String,
-    pub diff: f64,
+    pub change: f64,
+    pub high: f64,
+    pub low: f64,
+    pub symbol: String,
+    pub volume: u64,
+    pub news_article: Option<NewsItem>,
 }
 
 #[openapi(tag = "Data")]
@@ -128,14 +127,23 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
         );
 
         res.push(MarketOverviewItem {
+            symbol: metadata.symbol,
             name: metadata
                 .long_name
                 .or(metadata.short_name)
                 .unwrap_or(metadata.exchange_name),
-            group: metadata.instrument_type,
+            sector: metadata.instrument_type,
             short: ticker.to_owned(),
             current_price: format!("${close_price}"),
-            diff: percent_diff,
+            change: percent_diff,
+            high: quote.high,
+            low: quote.low,
+            volume: quote.volume,
+            news_article: get_news(Some(ticker.to_owned()))
+                .await?
+                .0
+                .first()
+                .map(|e| (*e).clone()),
         });
 
         // Calculate % difference
@@ -152,64 +160,86 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
     // provider.get_latest_quotes(Status::Ok, Json(vec![1, 2, 3]))
 }
 
-#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
-pub struct TickerNewsItem {
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug, Default, Clone)]
+pub struct NewsItem {
     pub id: String,
     pub title: String,
-    pub summary: String,
+    pub publisher: String,
     pub source: String,
-    pub content: String,
     pub date: String,
 }
 
 #[openapi(tag = "Data")]
 #[get("/get/ticker-news/<ticker>")]
-pub async fn get_ticker_news(ticker: String) -> Result<Json<Vec<TickerNewsItem>>, BackendError> {
-    // List of stock tickers
-    let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
+pub async fn get_ticker_news(ticker: String) -> Result<Json<Vec<NewsItem>>, BackendError> {
+    todo!()
+}
 
-    // Create a YahooFinance client
+#[openapi(tag = "Data")]
+#[get("/get/news?<ticker>")]
+pub async fn get_news(ticker: Option<String>) -> Result<Json<Vec<NewsItem>>, BackendError> {
+    dbg!(&ticker);
+    // // List of stock tickers
+    // let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
+
+    // // Create a YahooFinance client
     let provider = YahooConnector::new().unwrap();
 
-    let mut res = vec![];
+    let searchres = provider
+        .search_ticker(&ticker.unwrap_or("*".to_owned()))
+        .await?;
+    Ok(Json(
+        searchres
+            .news
+            .into_iter()
+            .map(|yni| NewsItem {
+                id: yni.uuid,
+                title: yni.title,
+                publisher: yni.publisher,
+                source: yni.link,
+                date: yni.provider_publish_time.to_string(),
+            })
+            .collect(),
+    ))
 
-    for ticker in tickers {
-        // Fetch quote asynchronously
-        let quotes = provider.get_latest_quotes(ticker, "1d").await?;
-        let quote = quotes.last_quote()?;
-        let metadata = quotes.metadata()?;
+    // let mut res = vec![];
 
-        let open_price = quote.open;
-        let close_price = quote.close;
+    // for ticker in tickers {
+    //     // Fetch quote asynchronously
+    //     let quotes = provider.get_latest_quotes(ticker, "1d").await?;
+    //     let quote = quotes.last_quote()?;
+    //     let metadata = quotes.metadata()?;
 
-        let percent_diff = ((close_price - open_price) / open_price) * 100.0;
+    //     let open_price = quote.open;
+    //     let close_price = quote.close;
 
-        println!(
-            "Open: ${:.2}, Close: ${:.2}, % Diff: {:.2}%",
-            open_price, close_price, percent_diff
-        );
+    //     let percent_diff = ((close_price - open_price) / open_price) * 100.0;
 
-        res.push(MarketOverviewItem {
-            name: metadata
-                .long_name
-                .or(metadata.short_name)
-                .unwrap_or(metadata.exchange_name),
-            group: metadata.instrument_type,
-            short: ticker.to_owned(),
-            current_price: format!("${close_price}"),
-            diff: percent_diff,
-        });
+    //     println!(
+    //         "Open: ${:.2}, Close: ${:.2}, % Diff: {:.2}%",
+    //         open_price, close_price, percent_diff
+    //     );
 
-        // Calculate % difference
-        // let percent_diff = ((current_price - prev_close) / prev_close) * 100.0;
+    //     res.push(MarketOverviewItem {
+    //         name: metadata
+    //             .long_name
+    //             .or(metadata.short_name)
+    //             .unwrap_or(metadata.exchange_name),
+    //         group: metadata.instrument_type,
+    //         short: ticker.to_owned(),
+    //         current_price: format!("${close_price}"),
+    //         diff: percent_diff,
+    //     });
 
-        // println!(
-        //     "Ticker: {}, Price: ${:.2}, % Diff: {:.2}%",
-        //     ticker, current_price, percent_diff
-        // );
-    }
+    //     // Calculate % difference
+    //     // let percent_diff = ((current_price - prev_close) / prev_close) * 100.0;
 
-    todo!()
+    //     // println!(
+    //     //     "Ticker: {}, Price: ${:.2}, % Diff: {:.2}%",
+    //     //     ticker, current_price, percent_diff
+    //     // );
+    // }
+
     // provider.get_latest_quotes(Status::Ok, Json(vec![1, 2, 3]))
 }
 
