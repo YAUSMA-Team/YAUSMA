@@ -18,6 +18,7 @@ use rocket_okapi::{
     openapi, openapi_get_spec,
     response::{OpenApiResponder, OpenApiResponderInner},
 };
+use yahoo_finance_api::YahooConnector;
 type DB = State<sled::Db>;
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
@@ -90,14 +91,153 @@ pub async fn get_charts() -> (Status, Json<Vec<u32>>) {
     (Status::Ok, Json(vec![1, 2, 3]))
 }
 
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
+pub struct MarketOverviewItem {
+    pub name: String,
+    pub short: String,
+    pub group: String,
+    pub current_price: String,
+    pub diff: f64,
+}
+
+#[openapi(tag = "Data")]
+#[get("/get/market-overview")]
+pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, BackendError> {
+    // List of stock tickers
+    let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
+
+    // Create a YahooFinance client
+    let provider = YahooConnector::new().unwrap();
+
+    let mut res = vec![];
+
+    for ticker in tickers {
+        // Fetch quote asynchronously
+        let quotes = provider.get_latest_quotes(ticker, "1d").await?;
+        let quote = quotes.last_quote()?;
+        let metadata = quotes.metadata()?;
+
+        let open_price = quote.open;
+        let close_price = quote.close;
+
+        let percent_diff = ((close_price - open_price) / open_price) * 100.0;
+
+        println!(
+            "Open: ${:.2}, Close: ${:.2}, % Diff: {:.2}%",
+            open_price, close_price, percent_diff
+        );
+
+        res.push(MarketOverviewItem {
+            name: metadata
+                .long_name
+                .or(metadata.short_name)
+                .unwrap_or(metadata.exchange_name),
+            group: metadata.instrument_type,
+            short: ticker.to_owned(),
+            current_price: format!("${close_price}"),
+            diff: percent_diff,
+        });
+
+        // Calculate % difference
+        // let percent_diff = ((current_price - prev_close) / prev_close) * 100.0;
+
+        // println!(
+        //     "Ticker: {}, Price: ${:.2}, % Diff: {:.2}%",
+        //     ticker, current_price, percent_diff
+        // );
+    }
+
+    // todo!()
+    Ok(Json(res))
+    // provider.get_latest_quotes(Status::Ok, Json(vec![1, 2, 3]))
+}
+
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
+pub struct TickerNewsItem {
+    pub id: String,
+    pub title: String,
+    pub summary: String,
+    pub source: String,
+    pub content: String,
+    pub date: String,
+}
+
+#[openapi(tag = "Data")]
+#[get("/get/ticker-news/<ticker>")]
+pub async fn get_ticker_news(ticker: String) -> Result<Json<Vec<TickerNewsItem>>, BackendError> {
+    // List of stock tickers
+    let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
+
+    // Create a YahooFinance client
+    let provider = YahooConnector::new().unwrap();
+
+    let mut res = vec![];
+
+    for ticker in tickers {
+        // Fetch quote asynchronously
+        let quotes = provider.get_latest_quotes(ticker, "1d").await?;
+        let quote = quotes.last_quote()?;
+        let metadata = quotes.metadata()?;
+
+        let open_price = quote.open;
+        let close_price = quote.close;
+
+        let percent_diff = ((close_price - open_price) / open_price) * 100.0;
+
+        println!(
+            "Open: ${:.2}, Close: ${:.2}, % Diff: {:.2}%",
+            open_price, close_price, percent_diff
+        );
+
+        res.push(MarketOverviewItem {
+            name: metadata
+                .long_name
+                .or(metadata.short_name)
+                .unwrap_or(metadata.exchange_name),
+            group: metadata.instrument_type,
+            short: ticker.to_owned(),
+            current_price: format!("${close_price}"),
+            diff: percent_diff,
+        });
+
+        // Calculate % difference
+        // let percent_diff = ((current_price - prev_close) / prev_close) * 100.0;
+
+        // println!(
+        //     "Ticker: {}, Price: ${:.2}, % Diff: {:.2}%",
+        //     ticker, current_price, percent_diff
+        // );
+    }
+
+    todo!()
+    // provider.get_latest_quotes(Status::Ok, Json(vec![1, 2, 3]))
+}
+
 pub fn get_spec() -> OpenApi {
-    openapi_get_spec![get_charts, get_news, delete, signup, login]
+    openapi_get_spec![
+        get_charts,
+        get_news,
+        delete,
+        signup,
+        login,
+        get_market_overview
+    ]
 }
 
 pub async fn launch() -> Rocket<Build> {
     rocket::build()
         .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
-        .mount("/", routes![get_charts, get_news, delete, signup, login])
+        .mount(
+            "/",
+            routes![
+                get_charts,
+                get_news,
+                delete,
+                signup,
+                login,
+                get_market_overview
+            ],
+        )
 }
 
 #[derive(Responder)]
@@ -112,6 +252,11 @@ pub enum BackendError {
 
 impl From<sled::Error> for BackendError {
     fn from(value: sled::Error) -> Self {
+        Self::Internal(value.to_string())
+    }
+}
+impl From<yahoo_finance_api::YahooError> for BackendError {
+    fn from(value: yahoo_finance_api::YahooError) -> Self {
         Self::Internal(value.to_string())
     }
 }

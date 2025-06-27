@@ -84,6 +84,26 @@ paths:
           description: Internal server error
         '409':
           description: Email already registered
+  /get/market-overview:
+    get:
+      tags:
+      - Data
+      operationId: get_market_overview
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MarketOverviewItem'
+        '404':
+          description: Unauthorized access
+        '500':
+          description: Internal server error
+        '409':
+          description: Email already registered
 components:
   schemas:
     UserCredentials:
@@ -96,3 +116,23 @@ components:
           type: string
         password_hash:
           type: string
+    MarketOverviewItem:
+      type: object
+      required:
+      - current_price
+      - diff
+      - group
+      - name
+      - short
+      properties:
+        name:
+          type: string
+        short:
+          type: string
+        group:
+          type: string
+        current_price:
+          type: string
+        diff:
+          type: number
+          format: double

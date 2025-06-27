@@ -324,6 +324,7 @@ class StockQuickView extends StatelessWidget {
 
 class StocksOverviewPage extends StatelessWidget {
   const StocksOverviewPage({super.key});
+  // Your async function
 
   @override
   Widget build(BuildContext context) {
@@ -339,46 +340,81 @@ class StocksOverviewPage extends StatelessWidget {
       Stock('TSLA', 'Tesla Inc.', 245.12, 5.67,
           high: 248.90, low: 240.50, volume: '52.7M', sector: 'Automotive'),
     ];
-
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Stock Market Overview',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-        ),
-        ...stocks.map((stock) => Card(
-              margin:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: ListTile(
-                title: Text(stock.name),
-                subtitle: Text(stock.sector),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('\$${stock.currentPrice}'),
-                    Text(
-                      '${stock.change > 0 ? '+' : ''}${stock.change}%',
-                      style: TextStyle(
-                        color: stock.change > 0 ? Colors.green : Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StockDetailPage(stock: stock),
-                  ),
+    return FutureBuilder<List<MarketOverviewItem>>(
+        future: DataApi(client)
+            .getMarketOverview()
+            .then((value) => value ?? []), // call your async function here
+        builder: (context, snapshot) {
+          return ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Stock Market Overview',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
-            )),
-      ],
-    );
+              ...(snapshot.data ?? []).map((stock) => Card(
+                    // ...stocks.map((stock) => Card(
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: ListTile(
+                      title: Text(stock.name),
+                      subtitle: Text(stock.group),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('${stock.currentPrice}'),
+                          Text(
+                            '${stock.diff > 0 ? '+' : ''}${stock.diff}%',
+                            style: TextStyle(
+                              color: stock.diff > 0 ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                      // onTap: () => Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => StockDetailPage(stock: stock),
+                      //   ),
+                      // ),
+                    ),
+                  )),
+              // ...stocks.map((stock) => Card(
+              //       margin: const EdgeInsets.symmetric(
+              //           horizontal: 16.0, vertical: 8.0),
+              //       child: ListTile(
+              //         title: Text(stock.name),
+              //         subtitle: Text(stock.sector),
+              //         trailing: Column(
+              //           mainAxisAlignment: MainAxisAlignment.center,
+              //           crossAxisAlignment: CrossAxisAlignment.end,
+              //           children: [
+              //             Text('\$${stock.currentPrice}'),
+              //             Text(
+              //               '${stock.change > 0 ? '+' : ''}${stock.change}%',
+              //               style: TextStyle(
+              //                 color:
+              //                     stock.change > 0 ? Colors.green : Colors.red,
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //         onTap: () => Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //             builder: (context) => StockDetailPage(stock: stock),
+              //           ),
+              //         ),
+              //       ),
+              //     )),
+            ],
+          );
+        });
   }
+  // );
 }
 
 class NewsPage extends StatelessWidget {
