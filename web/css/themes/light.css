@@ -1,0 +1,12 @@
+/* Light theme variables */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --accent-positive: #28a745;
+    --accent-negative: #dc3545;
+    --accent-primary: #007bff;
+    --border-color: #dee2e6;
+    --card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+} 

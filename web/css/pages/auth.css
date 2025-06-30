@@ -1,0 +1,104 @@
+/* Authentication page styles */
+
+/* Card styles */
+.card {
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Tab styles */
+.nav-tabs {
+    border-bottom: none;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: var(--text-secondary);
+    padding: 1rem 1.5rem;
+    margin-right: 0.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.nav-tabs .nav-link:hover {
+    border: none;
+    color: var(--text-primary);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--accent-primary);
+    background-color: transparent;
+    border-bottom: 2px solid var(--accent-primary);
+}
+
+/* Form styles */
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.form-control:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Button styles */
+.btn-primary {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+/* Alert styles */
+.alert {
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0;
+    border: none;
+}
+
+/* Validation styles */
+.was-validated .form-control:invalid {
+    border-color: var(--accent-negative);
+    background-image: none;
+}
+
+.was-validated .form-control:valid {
+    border-color: var(--accent-positive);
+    background-image: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .card {
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    .row {
+        margin: 0;
+    }
+
+    .col-md-6 {
+        padding: 0;
+    }
+} 

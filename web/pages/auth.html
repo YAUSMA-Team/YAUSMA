@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - YAUSMA</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/pages/auth.css">
+    <link rel="stylesheet" href="../css/themes/light.css" id="theme-stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
+</head>
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-3" href="../index.html">
+                <i class="bi bi-graph-up-arrow text-primary me-2"></i>YAUSMA
+            </a>
+            
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <div class="ms-auto">
+                    <button id="theme-toggle" class="btn btn-outline-secondary border-0" title="Toggle theme" type="button">
+                        <i class="bi bi-moon-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Authentication Section -->
+    <section class="auth-section min-vh-100 d-flex align-items-center" style="padding-top: 80px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-transparent text-center py-4">
+                            <div class="mb-3">
+                                <i class="bi bi-graph-up-arrow display-4 text-primary"></i>
+                            </div>
+                            <h2 class="card-title mb-2 fw-bold" id="auth-title">Welcome to YAUSMA</h2>
+                            <p class="text-muted mb-0" id="auth-subtitle">Your Advanced Stock Market Analysis Platform</p>
+                        </div>
+                        
+                        <div class="card-body p-4">
+                            <!-- Tab Navigation -->
+                            <ul class="nav nav-tabs nav-fill mb-4" id="authTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active fw-semibold" id="signin-tab" data-bs-toggle="tab" data-bs-target="#signin" type="button" role="tab" aria-controls="signin" aria-selected="true">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-semibold" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="false">
+                                        <i class="bi bi-person-plus me-2"></i>Register
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Alert for messages -->
+                            <div class="alert alert-info" id="auth-alert" style="display: none;" role="alert">
+                                <!-- Messages will be displayed here -->
+                            </div>
+
+                            <!-- Tab Content -->
+                            <div class="tab-content" id="authTabContent">
+                                <!-- Sign In Form -->
+                                <div class="tab-pane fade show active" id="signin" role="tabpanel" aria-labelledby="signin-tab">
+                                    <form id="signin-form" class="needs-validation" novalidate>
+                                        <div class="mb-3">
+                                            <label for="signin-username" class="form-label fw-semibold">
+                                                <i class="bi bi-person me-2 text-primary"></i>Username or Email
+                                            </label>
+                                            <input type="text" class="form-control form-control-lg" id="signin-username" name="username" required>
+                                            <div class="invalid-feedback">
+                                                Please enter your username or email.
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="signin-password" class="form-label fw-semibold">
+                                                <i class="bi bi-lock me-2 text-primary"></i>Password
+                                            </label>
+                                            <div class="position-relative">
+                                                <input type="password" class="form-control form-control-lg" id="signin-password" name="password" required>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 border-0" id="signin-toggle-password">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Please enter your password.
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="remember-me">
+                                                <label class="form-check-label text-sm" for="remember-me">
+                                                    Remember me
+                                                </label>
+                                            </div>
+                                            <a href="#" class="text-decoration-none text-primary fw-semibold small">
+                                                Forgot password?
+                                            </a>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3" id="signin-submit">
+                                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                                        </button>
+                                        
+                                        <div class="text-center">
+                                            <p class="text-muted mb-0">
+                                                Don't have an account? 
+                                                <button type="button" class="btn btn-link p-0 text-primary fw-semibold text-decoration-none" onclick="switchToRegister()">
+                                                    Create one here
+                                                </button>
+                                            </p>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Register Form -->
+                                <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                                    <form id="register-form" class="needs-validation" novalidate>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="register-username" class="form-label fw-semibold">
+                                                    <i class="bi bi-person me-2 text-primary"></i>Username
+                                                </label>
+                                                <input type="text" class="form-control form-control-lg" id="register-username" name="username" required minlength="3">
+                                                <div class="invalid-feedback">
+                                                    Username must be at least 3 characters.
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6 mb-3">
+                                                <label for="register-email" class="form-label fw-semibold">
+                                                    <i class="bi bi-envelope me-2 text-primary"></i>Email
+                                                </label>
+                                                <input type="email" class="form-control form-control-lg" id="register-email" name="email" required>
+                                                <div class="invalid-feedback">
+                                                    Please enter a valid email address.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="register-password" class="form-label fw-semibold">
+                                                <i class="bi bi-lock me-2 text-primary"></i>Password
+                                            </label>
+                                            <div class="position-relative">
+                                                <input type="password" class="form-control form-control-lg" id="register-password" name="password" required minlength="8">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 border-0" id="register-toggle-password">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Password must be at least 8 characters.
+                                            </div>
+                                            <div class="form-text">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    Password should contain at least 8 characters with letters and numbers.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="register-confirm-password" class="form-label fw-semibold">
+                                                <i class="bi bi-lock-fill me-2 text-primary"></i>Confirm Password
+                                            </label>
+                                            <div class="position-relative">
+                                                <input type="password" class="form-control form-control-lg" id="register-confirm-password" name="confirmPassword" required>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 border-0" id="register-toggle-confirm-password">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Passwords do not match.
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="terms-agree" required>
+                                                <label class="form-check-label text-sm" for="terms-agree">
+                                                    I agree to the 
+                                                    <a href="#" class="text-primary text-decoration-none">Terms of Service</a> 
+                                                    and 
+                                                    <a href="#" class="text-primary text-decoration-none">Privacy Policy</a>
+                                                </label>
+                                                <div class="invalid-feedback">
+                                                    You must agree to the terms and conditions.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3" id="register-submit">
+                                            <i class="bi bi-person-plus me-2"></i>Create Account
+                                        </button>
+                                        
+                                        <div class="text-center">
+                                            <p class="text-muted mb-0">
+                                                Already have an account? 
+                                                <button type="button" class="btn btn-link p-0 text-primary fw-semibold text-decoration-none" onclick="switchToSignIn()">
+                                                    Sign in here
+                                                </button>
+                                            </p>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Social Login Options -->
+                            <div class="mt-4 pt-4 border-top">
+                                <div class="text-center mb-3">
+                                    <span class="text-muted small">Or continue with</span>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-google me-2"></i>Google
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-linkedin me-2"></i>LinkedIn
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Features Preview -->
+                    <div class="text-center mt-5">
+                        <h5 class="text-muted mb-4">Why traders choose YAUSMA</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="bi bi-speedometer2 text-primary mb-2" style="font-size: 2rem;"></i>
+                                    <h6 class="fw-semibold">Real-time Data</h6>
+                                    <small class="text-muted">Live market updates</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="bi bi-graph-up text-primary mb-2" style="font-size: 2rem;"></i>
+                                    <h6 class="fw-semibold">Advanced Charts</h6>
+                                    <small class="text-muted">Professional analysis tools</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="bi bi-shield-check text-primary mb-2" style="font-size: 2rem;"></i>
+                                    <h6 class="fw-semibold">Secure Platform</h6>
+                                    <small class="text-muted">Bank-level security</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Core utilities (load first) -->
+    <script src="../js/utils/global-theme-manager.js"></script>
+    <script src="../js/utils/bootstrap-init.js"></script>
+    <script src="../js/utils/app-initializer.js"></script>
+    
+    <!-- Configuration and API -->
+    <script src="../js/config.js"></script>
+    <script src="../js/api/client.js"></script>
+    <script src="../js/api/auth.js"></script>
+    
+    <!-- Main application -->
+    <script src="../js/main.js"></script>
+    
+    <!-- Page-specific script -->
+    <script>
+        // Enhanced Authentication Page Logic
+        class AuthPage {
+            constructor() {
+                this.authAPI = new AuthAPI();
+                this.currentForm = 'signin';
+                this.init();
+            }
+
+            init() {
+                this.initializeEventListeners();
+                this.checkURLParameters();
+                this.checkAuthStatus();
+                this.initializePasswordToggles();
+                this.initializeFormValidation();
+            }
+
+            initializeEventListeners() {
+                // Form submit handlers
+                const signinForm = document.getElementById('signin-form');
+                const registerForm = document.getElementById('register-form');
+
+                if (signinForm) {
+                    signinForm.addEventListener('submit', (e) => this.handleSignIn(e));
+                }
+                if (registerForm) {
+                    registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+                }
+
+                // Tab change handlers
+                document.getElementById('signin-tab').addEventListener('click', () => {
+                    this.currentForm = 'signin';
+                    this.updateURLParameter('signin');
+                    this.clearMessages();
+                });
+
+                document.getElementById('register-tab').addEventListener('click', () => {
+                    this.currentForm = 'register';
+                    this.updateURLParameter('register');
+                    this.clearMessages();
+                });
+
+                // Social login handlers
+                document.querySelectorAll('.btn-outline-dark, .btn-outline-primary').forEach(btn => {
+                    if (btn.textContent.includes('Google') || btn.textContent.includes('LinkedIn')) {
+                        btn.addEventListener('click', (e) => this.handleSocialLogin(e));
+                    }
+                });
+            }
+
+            checkURLParameters() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const action = urlParams.get('action');
+                
+                if (action === 'register') {
+                    this.switchToRegister();
+                } else {
+                    this.switchToSignIn();
+                }
+            }
+
+            checkAuthStatus() {
+                if (this.authAPI && this.authAPI.isAuthenticated()) {
+                    // User is already logged in, redirect to home
+                    window.location.href = '../index.html';
+                }
+            }
+
+            initializePasswordToggles() {
+                // Sign in password toggle
+                const signinToggle = document.getElementById('signin-toggle-password');
+                const signinPassword = document.getElementById('signin-password');
+                
+                signinToggle.addEventListener('click', () => {
+                    this.togglePasswordVisibility(signinPassword, signinToggle);
+                });
+
+                // Register password toggles
+                const registerToggle = document.getElementById('register-toggle-password');
+                const registerPassword = document.getElementById('register-password');
+                
+                registerToggle.addEventListener('click', () => {
+                    this.togglePasswordVisibility(registerPassword, registerToggle);
+                });
+
+                const confirmToggle = document.getElementById('register-toggle-confirm-password');
+                const confirmPassword = document.getElementById('register-confirm-password');
+                
+                confirmToggle.addEventListener('click', () => {
+                    this.togglePasswordVisibility(confirmPassword, confirmToggle);
+                });
+            }
+
+            togglePasswordVisibility(passwordInput, toggleButton) {
+                const icon = toggleButton.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.className = 'bi bi-eye-slash';
+                } else {
+                    passwordInput.type = 'password';
+                    icon.className = 'bi bi-eye';
+                }
+            }
+
+            initializeFormValidation() {
+                // Custom validation for password confirmation
+                const confirmPassword = document.getElementById('register-confirm-password');
+                const password = document.getElementById('register-password');
+                
+                confirmPassword.addEventListener('input', () => {
+                    if (confirmPassword.value !== password.value) {
+                        confirmPassword.setCustomValidity('Passwords do not match');
+                    } else {
+                        confirmPassword.setCustomValidity('');
+                    }
+                });
+
+                password.addEventListener('input', () => {
+                    if (confirmPassword.value && confirmPassword.value !== password.value) {
+                        confirmPassword.setCustomValidity('Passwords do not match');
+                    } else {
+                        confirmPassword.setCustomValidity('');
+                    }
+                });
+            }
+
+            async handleSignIn(event) {
+                event.preventDefault();
+                
+                const form = event.target;
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                const username = document.getElementById('signin-username').value;
+                const password = document.getElementById('signin-password').value;
+
+                try {
+                    this.showLoading('Signing in...');
+                    this.setButtonLoading('signin-submit', true);
+                    
+                    const success = await this.authAPI.login(username, password);
+                    
+                    if (success) {
+                        this.showSuccess('Successfully signed in! Redirecting...');
+                        setTimeout(() => {
+                            window.location.href = '../index.html';
+                        }, 1500);
+                    } else {
+                        this.showError('Invalid credentials. Please check your username and password.');
+                    }
+                } catch (error) {
+                    this.showError(error.message || 'Sign in failed. Please try again.');
+                } finally {
+                    this.setButtonLoading('signin-submit', false);
+                }
+            }
+
+            async handleRegister(event) {
+                event.preventDefault();
+                
+                const form = event.target;
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                const username = document.getElementById('register-username').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+
+                if (password !== confirmPassword) {
+                    this.showError('Passwords do not match.');
+                    return;
+                }
+
+                try {
+                    this.showLoading('Creating your account...');
+                    this.setButtonLoading('register-submit', true);
+                    
+                    const success = await this.authAPI.signup(username, password, email);
+                    
+                    if (success) {
+                        this.showSuccess('Account created successfully! Redirecting...');
+                        setTimeout(() => {
+                            window.location.href = '../index.html';
+                        }, 1500);
+                    } else {
+                        this.showError('Registration failed. Please try again.');
+                    }
+                } catch (error) {
+                    this.showError(error.message || 'Registration failed. Please try again.');
+                } finally {
+                    this.setButtonLoading('register-submit', false);
+                }
+            }
+
+            handleSocialLogin(event) {
+                const button = event.currentTarget;
+                const provider = button.textContent.includes('Google') ? 'Google' : 'LinkedIn';
+                
+                this.showInfo(`${provider} login is coming soon! Please use email registration for now.`);
+            }
+
+            setButtonLoading(buttonId, isLoading) {
+                const button = document.getElementById(buttonId);
+                const originalText = button.getAttribute('data-original-text') || button.innerHTML;
+                
+                if (!button.getAttribute('data-original-text')) {
+                    button.setAttribute('data-original-text', originalText);
+                }
+
+                if (isLoading) {
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
+                    button.disabled = true;
+                } else {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+
+            switchToSignIn() {
+                const signinTab = document.getElementById('signin-tab');
+                const registerTab = document.getElementById('register-tab');
+                
+                signinTab.click();
+                this.currentForm = 'signin';
+                document.getElementById('auth-title').textContent = 'Welcome Back';
+                document.getElementById('auth-subtitle').textContent = 'Sign in to access your trading dashboard';
+            }
+
+            switchToRegister() {
+                const registerTab = document.getElementById('register-tab');
+                
+                registerTab.click();
+                this.currentForm = 'register';
+                document.getElementById('auth-title').textContent = 'Join YAUSMA';
+                document.getElementById('auth-subtitle').textContent = 'Create your account to start trading';
+            }
+
+            updateURLParameter(action) {
+                const url = new URL(window.location);
+                url.searchParams.set('action', action);
+                window.history.replaceState({}, '', url);
+            }
+
+            showMessage(message, type) {
+                const alert = document.getElementById('auth-alert');
+                alert.className = `alert alert-${type}`;
+                alert.textContent = message;
+                alert.style.display = 'block';
+                
+                // Auto-hide success and info messages
+                if (type === 'success' || type === 'info') {
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            showLoading(message) {
+                this.showMessage(message, 'info');
+            }
+
+            showSuccess(message) {
+                this.showMessage(message, 'success');
+            }
+
+            showError(message) {
+                this.showMessage(message, 'danger');
+            }
+
+            showInfo(message) {
+                this.showMessage(message, 'info');
+            }
+
+            clearMessages() {
+                const alert = document.getElementById('auth-alert');
+                alert.style.display = 'none';
+            }
+        }
+
+        // Global functions for button clicks
+        function switchToRegister() {
+            if (window.authPageInstance) {
+                window.authPageInstance.switchToRegister();
+            }
+        }
+
+        function switchToSignIn() {
+            if (window.authPageInstance) {
+                window.authPageInstance.switchToSignIn();
+            }
+        }
+
+        // Initialize the auth page when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.authPageInstance = new AuthPage();
+        });
+    </script>
+</body>
+</html>
