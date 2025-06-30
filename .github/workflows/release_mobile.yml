@@ -3,7 +3,7 @@ name: Release Mobile
 
 on:
   push:
-    paths: ['flake.nix', 'mobile/**', 'openapi.yaml']
+    paths: ['flake.nix', 'mobile/**', 'openapi.yaml', 'release_mobile.yml']
     branches: ['master']
   workflow_dispatch:
 
