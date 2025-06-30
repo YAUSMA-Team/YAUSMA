@@ -5,7 +5,7 @@ on:
     branches: [master]
     paths:
       # - /backend/**
-      - ../../flake.nix
+      - 'flake.nix'
 
 jobs:
   bundle-and-release:
