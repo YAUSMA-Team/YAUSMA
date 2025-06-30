@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-var client = ApiClient(basePath: "http://192.168.0.58:8000");
+var client = ApiClient(basePath: "http://89.36.231.38:8000");
 
 void main() => runApp(
       ChangeNotifierProvider(
