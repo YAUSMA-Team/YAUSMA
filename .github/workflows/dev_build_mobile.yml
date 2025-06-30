@@ -5,8 +5,8 @@ on:
   push:
     branches: [master]
     paths:
-      - openapi.yaml
-      - mobile/**
+      - /openapi.yaml
+      - /mobile/**
 
   workflow_dispatch:
 
