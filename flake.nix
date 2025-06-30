@@ -42,37 +42,7 @@
           openapi-generator-cli
         ];
       in {
-        # packages."server" = pkgs.writeShellApplication {
-        #   name = "yausma-server";
-        #   runtimeInputs = [
-        #     pkgs.your-server-pkg # Replace with your server package (e.g., `pkgs.nodejs`, `pkgs.python3`, etc.)
-        #   ];
-
-        #   text = ''
-        #     echo "Starting server..."
-        #     your-server-command --port 8080  # Replace with your server's start command
-        #   '';
-        # };
-        # packages."server" = pkgs.stdenv.mkDerivation {
-        #   name = "my-package";
-        #   src = ./backend;
-        #   buildInputs = [
-        #     # Backend
-        #     rust
-        #   ] ++ commonBuildInputs;
-        #   buildPhase = ''
-        #     cargo build --release
-        #   '';
-        #   installPhase = ''
-        #     mkdir -p $out/bin
-        #     cp target/release/backend $out/bin
-        #   '';
-
-        #   shellHook = ''
-        #     echo "Hello shell!"
-        #   '';
-        # };
-        packages."srv" = pkgs-unstable.rustPlatform.buildRustPackage {
+        packages."serv" = pkgs-unstable.rustPlatform.buildRustPackage {
           pname = "backend";
           version = "0.1.1";
           src = pkgs.lib.cleanSource ./backend;
@@ -83,8 +53,14 @@
           # ];
         };
 
-        # devShell.default = with pkgs;
-        #   mkShell { inherit (buildInputs) commonBuildInputs; };
+        packages."prod" = pkgs.writeShellApplication {
+          name = "run-server-prod";
+          runtimeInputs = [ pkgs.caddy ];
+          text = ''
+            caddy reverse-proxy --from 89.36.231.38:80 --to :8000 &
+            ${self.packages.${system}."serv"}/bin/backend
+          '';
+        };
 
         devShells.default = with pkgs;
           mkShell {
@@ -101,11 +77,5 @@
             ] ++ commonBuildInputs;
           };
 
-        # devShell."backend" = with pkgs;
-        #   mkShell rec {
-        #     inherit (buildInputs) commonBuildInputs;
-        #     buildInputs = [
-        #     ];
-        #   };
       });
 }
