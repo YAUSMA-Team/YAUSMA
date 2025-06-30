@@ -1,4 +1,4 @@
-package org.yausma.mobile
+package org.yausma.yausma
 
 import io.flutter.embedding.android.FlutterActivity
 
