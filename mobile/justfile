@@ -1,6 +1,10 @@
-client-gen:
+gen-client:
     openapi-generator-cli generate -i ../openapi.yaml -g dart -o ./gen_api
 
-dev: client-gen
+gen-icons:
+    flutter pub get
+    dart run flutter_launcher_icons
+
+dev: gen-client gen-icons
     flutter run
     
