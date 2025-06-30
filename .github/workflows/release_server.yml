@@ -19,7 +19,7 @@ jobs:
 
       # Build the bundle
       - name: Build bundle
-        run: nix bundle .#prod
+        run: nix bundle .#server
 
       - uses: actions/upload-artifact@v4
         with:
