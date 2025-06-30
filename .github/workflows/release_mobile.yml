@@ -7,6 +7,13 @@ on:
     branches: ['master']
   workflow_dispatch:
 
+
+    # Automatically cancels any existing runs in the same group
+    # Applies to jobs in the same workflow only
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build-mobile-and-release:
     runs-on: ubuntu-latest
