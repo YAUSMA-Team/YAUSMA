@@ -53,13 +53,31 @@
           # ];
         };
 
-        packages."prod" = pkgs.writeShellApplication {
-          name = "run-server-prod";
-          # runtimeInputs = [ pkgs.caddy ];
-          text = ''
+        packages."prod" = pkgs.stdenv.mkDerivation {
+          pname = "run-server-prod"; # Required field
+          version = "0.1.0"; # Required field
+
+          # Ensure all dependencies are available
+          nativeBuildInputs = [ pkgs.makeWrapper pkgs.caddy ];
+
+          # No actual source needed for this simple script
+          dontUnpack = true;
+
+          installPhase = ''
+            mkdir -p $out/bin
+            cat <<EOF > $out/bin/run-server-prod
+            #!/bin/sh
+            # ${pkgs.caddy}/bin/caddy reverse-proxy --from :2000 --to :8000 &
             ${pkgs.caddy}/bin/caddy reverse-proxy --from 89.36.231.38:80 --to :8000 &
             ${self.packages.${system}."serv"}/bin/backend
+            EOF
+            chmod +x $out/bin/run-server-prod
           '';
+
+          meta = {
+            description = "YAUSMA production server script";
+            license = pkgs.lib.licenses.mit;
+          };
         };
 
         devShells.default = with pkgs;

@@ -20,19 +20,20 @@ jobs:
 
       # Build the bundle
       - name: Build bundle
-        run: nix build .#prod
+        run: nix bundle .#prod
 
       - uses: actions/upload-artifact@v4
         with:
           name: server-build
-          path: result/bin/run-server-prod
+          path: run-server-prod-arx
 
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/master'
         with:
           tag_name: latest-master
           prerelease: true
-          files: result/bin/run-server-prod
+          # files: result/bin/run-server-prod
+          files: run-server-prod-arx
           body: "Auto-generated release from master branch [Server]"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
