@@ -3,26 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Market News - YAUSMA</title>
+    <title>Financial News - YAUSMA</title>
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/pages/news.css">
     <link rel="stylesheet" href="../css/themes/light.css" id="theme-stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
 </head>
 <body data-theme="light">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <!-- Navbar content will be loaded by navbar.js -->
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-3" href="../index.html">
+                <i class="bi bi-graph-up-arrow text-primary me-2"></i>YAUSMA
+            </a>
+            
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" href="stocks.html">Markets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold active" href="news.html">News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" id="portfolio-link" href="portfolio.html" style="display: none;">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" href="pro.html">Pro</a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <button id="theme-toggle" class="btn btn-outline-secondary border-0" title="Toggle theme" type="button">
+                        <i class="bi bi-moon-fill"></i>
+                    </button>
+                    
+                    <div id="auth-buttons" class="d-flex gap-2">
+                        <a href="auth.html" class="btn btn-outline-primary fw-semibold">Sign In</a>
+                        <a href="auth.html?action=register" class="btn btn-primary fw-semibold">Get Started</a>
+                    </div>
+                    
+                    <div id="user-menu" class="dropdown" style="display: none;">
+                        <button class="btn btn-outline-secondary dropdown-toggle border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="portfolio.html"><i class="bi bi-briefcase me-2"></i>My Portfolio</a></li>
+                            <li><a class="dropdown-item" href="pro.html"><i class="bi bi-star me-2"></i>Upgrade to Pro</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </nav>
 
-    <main class="container-fluid">
-        <!-- Content will be added later -->
+    <!-- News Header -->
+    <section class="news-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">Financial News & Insights</h1>
+                    <p class="lead mb-4">Stay informed with the latest market news, analysis, and expert insights from around the world.</p>
+                </div>
+                <div class="col-lg-4">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="form-control" id="newsSearch" placeholder="Search news articles...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <section class="news-filter-bar">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center">
+                <span class="me-3 fw-semibold text-secondary">Filter by:</span>
+                <a href="#" class="filter-chip active" data-category="all">All News</a>
+                <a href="#" class="filter-chip" data-category="markets">Markets</a>
+                <a href="#" class="filter-chip" data-category="stocks">Stocks</a>
+                <a href="#" class="filter-chip" data-category="crypto">Crypto</a>
+                <a href="#" class="filter-chip" data-category="economics">Economics</a>
+                <a href="#" class="filter-chip" data-category="earnings">Earnings</a>
+                <a href="#" class="filter-chip" data-category="analysis">Analysis</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- News Articles -->
+                <div class="col-lg-8">
+                    <!-- Breaking News Alert (for registered users) -->
+                    <div id="breaking-news-alert" class="alert alert-warning border-0 rounded-3 mb-4" style="display: none;" data-auth-required>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Breaking News Alert</h6>
+                                <p class="mb-0 small">You have <span id="alert-count">3</span> new breaking news alerts. <a href="#" class="alert-link">View all alerts</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- News Grid -->
+                    <div class="row" id="news-container">
+                        <!-- News articles will be populated here -->
+                    </div>
+
+                    <!-- Load More Button -->
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-primary btn-lg" id="load-more-btn">
+                            <i class="bi bi-arrow-down-circle me-2"></i>Load More Articles
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Trending News -->
+                    <div class="trending-news">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-fire text-danger me-2"></i>Trending Now
+                        </h5>
+                        <div id="trending-container">
+                            <!-- Trending items will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Market Summary Widget -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold mb-3">
+                                <i class="bi bi-graph-up me-2 text-primary"></i>Market Summary
+                            </h6>
+                            <div id="market-summary">
+                                <!-- Market data will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Testing Widget -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold mb-3">
+                                <i class="bi bi-gear me-2 text-primary"></i>API Testing
+                            </h6>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="use-real-api">
+                                <label class="form-check-label" for="use-real-api">
+                                    Use Real Market APIs
+                                </label>
+                            </div>
+                            <div id="api-status" class="small text-muted">
+                                Currently using mock data
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pro Features Teaser (for non-registered users) -->
+                    <div class="card border-0 shadow-sm mt-4" data-auth-anonymous>
+                        <div class="card-body text-center">
+                            <i class="bi bi-star-fill text-warning fs-2 mb-3"></i>
+                            <h6 class="card-title fw-bold">Unlock Pro Features</h6>
+                            <p class="card-text small text-muted mb-3">Get real-time alerts, personalized news feeds, and advanced market analysis.</p>
+                            <a href="pro.html" class="btn btn-primary w-100">Upgrade to Pro</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2025 YAUSMA. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-flex justify-content-md-end gap-3">
+                        <a href="#" class="text-light"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Error Container -->
+    <div id="error-container" class="alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3" style="display: none; z-index: 9999;" role="alert"></div>
+
+    <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Core utilities (load first) -->
+    <script src="../js/utils/global-theme-manager.js"></script>
+    <script src="../js/utils/bootstrap-init.js"></script>
+    <script src="../js/utils/app-initializer.js"></script>
+    
+    <!-- Configuration and API -->
     <script src="../js/config.js"></script>
+    <script src="../js/api/client.js"></script>
+    <script src="../js/api/auth.js"></script>
+    
+    <!-- Main application -->
     <script src="../js/main.js"></script>
+    
+    <!-- Components -->
     <script src="../js/components/navbar.js"></script>
-    <script src="../js/components/news-card.js"></script>
+    
+    <!-- Page-specific scripts -->
     <script src="../js/pages/news.js"></script>
 </body>
-</html> 
+</html>
