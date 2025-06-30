@@ -70,7 +70,7 @@
             cat <<EOF > $out/bin/yausma-server
             #!/bin/sh
             # ${pkgs.caddy}/bin/caddy reverse-proxy --from :2000 --to :8000 &
-            ${pkgs.caddy}/bin/caddy reverse-proxy --from 89.36.231.38:80 --to :8000 &
+            ${pkgs.caddy}/bin/caddy reverse-proxy --from v.rockhoster.net --to :8000 &
             ROCKET_ADDRESS=0.0.0.0 ${
               self.packages.${system}."server-unwrapped"
             }/bin/backend
