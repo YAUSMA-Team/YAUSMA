@@ -63,8 +63,4 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Deploy to server
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<EOF
-            pkill backend
-            pkill yausma-server
-            curl -L https://github.com/YAUSMA-Team/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s &
-          EOF
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -t 'pkill backend && pkill yausma-server && curl -L https://github.com/YAUSMA-Team/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s &'
