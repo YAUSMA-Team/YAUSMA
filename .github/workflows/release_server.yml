@@ -2,7 +2,7 @@ name: Release Server
 
 on:
   push:
-    paths: ['flake.nix']
+    paths: ['flake.nix', 'backend/**']
     branches: ['master']
 
 jobs:
