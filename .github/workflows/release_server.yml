@@ -2,7 +2,7 @@ name: Release Server
 
 on:
   push:
-    paths: ['flake.nix', 'backend/**', 'release_server.yml']
+    paths: ['flake.nix', 'backend/**', '.github/workflows/release_server.yml']
     branches: ['master']
 
 jobs:
