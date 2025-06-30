@@ -1,34 +1,29 @@
 use ::serde::{Deserialize, Serialize};
-use derive_more::Into;
-use rocket::{
-    Build, Request, Responder, Rocket, State, get,
-    http::{Cookie, CookieJar, Status},
-    outcome::Outcome,
-    post,
-    request::{self, FromRequest},
-    response::status,
-    routes,
-    serde::json::Json,
-};
+use rocket::{Build, Responder, Rocket, State, get, http::Status, post, routes, serde::json::Json};
 use rocket_okapi::{
     okapi::{
         openapi3::{OpenApi, Response, Responses},
         schemars,
     },
     openapi, openapi_get_spec,
-    response::{OpenApiResponder, OpenApiResponderInner},
+    response::OpenApiResponderInner,
 };
-use yahoo_finance_api::{Quote, YahooConnector};
-type DB = State<sled::Db>;
+use yahoo_finance_api::YahooConnector;
+// type DB = State<sled::Db>;
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
 pub struct UserCredentials {
     pub email: String,
     pub password_hash: String,
 }
+#[openapi(tag = "Landing")]
+#[get("/")]
+pub async fn landing() -> Result<Json<String>, BackendError> {
+    Ok(Json("TODO".into()))
+}
 
 #[openapi(tag = "User")]
-#[post("/login", data = "<creds>")]
+#[post("/api/user/login", data = "<creds>")]
 // pub async fn login(db: &DB, creds: Json<UserCredentials>) -> &'static str {
 pub async fn login(
     db: &State<sled::Db>,
@@ -52,7 +47,7 @@ pub async fn login(
 }
 
 #[openapi(tag = "User")]
-#[post("/signup", data = "<creds>")]
+#[post("/api/user/signup", data = "<creds>")]
 // pub async fn login(db: &DB, creds: Json<UserCredentials>) -> &'static str {
 pub async fn signup(
     db: &State<sled::Db>,
@@ -68,19 +63,19 @@ pub async fn signup(
 }
 
 #[openapi(tag = "User")]
-#[post("/user/delete")]
+#[post("/api/user/delete")]
 pub async fn delete() -> &'static str {
     "Hello, world!"
 }
 
-#[openapi(tag = "Data")]
-#[get("/api/portfolio", data = "<token>")]
-pub async fn get_portfolio(token: Json<String>) -> &'static str {
-    "Hello, world!"
-}
+// #[openapi(tag = "Data")]
+// #[get("/api/portfolio", data = "<token>")]
+// pub async fn get_portfolio(token: Json<String>) -> &'static str {
+//     "Hello, world!"
+// }
 /// Get prices
 #[openapi(tag = "Data")]
-#[get("/get/charts")]
+#[get("/api/data/charts")]
 pub async fn get_charts() -> (Status, Json<Vec<u32>>) {
     (Status::Ok, Json(vec![1, 2, 3]))
 }
@@ -100,7 +95,7 @@ pub struct MarketOverviewItem {
 }
 
 #[openapi(tag = "Data")]
-#[get("/get/market-overview")]
+#[get("/api/data/market-overview")]
 pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, BackendError> {
     // List of stock tickers
     let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
@@ -170,19 +165,9 @@ pub struct NewsItem {
 }
 
 #[openapi(tag = "Data")]
-#[get("/get/ticker-news/<ticker>")]
-pub async fn get_ticker_news(ticker: String) -> Result<Json<Vec<NewsItem>>, BackendError> {
-    todo!()
-}
-
-#[openapi(tag = "Data")]
-#[get("/get/news?<ticker>")]
+#[get("/api/data/news?<ticker>")]
 pub async fn get_news(ticker: Option<String>) -> Result<Json<Vec<NewsItem>>, BackendError> {
-    dbg!(&ticker);
-    // // List of stock tickers
-    // let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
-
-    // // Create a YahooFinance client
+    // Create a YahooFinance client
     let provider = YahooConnector::new().unwrap();
 
     let searchres = provider
@@ -201,46 +186,6 @@ pub async fn get_news(ticker: Option<String>) -> Result<Json<Vec<NewsItem>>, Bac
             })
             .collect(),
     ))
-
-    // let mut res = vec![];
-
-    // for ticker in tickers {
-    //     // Fetch quote asynchronously
-    //     let quotes = provider.get_latest_quotes(ticker, "1d").await?;
-    //     let quote = quotes.last_quote()?;
-    //     let metadata = quotes.metadata()?;
-
-    //     let open_price = quote.open;
-    //     let close_price = quote.close;
-
-    //     let percent_diff = ((close_price - open_price) / open_price) * 100.0;
-
-    //     println!(
-    //         "Open: ${:.2}, Close: ${:.2}, % Diff: {:.2}%",
-    //         open_price, close_price, percent_diff
-    //     );
-
-    //     res.push(MarketOverviewItem {
-    //         name: metadata
-    //             .long_name
-    //             .or(metadata.short_name)
-    //             .unwrap_or(metadata.exchange_name),
-    //         group: metadata.instrument_type,
-    //         short: ticker.to_owned(),
-    //         current_price: format!("${close_price}"),
-    //         diff: percent_diff,
-    //     });
-
-    //     // Calculate % difference
-    //     // let percent_diff = ((current_price - prev_close) / prev_close) * 100.0;
-
-    //     // println!(
-    //     //     "Ticker: {}, Price: ${:.2}, % Diff: {:.2}%",
-    //     //     ticker, current_price, percent_diff
-    //     // );
-    // }
-
-    // provider.get_latest_quotes(Status::Ok, Json(vec![1, 2, 3]))
 }
 
 pub fn get_spec() -> OpenApi {
@@ -250,7 +195,8 @@ pub fn get_spec() -> OpenApi {
         delete,
         signup,
         login,
-        get_market_overview
+        get_market_overview,
+        landing
     ]
 }
 
@@ -265,7 +211,8 @@ pub async fn launch() -> Rocket<Build> {
                 delete,
                 signup,
                 login,
-                get_market_overview
+                get_market_overview,
+                landing
             ],
         )
 }
