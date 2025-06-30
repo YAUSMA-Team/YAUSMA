@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-release:
+  build-mobile-and-release:
     runs-on: ubuntu-latest
     # TODO: Use if we get nixos workers
     # runs-on: nixos-23.11  # Official NixOS runner

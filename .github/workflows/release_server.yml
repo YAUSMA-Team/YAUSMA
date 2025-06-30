@@ -1,4 +1,4 @@
-name: Release Server
+name: Release & Deploy Server
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     branches: ['master']
 
 jobs:
-  bundle-and-release:
+  build-release-deploy-server:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
