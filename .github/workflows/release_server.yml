@@ -2,10 +2,8 @@ name: Release Server
 
 on:
   push:
-    branches: [master]
-    paths:
-      # - /backend/**
-      - 'flake.nix'
+    paths: ['flake.nix']
+    branches: ['master']
 
 jobs:
   bundle-and-release:
