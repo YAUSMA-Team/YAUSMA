@@ -1,5 +1,5 @@
 # .github/workflows/release_master.yml
-name: Release Master
+name: Release Mobile
 
 on:
   push:

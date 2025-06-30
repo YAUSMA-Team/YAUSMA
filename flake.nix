@@ -42,19 +42,20 @@
           openapi-generator-cli
         ];
       in {
-        packages."serv" = pkgs-unstable.rustPlatform.buildRustPackage {
-          pname = "backend";
-          version = "0.1.1";
-          src = pkgs.lib.cleanSource ./backend;
-          cargoLock.lockFile = ./backend/Cargo.lock;
-          # buildInputs = [
-          #   # Example Run-time Additional Dependencies
-          #   pkgs.openapi-generator-cli
-          # ];
-        };
+        packages."server-unwrapped" =
+          pkgs-unstable.rustPlatform.buildRustPackage {
+            pname = "yausma-server-unwrapped";
+            version = "0.1.1";
+            src = pkgs.lib.cleanSource ./backend;
+            cargoLock.lockFile = ./backend/Cargo.lock;
+            # buildInputs = [
+            #   # Example Run-time Additional Dependencies
+            #   pkgs.openapi-generator-cli
+            # ];
+          };
 
-        packages."prod" = pkgs.stdenv.mkDerivation {
-          pname = "run-server-prod"; # Required field
+        packages."server" = pkgs.stdenv.mkDerivation {
+          pname = "yausma-server"; # Required field
           version = "0.1.0"; # Required field
 
           # Ensure all dependencies are available
@@ -65,13 +66,15 @@
 
           installPhase = ''
             mkdir -p $out/bin
-            cat <<EOF > $out/bin/run-server-prod
+            cat <<EOF > $out/bin/yausma-server
             #!/bin/sh
             # ${pkgs.caddy}/bin/caddy reverse-proxy --from :2000 --to :8000 &
             ${pkgs.caddy}/bin/caddy reverse-proxy --from 89.36.231.38:80 --to :8000 &
-            ${self.packages.${system}."serv"}/bin/backend
+            ${
+              self.packages.${system}."server-unwrapped"
+            }/bin/yausma-server-unwrapped
             EOF
-            chmod +x $out/bin/run-server-prod
+            chmod +x $out/bin/yausma-server
           '';
 
           meta = {
