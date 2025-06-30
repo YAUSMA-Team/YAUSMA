@@ -6,7 +6,7 @@ mobile and web can then use it to generate typed sdk.
 
 Run on server to bootstrap.
 
-`curl -L https://github.com/Le-618/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s`
+`curl -L https://github.com/YAUSMA-Team/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s`
 
 Alternatively you can download binary from release and just run it.
 
