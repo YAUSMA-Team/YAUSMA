@@ -4,6 +4,10 @@ name: Release Master
 on:
   push:
     branches: [master]
+    paths:
+      - openapi.yaml
+      - mobile/**
+
   workflow_dispatch:
 
 jobs:
