@@ -7,6 +7,9 @@ on:
     branches: ['master']
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 # Automatically cancels any existing runs in the same group
 # Applies to jobs in the same workflow only
 concurrency:
