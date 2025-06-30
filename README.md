@@ -1,1 +1,1 @@
-YAUSMA - Yet Another Useful Stock Market App
+YAUSMA - Yet Another Useless Stock Market App
