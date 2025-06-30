@@ -55,9 +55,9 @@
 
         packages."prod" = pkgs.writeShellApplication {
           name = "run-server-prod";
-          runtimeInputs = [ pkgs.caddy ];
+          # runtimeInputs = [ pkgs.caddy ];
           text = ''
-            caddy reverse-proxy --from 89.36.231.38:80 --to :8000 &
+            ${pkgs.caddy}/bin/caddy reverse-proxy --from 89.36.231.38:80 --to :8000 &
             ${self.packages.${system}."serv"}/bin/backend
           '';
         };

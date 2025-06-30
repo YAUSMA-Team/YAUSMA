@@ -10,3 +10,4 @@ web/node_modules
 
 # pre-commit
 .pre-commit-config.yaml
+result
