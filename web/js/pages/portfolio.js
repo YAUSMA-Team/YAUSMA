@@ -1,4 +1,5 @@
-// YAUSMA Portfolio Page - Interactive Features and Data Management
+// YAUSMA Portfolio Page - Professional Portfolio Management System
+// Institutional-grade features with Coinbase-level sophistication
 
 class PortfolioManager {
     constructor() {
@@ -10,7 +11,11 @@ class PortfolioManager {
             holdings: [],
             transactions: [],
             performanceHistory: [],
-            sectorAllocation: {}
+            sectorAllocation: {},
+            benchmarkData: [],
+            riskMetrics: {},
+            dividendHistory: [],
+            alerts: []
         };
         
         this.charts = {
@@ -18,6 +23,24 @@ class PortfolioManager {
             allocationChart: null,
             sectorChart: null
         };
+        
+        this.config = {
+            updateInterval: 30000, // 30 seconds
+            chartColors: {
+                primary: '#344afb',
+                success: '#00d395',
+                danger: '#f92364',
+                warning: '#ffc947',
+                info: '#17a2b8',
+                secondary: '#6c757d'
+            },
+            benchmarkSymbol: 'SPY' // S&P 500 benchmark
+        };
+        
+        this.updateTimer = null;
+        this.filteredHoldings = [];
+        this.sortDirection = 'desc';
+        this.currentPeriod = '1M';
         
         this.init();
     }
@@ -30,6 +53,10 @@ class PortfolioManager {
         this.renderHoldingsTable();
         this.renderTransactionsTable();
         this.setupPerformanceMetrics();
+        this.calculateAdvancedMetrics();
+        this.startRealTimeUpdates();
+        this.setupKeyboardShortcuts();
+        this.initializeTooltips();
     }
 
     loadMockData() {
@@ -214,27 +241,192 @@ class PortfolioManager {
 
         // Generate performance history (mock data)
         this.generatePerformanceHistory();
+        this.generateBenchmarkData();
+        this.calculateRiskMetrics();
+        this.generateDividendHistory();
     }
 
     generatePerformanceHistory() {
-        const days = 30;
+        const periods = {
+            '1D': 1,
+            '1W': 7,
+            '1M': 30,
+            '3M': 90,
+            '1Y': 365,
+            'ALL': 730
+        };
+        
+        const days = periods[this.currentPeriod] || 30;
         const baseValue = this.portfolioData.totalValue * 0.95;
         const history = [];
+        
+        let cumulativeReturn = 0;
         
         for (let i = days; i >= 0; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i);
             
-            const randomChange = (Math.random() - 0.5) * 0.02;
-            const value = baseValue * (1 + randomChange * (days - i) / days + Math.random() * 0.01);
+            // More realistic price movement simulation
+            const dailyReturn = this.generateRealisticReturn();
+            cumulativeReturn += dailyReturn;
+            
+            const value = baseValue * (1 + cumulativeReturn);
             
             history.push({
                 date: date.toISOString().split('T')[0],
-                value: value
+                value: value,
+                dailyReturn: dailyReturn,
+                cumulativeReturn: cumulativeReturn
             });
         }
         
         this.portfolioData.performanceHistory = history;
+    }
+    
+    generateRealisticReturn() {
+        // Simulate realistic stock market returns with volatility clustering
+        const mean = 0.0008; // ~20% annual return
+        const volatility = 0.015; // ~24% annual volatility
+        
+        // Box-Muller transformation for normal distribution
+        const u1 = Math.random();
+        const u2 = Math.random();
+        const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+        
+        return mean + volatility * z;
+    }
+    
+    generateBenchmarkData() {
+        const history = this.portfolioData.performanceHistory;
+        const benchmarkData = [];
+        
+        let baseValue = 100; // Start at $100 for percentage comparison
+        let cumulativeReturn = 0;
+        
+        history.forEach((point, index) => {
+            // S&P 500 typically has lower volatility than individual portfolios
+            const benchmarkReturn = this.generateRealisticReturn() * 0.8;
+            cumulativeReturn += benchmarkReturn;
+            
+            benchmarkData.push({
+                date: point.date,
+                value: baseValue * (1 + cumulativeReturn),
+                dailyReturn: benchmarkReturn,
+                cumulativeReturn: cumulativeReturn
+            });
+        });
+        
+        this.portfolioData.benchmarkData = benchmarkData;
+    }
+    
+    calculateRiskMetrics() {
+        const returns = this.portfolioData.performanceHistory.map(p => p.dailyReturn || 0);
+        const benchmarkReturns = this.portfolioData.benchmarkData.map(b => b.dailyReturn || 0);
+        
+        // Calculate various risk metrics
+        const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
+        const benchmarkAvgReturn = benchmarkReturns.reduce((a, b) => a + b, 0) / benchmarkReturns.length;
+        
+        // Standard deviation (volatility)
+        const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / returns.length;
+        const volatility = Math.sqrt(variance) * Math.sqrt(252); // Annualized
+        
+        // Beta calculation
+        const covariance = returns.reduce((sum, ret, i) => {
+            return sum + (ret - avgReturn) * (benchmarkReturns[i] - benchmarkAvgReturn);
+        }, 0) / returns.length;
+        
+        const benchmarkVariance = benchmarkReturns.reduce((sum, ret) => {
+            return sum + Math.pow(ret - benchmarkAvgReturn, 2);
+        }, 0) / benchmarkReturns.length;
+        
+        const beta = covariance / benchmarkVariance;
+        
+        // Alpha calculation (Jensen's Alpha)
+        const riskFreeRate = 0.02 / 252; // 2% annual risk-free rate, daily
+        const portfolioReturn = avgReturn * 252; // Annualized
+        const benchmarkReturn = benchmarkAvgReturn * 252; // Annualized
+        const alpha = portfolioReturn - (0.02 + beta * (benchmarkReturn - 0.02));
+        
+        // Sharpe Ratio
+        const sharpeRatio = (portfolioReturn - 0.02) / volatility;
+        
+        // Maximum Drawdown
+        let maxDrawdown = 0;
+        let peak = this.portfolioData.performanceHistory[0]?.value || 0;
+        
+        this.portfolioData.performanceHistory.forEach(point => {
+            if (point.value > peak) {
+                peak = point.value;
+            }
+            const drawdown = (peak - point.value) / peak;
+            if (drawdown > maxDrawdown) {
+                maxDrawdown = drawdown;
+            }
+        });
+        
+        this.portfolioData.riskMetrics = {
+            volatility: volatility * 100,
+            beta: beta,
+            alpha: alpha * 100,
+            sharpeRatio: sharpeRatio,
+            maxDrawdown: maxDrawdown * 100,
+            sortino: this.calculateSortino(returns),
+            informationRatio: this.calculateInformationRatio(returns, benchmarkReturns),
+            calmarRatio: (portfolioReturn * 100) / (maxDrawdown * 100)
+        };
+    }
+    
+    calculateSortino(returns) {
+        const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
+        const downSideReturns = returns.filter(r => r < 0);
+        
+        if (downSideReturns.length === 0) return Infinity;
+        
+        const downSideVariance = downSideReturns.reduce((sum, ret) => sum + Math.pow(ret, 2), 0) / downSideReturns.length;
+        const downSideDeviation = Math.sqrt(downSideVariance) * Math.sqrt(252);
+        
+        return (avgReturn * 252 - 0.02) / downSideDeviation;
+    }
+    
+    calculateInformationRatio(portfolioReturns, benchmarkReturns) {
+        const excessReturns = portfolioReturns.map((ret, i) => ret - benchmarkReturns[i]);
+        const avgExcessReturn = excessReturns.reduce((a, b) => a + b, 0) / excessReturns.length;
+        
+        const trackingError = Math.sqrt(
+            excessReturns.reduce((sum, ret) => sum + Math.pow(ret - avgExcessReturn, 2), 0) / excessReturns.length
+        ) * Math.sqrt(252);
+        
+        return trackingError > 0 ? (avgExcessReturn * 252) / trackingError : 0;
+    }
+    
+    generateDividendHistory() {
+        const dividendHistory = [];
+        const currentDate = new Date();
+        
+        // Generate quarterly dividend payments for the past year
+        for (let i = 0; i < 4; i++) {
+            const quarterDate = new Date(currentDate);
+            quarterDate.setMonth(quarterDate.getMonth() - (i * 3));
+            
+            let quarterlyDividend = 0;
+            this.portfolioData.holdings.forEach(holding => {
+                if (holding.dividendYield > 0) {
+                    const annualDividend = holding.marketValue * (holding.dividendYield / 100);
+                    quarterlyDividend += annualDividend / 4;
+                }
+            });
+            
+            if (quarterlyDividend > 0) {
+                dividendHistory.unshift({
+                    date: quarterDate.toISOString().split('T')[0],
+                    amount: quarterlyDividend,
+                    quarter: `Q${Math.floor((quarterDate.getMonth() / 3)) + 1} ${quarterDate.getFullYear()}`
+                });
+            }
+        }
+        
+        this.portfolioData.dividendHistory = dividendHistory;
     }
 
     initializeEventListeners() {
@@ -275,6 +467,96 @@ class PortfolioManager {
         // View all transactions
         document.getElementById('viewAllTransactions')?.addEventListener('click', () => {
             this.showAllTransactions();
+        });
+        
+        // Export functionality
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'e':
+                        e.preventDefault();
+                        this.exportPortfolioData();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        this.refreshPortfolio();
+                        break;
+                }
+            }
+        });
+    }
+    
+    startRealTimeUpdates() {
+        // Simulate real-time updates every 30 seconds
+        this.updateTimer = setInterval(() => {
+            this.simulateMarketUpdates();
+        }, this.config.updateInterval);
+    }
+    
+    simulateMarketUpdates() {
+        // Simulate price updates for holdings
+        this.portfolioData.holdings.forEach(holding => {
+            const priceChange = holding.currentPrice * (Math.random() * 0.02 - 0.01); // ±1% random change
+            holding.currentPrice = Math.max(0.01, holding.currentPrice + priceChange);
+            holding.marketValue = holding.shares * holding.currentPrice;
+            holding.gainLoss = holding.marketValue - (holding.shares * holding.avgCost);
+            holding.gainLossPercent = (holding.gainLoss / (holding.shares * holding.avgCost)) * 100;
+        });
+        
+        // Recalculate portfolio metrics
+        this.calculatePortfolioMetrics();
+        
+        // Update UI elements
+        this.renderPortfolioSummary();
+        this.renderHoldingsTable();
+        
+        // Add visual indicator for updates
+        this.showUpdateIndicator();
+    }
+    
+    showUpdateIndicator() {
+        const refreshBtn = document.getElementById('refreshPortfolio');
+        if (refreshBtn) {
+            refreshBtn.classList.add('btn-pulse');
+            setTimeout(() => {
+                refreshBtn.classList.remove('btn-pulse');
+            }, 1000);
+        }
+    }
+    
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Only activate shortcuts when not in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            switch(e.key) {
+                case 'a':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.showAddHoldingModal();
+                    }
+                    break;
+                case 'f':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        document.getElementById('holdingsSearch')?.focus();
+                    }
+                    break;
+                case 'Escape':
+                    // Close any open modals
+                    document.querySelectorAll('.modal.show').forEach(modal => {
+                        bootstrap.Modal.getInstance(modal)?.hide();
+                    });
+                    break;
+            }
+        });
+    }
+    
+    initializeTooltips() {
+        // Initialize Bootstrap tooltips for help text
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     }
 
@@ -317,39 +599,104 @@ class PortfolioManager {
         const ctx = document.getElementById('portfolioChart');
         if (!ctx) return;
 
-        const data = this.portfolioData.performanceHistory;
-        const labels = data.map(d => new Date(d.date).toLocaleDateString());
-        const values = data.map(d => d.value);
+        const portfolioData = this.portfolioData.performanceHistory;
+        const benchmarkData = this.portfolioData.benchmarkData;
+        
+        const labels = portfolioData.map(d => {
+            const date = new Date(d.date);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        
+        const portfolioValues = portfolioData.map(d => d.value);
+        const benchmarkValues = benchmarkData.map(d => d.value);
+        
+        // Normalize benchmark to start at same value as portfolio for comparison
+        const portfolioStart = portfolioValues[0];
+        const benchmarkStart = benchmarkValues[0];
+        const normalizedBenchmark = benchmarkValues.map(v => (v / benchmarkStart) * portfolioStart);
 
         this.charts.portfolioChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Portfolio Value',
-                    data: values,
-                    borderColor: 'var(--interactive-blue)',
-                    backgroundColor: 'rgba(52, 74, 251, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 5
-                }]
+                datasets: [
+                    {
+                        label: 'Portfolio',
+                        data: portfolioValues,
+                        borderColor: this.config.chartColors.primary,
+                        backgroundColor: `${this.config.chartColors.primary}20`,
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBorderWidth: 3
+                    },
+                    {
+                        label: 'S&P 500 Benchmark',
+                        data: normalizedBenchmark,
+                        borderColor: this.config.chartColors.secondary,
+                        backgroundColor: `${this.config.chartColors.secondary}10`,
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        borderDash: [5, 5]
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false
+                        display: true,
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
                     },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: this.config.chartColors.primary,
+                        borderWidth: 1,
+                        cornerRadius: 8,
                         callbacks: {
+                            title: (context) => {
+                                return `Date: ${context[0].label}`;
+                            },
                             label: (context) => {
-                                return `Portfolio Value: ${this.formatCurrency(context.raw)}`;
+                                const value = context.raw;
+                                const datasetLabel = context.dataset.label;
+                                
+                                if (datasetLabel === 'Portfolio') {
+                                    const dataPoint = portfolioData[context.dataIndex];
+                                    const dailyReturn = (dataPoint.dailyReturn * 100).toFixed(2);
+                                    return `${datasetLabel}: ${this.formatCurrency(value)} (${dailyReturn > 0 ? '+' : ''}${dailyReturn}%)`;
+                                } else {
+                                    return `${datasetLabel}: ${this.formatCurrency(value)}`;
+                                }
+                            },
+                            afterBody: (context) => {
+                                const portfolioValue = context[0].raw;
+                                const benchmarkValue = context[1]?.raw;
+                                
+                                if (portfolioValue && benchmarkValue) {
+                                    const outperformance = ((portfolioValue - benchmarkValue) / benchmarkValue * 100).toFixed(2);
+                                    return `\nOutperformance: ${outperformance > 0 ? '+' : ''}${outperformance}%`;
+                                }
+                                return '';
                             }
                         }
                     }
@@ -359,21 +706,39 @@ class PortfolioManager {
                         display: true,
                         grid: {
                             display: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 8,
+                            font: {
+                                size: 11
+                            }
                         }
                     },
                     y: {
                         display: true,
+                        position: 'left',
                         grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim(),
+                            drawBorder: false
                         },
                         ticks: {
-                            callback: (value) => this.formatCurrency(value, false)
+                            callback: (value) => this.formatCurrency(value, false),
+                            font: {
+                                size: 11
+                            }
                         }
                     }
                 },
                 interaction: {
                     intersect: false,
                     mode: 'index'
+                },
+                hover: {
+                    animationDuration: 200
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
                 }
             }
         });
@@ -567,26 +932,88 @@ class PortfolioManager {
     }
 
     setupPerformanceMetrics() {
-        // These would typically be calculated from historical data
-        const metrics = {
-            sharpeRatio: 1.24,
-            beta: 1.05,
-            alpha: 2.3,
-            volatility: 18.5,
-            maxDrawdown: -12.3,
-            dividendYield: 2.1
+        const metrics = this.portfolioData.riskMetrics;
+        
+        // Calculate current dividend yield
+        const totalDividends = this.portfolioData.holdings.reduce((sum, holding) => {
+            return sum + (holding.marketValue * (holding.dividendYield / 100));
+        }, 0);
+        const portfolioDividendYield = (totalDividends / this.portfolioData.totalValue) * 100;
+        
+        const displayMetrics = {
+            sharpeRatio: metrics.sharpeRatio || 1.24,
+            beta: metrics.beta || 1.05,
+            alpha: metrics.alpha || 2.3,
+            volatility: metrics.volatility || 18.5,
+            maxDrawdown: -(Math.abs(metrics.maxDrawdown) || 12.3),
+            dividendYield: portfolioDividendYield || 2.1
         };
 
-        Object.entries(metrics).forEach(([key, value]) => {
+        Object.entries(displayMetrics).forEach(([key, value]) => {
             const element = document.getElementById(key);
             if (element) {
                 if (key === 'alpha' || key === 'volatility' || key === 'dividendYield' || key === 'maxDrawdown') {
-                    element.textContent = value + '%';
+                    element.textContent = value.toFixed(2) + '%';
+                    
+                    // Add color coding
+                    if (key === 'alpha' && value > 0) {
+                        element.classList.add('positive');
+                    } else if (key === 'maxDrawdown') {
+                        element.classList.add('negative');
+                    }
                 } else {
-                    element.textContent = value.toString();
+                    element.textContent = value.toFixed(2);
                 }
             }
         });
+    }
+    
+    calculateAdvancedMetrics() {
+        // Calculate additional portfolio analytics
+        const metrics = {
+            concentration: this.calculateConcentrationRisk(),
+            correlation: this.calculatePortfolioCorrelation(),
+            efficiency: this.calculatePortfolioEfficiency(),
+            diversificationRatio: this.calculateDiversificationRatio()
+        };
+        
+        this.portfolioData.advancedMetrics = metrics;
+    }
+    
+    calculateConcentrationRisk() {
+        // Herfindahl-Hirschman Index for concentration
+        const totalValue = this.portfolioData.totalValue;
+        let hhi = 0;
+        
+        this.portfolioData.holdings.forEach(holding => {
+            const weight = holding.marketValue / totalValue;
+            hhi += weight * weight;
+        });
+        
+        return hhi * 10000; // Scale to 0-10000
+    }
+    
+    calculatePortfolioCorrelation() {
+        // Simplified correlation calculation (would need actual price data)
+        const sectors = Object.keys(this.portfolioData.sectorAllocation);
+        return sectors.length > 3 ? 0.65 : 0.85; // Mock correlation based on diversification
+    }
+    
+    calculatePortfolioEfficiency() {
+        // Risk-adjusted return efficiency
+        const totalReturn = (this.portfolioData.totalGainLoss / (this.portfolioData.totalValue - this.portfolioData.totalGainLoss)) * 100;
+        const volatility = this.portfolioData.riskMetrics.volatility || 20;
+        
+        return totalReturn / volatility;
+    }
+    
+    calculateDiversificationRatio() {
+        // Weighted average volatility / Portfolio volatility
+        const weights = this.portfolioData.holdings.map(h => h.marketValue / this.portfolioData.totalValue);
+        const avgIndividualVol = 0.25; // Assume 25% individual stock volatility
+        const portfolioVol = (this.portfolioData.riskMetrics.volatility || 20) / 100;
+        
+        return (weights.reduce((sum, w) => sum + w * avgIndividualVol, 0)) / portfolioVol;
     }
 
     // Utility methods
@@ -637,9 +1064,51 @@ class PortfolioManager {
     }
 
     updatePerformanceChart(period) {
-        // This would filter the performance history based on the selected period
-        console.log(`Updating chart for period: ${period}`);
-        // For now, we'll just re-render the same chart
+        this.currentPeriod = period;
+        
+        // Regenerate data for the selected period
+        this.generatePerformanceHistory();
+        this.generateBenchmarkData();
+        
+        // Update the chart
+        if (this.charts.portfolioChart) {
+            this.charts.portfolioChart.destroy();
+        }
+        
+        this.renderPerformanceChart();
+        
+        // Update period-specific metrics display
+        this.updatePeriodMetrics(period);
+    }
+    
+    updatePeriodMetrics(period) {
+        const history = this.portfolioData.performanceHistory;
+        if (history.length === 0) return;
+        
+        const startValue = history[0].value;
+        const endValue = history[history.length - 1].value;
+        const totalReturn = ((endValue - startValue) / startValue) * 100;
+        
+        // Display period return in a tooltip or status area
+        const periodInfo = document.createElement('div');
+        periodInfo.className = 'period-return-info';
+        periodInfo.innerHTML = `
+            <small class="text-muted">
+                ${period} Return: 
+                <span class="${totalReturn >= 0 ? 'text-success' : 'text-danger'}">
+                    ${totalReturn >= 0 ? '+' : ''}${totalReturn.toFixed(2)}%
+                </span>
+            </small>
+        `;
+        
+        // Update or add to chart header
+        const chartHeader = document.querySelector('.chart-card-header');
+        const existingInfo = chartHeader?.querySelector('.period-return-info');
+        if (existingInfo) {
+            existingInfo.replaceWith(periodInfo);
+        } else {
+            chartHeader?.appendChild(periodInfo);
+        }
     }
 
     showAddHoldingModal() {
@@ -735,8 +1204,231 @@ class PortfolioManager {
     }
 
     showAllTransactions() {
-        console.log('Show all transactions');
-        // Implementation for showing all transactions
+        // Create and show modal with all transactions
+        this.createTransactionModal();
+    }
+    
+    createTransactionModal() {
+        const modalHtml = `
+            <div class="modal fade" id="allTransactionsModal" tabindex="-1">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">All Transactions</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="transaction-filters">
+                                    <select class="form-select form-select-sm me-2" id="transactionTypeFilter">
+                                        <option value="all">All Types</option>
+                                        <option value="BUY">Buy Orders</option>
+                                        <option value="SELL">Sell Orders</option>
+                                    </select>
+                                    <input type="date" class="form-control form-control-sm me-2" id="transactionDateFrom" placeholder="From Date">
+                                    <input type="date" class="form-control form-control-sm" id="transactionDateTo" placeholder="To Date">
+                                </div>
+                                <button class="btn btn-coinbase-secondary btn-sm" onclick="portfolioManager.exportTransactions()">
+                                    <i class="bi bi-download me-1"></i>Export CSV
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="allTransactionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Symbol</th>
+                                            <th>Type</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Total</th>
+                                            <th>Fees</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add modal to DOM if it doesn't exist
+        if (!document.getElementById('allTransactionsModal')) {
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            this.populateAllTransactionsTable();
+            this.setupTransactionFilters();
+        }
+        
+        const modal = new bootstrap.Modal(document.getElementById('allTransactionsModal'));
+        modal.show();
+    }
+    
+    populateAllTransactionsTable() {
+        const tbody = document.querySelector('#allTransactionsTable tbody');
+        if (!tbody) return;
+        
+        // Extended transaction data
+        const allTransactions = [...this.portfolioData.transactions, 
+            ...this.generateAdditionalTransactions()
+        ].sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        tbody.innerHTML = allTransactions.map(transaction => {
+            const fees = transaction.total * 0.001; // 0.1% fee simulation
+            return `
+                <tr>
+                    <td>${new Date(transaction.date).toLocaleDateString()}</td>
+                    <td><span class="stock-symbol">${transaction.symbol}</span></td>
+                    <td><span class="transaction-type ${transaction.type.toLowerCase()}">${transaction.type}</span></td>
+                    <td class="financial-value">${transaction.quantity}</td>
+                    <td class="financial-value">${this.formatCurrency(transaction.price)}</td>
+                    <td class="financial-value">${this.formatCurrency(transaction.total)}</td>
+                    <td class="financial-value">${this.formatCurrency(fees)}</td>
+                    <td><span class="transaction-status ${transaction.status.toLowerCase()}">${transaction.status}</span></td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    generateAdditionalTransactions() {
+        const additionalTransactions = [];
+        const symbols = ['NVDA', 'META', 'NFLX', 'ADBE', 'CRM', 'PYPL', 'INTC', 'AMD'];
+        
+        for (let i = 0; i < 15; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - Math.random() * 180);
+            
+            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            const type = Math.random() > 0.7 ? 'SELL' : 'BUY';
+            const quantity = Math.floor(Math.random() * 50) + 1;
+            const price = Math.random() * 300 + 50;
+            
+            additionalTransactions.push({
+                date: date.toISOString().split('T')[0],
+                symbol: symbol,
+                type: type,
+                quantity: quantity,
+                price: price,
+                total: quantity * price,
+                status: Math.random() > 0.1 ? 'COMPLETED' : 'PENDING'
+            });
+        }
+        
+        return additionalTransactions;
+    }
+    
+    setupTransactionFilters() {
+        const typeFilter = document.getElementById('transactionTypeFilter');
+        const dateFromFilter = document.getElementById('transactionDateFrom');
+        const dateToFilter = document.getElementById('transactionDateTo');
+        
+        const applyFilters = () => {
+            const rows = document.querySelectorAll('#allTransactionsTable tbody tr');
+            const selectedType = typeFilter.value;
+            const fromDate = dateFromFilter.value ? new Date(dateFromFilter.value) : null;
+            const toDate = dateToFilter.value ? new Date(dateToFilter.value) : null;
+            
+            rows.forEach(row => {
+                const type = row.querySelector('.transaction-type').textContent;
+                const dateStr = row.cells[0].textContent;
+                const date = new Date(dateStr);
+                
+                let show = true;
+                
+                if (selectedType !== 'all' && type !== selectedType) {
+                    show = false;
+                }
+                
+                if (fromDate && date < fromDate) {
+                    show = false;
+                }
+                
+                if (toDate && date > toDate) {
+                    show = false;
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        };
+        
+        typeFilter?.addEventListener('change', applyFilters);
+        dateFromFilter?.addEventListener('change', applyFilters);
+        dateToFilter?.addEventListener('change', applyFilters);
+    }
+    
+    exportPortfolioData() {
+        const data = {
+            summary: {
+                totalValue: this.portfolioData.totalValue,
+                totalGainLoss: this.portfolioData.totalGainLoss,
+                todayGainLoss: this.portfolioData.todayGainLoss,
+                buyingPower: this.portfolioData.buyingPower
+            },
+            holdings: this.portfolioData.holdings,
+            performance: this.portfolioData.riskMetrics,
+            exportDate: new Date().toISOString()
+        };
+        
+        this.downloadJSON(data, `YAUSMA_Portfolio_${new Date().toISOString().split('T')[0]}.json`);
+    }
+    
+    exportTransactions() {
+        const transactions = [...this.portfolioData.transactions, ...this.generateAdditionalTransactions()];
+        const csvContent = this.convertToCSV(transactions);
+        this.downloadCSV(csvContent, `YAUSMA_Transactions_${new Date().toISOString().split('T')[0]}.csv`);
+    }
+    
+    convertToCSV(data) {
+        const headers = ['Date', 'Symbol', 'Type', 'Quantity', 'Price', 'Total', 'Status'];
+        const csvRows = [headers.join(',')];
+        
+        data.forEach(row => {
+            const values = [
+                row.date,
+                row.symbol,
+                row.type,
+                row.quantity,
+                row.price.toFixed(2),
+                row.total.toFixed(2),
+                row.status
+            ];
+            csvRows.push(values.join(','));
+        });
+        
+        return csvRows.join('\n');
+    }
+    
+    downloadCSV(content, filename) {
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+    
+    downloadJSON(data, filename) {
+        const jsonContent = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonContent], { type: 'application/json' });
+        const link = document.createElement('a');
+        
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     }
 }
 
@@ -757,6 +1449,57 @@ document.addEventListener('themeChanged', (e) => {
         }, 100);
     }
 });
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (window.portfolioManager && window.portfolioManager.updateTimer) {
+        clearInterval(window.portfolioManager.updateTimer);
+    }
+});
+
+// Add CSS for additional animations
+const additionalStyles = `
+    .btn-pulse {
+        animation: pulse 1s ease-in-out;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .period-return-info {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+    }
+    
+    .loading-overlay.show {
+        display: flex !important;
+    }
+    
+    .transaction-filters {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .transaction-filters {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+`;
+
+// Add styles to document
+if (!document.getElementById('portfolioAdditionalStyles')) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'portfolioAdditionalStyles';
+    styleSheet.textContent = additionalStyles;
+    document.head.appendChild(styleSheet);
+}
 
 // Export for global access
 if (typeof module !== 'undefined' && module.exports) {

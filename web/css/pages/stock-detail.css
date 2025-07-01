@@ -709,12 +709,63 @@
   }
 }
 
-/* Focus States */
+/* Enhanced Focus States */
 .stock-actions .btn:focus,
 .chart-controls .btn:focus,
 .peer-item:focus {
   outline: 2px solid var(--interactive-blue);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(52, 74, 251, 0.2);
+}
+
+/* Accessibility improvements */
+.stock-actions .btn:focus-visible,
+.chart-controls .btn:focus-visible {
+  outline: 3px solid var(--interactive-blue);
+  outline-offset: 2px;
+}
+
+/* High performance mode indicators */
+.performance-mode {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  z-index: 1000;
+  display: none;
+}
+
+.performance-mode.active {
+  display: block;
+}
+
+/* Loading states for real-time data */
+.data-loading {
+  position: relative;
+}
+
+.data-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--interactive-blue), transparent);
+  animation: loading-bar 1.5s infinite;
+}
+
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Dark Theme Specific Overrides */
@@ -750,7 +801,7 @@
   background: var(--background-tertiary);
 }
 
-/* Custom Chart Tooltips */
+/* Enhanced Chart Features */
 .chart-tooltip {
   background: var(--surface-raised);
   border: 1px solid var(--border-light);
@@ -773,6 +824,48 @@
   font-family: var(--font-family-mono);
   font-weight: var(--font-weight-bold);
   color: var(--interactive-blue);
+}
+
+/* Chart crosshair and interaction */
+.chart-container canvas {
+  cursor: crosshair;
+}
+
+.chart-container:hover canvas {
+  cursor: crosshair;
+}
+
+/* Chart control buttons */
+.chart-controls .btn-group .btn-check:checked + .btn {
+  background: var(--interactive-blue);
+  border-color: var(--interactive-blue);
+  color: white;
+  box-shadow: 0 2px 4px rgba(52, 74, 251, 0.3);
+}
+
+.chart-controls .btn-group .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced metric animations */
+.metric-item {
+  transition: all var(--transition-base), transform 0.2s ease;
+}
+
+.metric-item:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--interactive-blue);
+}
+
+.metric-value {
+  transition: all 0.3s ease;
+}
+
+.metric-value.updating {
+  transform: scale(1.05);
+  color: var(--interactive-blue) !important;
 }
 
 /* Animation Classes */
@@ -806,7 +899,7 @@
   }
 }
 
-/* Price Movement Animations */
+/* Enhanced Price Movement Animations */
 .price-flash {
   animation: priceFlash 0.5s ease-in-out;
 }
@@ -818,21 +911,113 @@
 }
 
 .price-up {
-  animation: priceUp 0.3s ease-in-out;
+  animation: priceUp 0.6s ease-in-out;
 }
 
 @keyframes priceUp {
   0% { transform: scale(1); }
-  50% { transform: scale(1.05); color: var(--market-positive); }
-  100% { transform: scale(1); }
+  25% { transform: scale(1.03); background-color: rgba(0, 211, 149, 0.1); }
+  50% { transform: scale(1.05); color: var(--market-positive); background-color: rgba(0, 211, 149, 0.2); }
+  75% { transform: scale(1.02); background-color: rgba(0, 211, 149, 0.1); }
+  100% { transform: scale(1); background-color: transparent; }
 }
 
 .price-down {
-  animation: priceDown 0.3s ease-in-out;
+  animation: priceDown 0.6s ease-in-out;
 }
 
 @keyframes priceDown {
   0% { transform: scale(1); }
-  50% { transform: scale(1.05); color: var(--market-negative); }
-  100% { transform: scale(1); }
+  25% { transform: scale(1.03); background-color: rgba(249, 35, 100, 0.1); }
+  50% { transform: scale(1.05); color: var(--market-negative); background-color: rgba(249, 35, 100, 0.2); }
+  75% { transform: scale(1.02); background-color: rgba(249, 35, 100, 0.1); }
+  100% { transform: scale(1); background-color: transparent; }
+}
+
+/* Trading button animations */
+.stock-actions .btn {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stock-actions .btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.stock-actions .btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.stock-actions .btn:active {
+  transform: scale(0.95);
+}
+
+/* Keyboard shortcut hints */
+.stock-actions .btn:hover::after {
+  content: attr(data-shortcut);
+  position: absolute;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+  opacity: 0;
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Real-time indicator */
+.real-time-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--success-green);
+  margin-left: var(--space-sm);
+}
+
+.real-time-indicator::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--success-green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 211, 149, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 211, 149, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 211, 149, 0);
+  }
 }

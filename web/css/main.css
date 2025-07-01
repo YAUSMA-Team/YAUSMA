@@ -1,5 +1,8 @@
 /* YAUSMA - Main CSS with Coinbase-Inspired Design System */
 
+/* Import Components CSS */
+@import url('./components.css');
+
 /* CSS Reset and Base Styles */
 *,
 *::before,

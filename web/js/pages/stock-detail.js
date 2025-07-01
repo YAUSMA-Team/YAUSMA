@@ -12,7 +12,7 @@ class StockDetailPage {
         this.priceUpdateInterval = null;
         this.isWatchlisted = false;
         
-        // Mock stock data for demonstration
+        // Enhanced mock stock data for demonstration
         this.stockData = {
             'AAPL': {
                 symbol: 'AAPL',
@@ -38,7 +38,84 @@ class StockDetailPage {
                 employees: 161000,
                 ceo: 'Timothy D. Cook',
                 founded: 'April 1, 1976',
-                headquarters: 'Cupertino, CA'
+                headquarters: 'Cupertino, CA',
+                analyst: {
+                    rating: 'Strong Buy',
+                    targetPrice: 195.00,
+                    highTarget: 225.00,
+                    lowTarget: 165.00,
+                    recommendations: {
+                        strongBuy: 20,
+                        buy: 8,
+                        hold: 4,
+                        sell: 0,
+                        strongSell: 0
+                    }
+                },
+                peers: [
+                    { symbol: 'MSFT', name: 'Microsoft', price: 387.92, change: 1.19 },
+                    { symbol: 'GOOGL', name: 'Alphabet', price: 142.56, change: -0.85 },
+                    { symbol: 'AMZN', name: 'Amazon', price: 167.89, change: 2.34 },
+                    { symbol: 'META', name: 'Meta', price: 501.23, change: -1.45 }
+                ],
+                financials: {
+                    revenue: { '2023': '383.3B', '2022': '394.3B', '2021': '365.8B' },
+                    netIncome: { '2023': '97.0B', '2022': '99.8B', '2021': '94.7B' },
+                    grossMargin: { '2023': '44.1%', '2022': '43.3%', '2021': '41.8%' },
+                    operatingMargin: { '2023': '29.8%', '2022': '30.3%', '2021': '29.8%' }
+                }
+            },
+            'MSFT': {
+                symbol: 'MSFT',
+                name: 'Microsoft Corporation',
+                price: 387.92,
+                change: 4.62,
+                changePercent: 1.19,
+                volume: 23400000,
+                marketCap: '2.88T',
+                peRatio: 32.45,
+                high52w: 420.82,
+                low52w: 284.91,
+                avgVolume: 28100000,
+                dividendYield: 0.68,
+                eps: 11.95,
+                beta: 0.89,
+                previousClose: 383.30,
+                open: 385.20,
+                dayLow: 384.15,
+                dayHigh: 389.50,
+                sector: 'Technology',
+                industry: 'Software',
+                employees: 221000,
+                ceo: 'Satya Nadella',
+                founded: 'April 4, 1975',
+                headquarters: 'Redmond, WA'
+            },
+            'GOOGL': {
+                symbol: 'GOOGL',
+                name: 'Alphabet Inc.',
+                price: 142.56,
+                change: -1.21,
+                changePercent: -0.85,
+                volume: 31200000,
+                marketCap: '1.80T',
+                peRatio: 25.34,
+                high52w: 153.78,
+                low52w: 101.88,
+                avgVolume: 32500000,
+                dividendYield: 0.00,
+                eps: 5.63,
+                beta: 1.05,
+                previousClose: 143.77,
+                open: 143.20,
+                dayLow: 141.89,
+                dayHigh: 144.25,
+                sector: 'Technology',
+                industry: 'Internet Services',
+                employees: 182000,
+                ceo: 'Sundar Pichai',
+                founded: 'September 4, 1998',
+                headquarters: 'Mountain View, CA'
             }
         };
         
@@ -69,6 +146,7 @@ class StockDetailPage {
             button.addEventListener('change', (e) => {
                 this.currentTimeRange = e.target.id;
                 this.updateChart();
+                this.updateTimeRangeUI(e.target.id);
             });
         });
         
@@ -89,6 +167,26 @@ class StockDetailPage {
             watchlistBtn.addEventListener('click', () => this.toggleWatchlist());
         }
         
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'b':
+                        e.preventDefault();
+                        this.handleBuy();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        this.handleSell();
+                        break;
+                    case 'w':
+                        e.preventDefault();
+                        this.toggleWatchlist();
+                        break;
+                }
+            }
+        });
+        
         // News items
         this.setupNewsEventListeners();
         
@@ -97,6 +195,9 @@ class StockDetailPage {
         
         // Tab switching
         this.setupTabEventListeners();
+        
+        // Chart interaction
+        this.setupChartEventListeners();
     }
     
     loadStockData() {
@@ -201,16 +302,43 @@ class StockDetailPage {
             'Beta': stock.beta.toFixed(2)
         };
         
-        // Update metric values
+        // Update metric values with enhanced animation
         Object.keys(metrics).forEach(key => {
-            const element = document.querySelector(`.metric-item .metric-label:contains("${key}")`);
-            if (element) {
-                const valueElement = element.parentElement.querySelector('.metric-value');
-                if (valueElement) {
-                    valueElement.textContent = metrics[key];
+            const metricItems = document.querySelectorAll('.metric-item');
+            metricItems.forEach(item => {
+                const labelElement = item.querySelector('.metric-label');
+                if (labelElement && labelElement.textContent.includes(key)) {
+                    const valueElement = item.querySelector('.metric-value');
+                    if (valueElement) {
+                        const oldValue = valueElement.textContent;
+                        const newValue = metrics[key];
+                        
+                        if (oldValue !== newValue) {
+                            valueElement.style.transform = 'scale(1.05)';
+                            valueElement.style.color = 'var(--interactive-blue)';
+                            
+                            setTimeout(() => {
+                                valueElement.textContent = newValue;
+                                valueElement.style.transform = 'scale(1)';
+                                valueElement.style.color = '';
+                            }, 200);
+                        } else {
+                            valueElement.textContent = newValue;
+                        }
+                    }
                 }
-            }
+            });
         });
+        
+        // Update analyst recommendations if available
+        if (stock.analyst) {
+            this.updateAnalystRecommendations(stock.analyst);
+        }
+        
+        // Update peer comparison if available
+        if (stock.peers) {
+            this.updatePeerComparison(stock.peers);
+        }
     }
     
     updateKeyStatistics(stock) {
@@ -267,6 +395,12 @@ class StockDetailPage {
         // Generate mock price data
         const data = this.generatePriceData(this.currentTimeRange);
         
+        // Determine chart color based on performance
+        const stock = this.stockData[this.symbol];
+        const isPositive = stock.changePercent >= 0;
+        const chartColor = isPositive ? 'rgb(0, 211, 149)' : 'rgb(249, 35, 100)';
+        const chartBgColor = isPositive ? 'rgba(0, 211, 149, 0.1)' : 'rgba(249, 35, 100, 0.1)';
+        
         this.priceChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -274,16 +408,16 @@ class StockDetailPage {
                 datasets: [{
                     label: 'Price',
                     data: data.prices,
-                    borderColor: 'rgb(52, 74, 251)',
-                    backgroundColor: 'rgba(52, 74, 251, 0.1)',
+                    borderColor: chartColor,
+                    backgroundColor: chartBgColor,
                     borderWidth: 2,
                     fill: true,
                     tension: 0.3,
                     pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointHoverBackgroundColor: 'rgb(52, 74, 251)',
+                    pointHoverRadius: 8,
+                    pointHoverBackgroundColor: chartColor,
                     pointHoverBorderColor: '#ffffff',
-                    pointHoverBorderWidth: 2
+                    pointHoverBorderWidth: 3
                 }]
             },
             options: {
@@ -293,25 +427,60 @@ class StockDetailPage {
                     intersect: false,
                     mode: 'index'
                 },
+                animation: {
+                    duration: 750,
+                    easing: 'easeInOutQuart'
+                },
                 plugins: {
                     legend: {
                         display: false
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        titleColor: '#050f19',
-                        bodyColor: '#050f19',
-                        borderColor: '#d8dce0',
-                        borderWidth: 1,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: chartColor,
+                        borderWidth: 2,
                         cornerRadius: 8,
                         displayColors: false,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 16,
+                            family: "'SF Mono', monospace",
+                            weight: 'bold'
+                        },
+                        padding: 12,
                         callbacks: {
                             title: function(context) {
                                 return context[0].label;
                             },
                             label: function(context) {
                                 return `$${context.parsed.y.toFixed(2)}`;
+                            },
+                            afterLabel: function(context) {
+                                const currentPrice = stock.price;
+                                const pointPrice = context.parsed.y;
+                                const change = pointPrice - currentPrice;
+                                const changePercent = (change / currentPrice) * 100;
+                                const sign = change >= 0 ? '+' : '';
+                                return `${sign}$${change.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)`;
                             }
+                        }
+                    },
+                    crosshair: {
+                        line: {
+                            color: chartColor,
+                            width: 1,
+                            dashPattern: [5, 5]
+                        },
+                        sync: {
+                            enabled: false
+                        },
+                        zoom: {
+                            enabled: false
                         }
                     }
                 },
@@ -319,7 +488,7 @@ class StockDetailPage {
                     x: {
                         display: true,
                         grid: {
-                            color: 'rgba(216, 220, 224, 0.3)',
+                            color: 'rgba(216, 220, 224, 0.2)',
                             drawBorder: false
                         },
                         ticks: {
@@ -327,14 +496,15 @@ class StockDetailPage {
                             font: {
                                 size: 12,
                                 family: "'Inter', sans-serif"
-                            }
+                            },
+                            maxTicksLimit: 8
                         }
                     },
                     y: {
                         display: true,
                         position: 'right',
                         grid: {
-                            color: 'rgba(216, 220, 224, 0.3)',
+                            color: 'rgba(216, 220, 224, 0.2)',
                             drawBorder: false
                         },
                         ticks: {
@@ -345,12 +515,19 @@ class StockDetailPage {
                             },
                             callback: function(value) {
                                 return '$' + value.toFixed(2);
-                            }
+                            },
+                            maxTicksLimit: 6
                         }
                     }
+                },
+                onHover: (event, activeElements) => {
+                    event.native.target.style.cursor = activeElements.length > 0 ? 'crosshair' : 'default';
                 }
             }
         });
+        
+        // Add chart annotations for support/resistance levels
+        this.addChartAnnotations();
     }
     
     generatePriceData(timeRange) {
@@ -710,6 +887,128 @@ class StockDetailPage {
         }, 3000);
     }
     
+    // New methods for enhanced functionality
+    updateTimeRangeUI(selectedRange) {
+        // Add visual feedback for selected time range
+        const rangeButtons = document.querySelectorAll('input[name="timeRange"]');
+        rangeButtons.forEach(button => {
+            const label = button.nextElementSibling;
+            if (button.id === selectedRange) {
+                label.style.background = 'var(--interactive-blue)';
+                label.style.color = 'white';
+            } else {
+                label.style.background = '';
+                label.style.color = '';
+            }
+        });
+    }
+
+    setupChartEventListeners() {
+        // Add chart zoom and pan functionality
+        const canvas = document.getElementById('priceChart');
+        if (!canvas) return;
+
+        let isDrawing = false;
+        let startX = 0;
+        let startY = 0;
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.shiftKey) {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                startX = e.clientX - rect.left;
+                startY = e.clientY - rect.top;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDrawing && e.shiftKey) {
+                // Drawing trend lines would go here
+                e.preventDefault();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        // Mouse wheel zoom
+        canvas.addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                // Zoom functionality would go here
+            }
+        });
+    }
+
+    addChartAnnotations() {
+        if (!this.priceChart) return;
+
+        const stock = this.stockData[this.symbol];
+        const currentPrice = stock.price;
+        
+        // Add support and resistance lines based on 52-week range
+        const supportLevel = stock.low52w * 1.05; // 5% above 52-week low
+        const resistanceLevel = stock.high52w * 0.95; // 5% below 52-week high
+        
+        // This would integrate with Chart.js annotation plugin in a real implementation
+        console.log(`Support level: $${supportLevel.toFixed(2)}, Resistance level: $${resistanceLevel.toFixed(2)}`);
+    }
+
+    updateAnalystRecommendations(analyst) {
+        // Update analyst recommendation section
+        const scoreElement = document.querySelector('.score-value');
+        const recommendationElement = document.querySelector('.recommendation-text strong');
+        
+        if (scoreElement) {
+            const totalRecommendations = Object.values(analyst.recommendations).reduce((a, b) => a + b, 0);
+            const weightedScore = (
+                analyst.recommendations.strongBuy * 5 +
+                analyst.recommendations.buy * 4 +
+                analyst.recommendations.hold * 3 +
+                analyst.recommendations.sell * 2 +
+                analyst.recommendations.strongSell * 1
+            ) / totalRecommendations;
+            
+            scoreElement.textContent = weightedScore.toFixed(1);
+        }
+        
+        if (recommendationElement) {
+            recommendationElement.textContent = analyst.rating;
+        }
+        
+        // Update recommendation breakdown bars
+        Object.keys(analyst.recommendations).forEach(key => {
+            const barElement = document.querySelector(`.breakdown-item:has(.breakdown-label:contains("${key.replace(/([A-Z])/g, ' $1').trim()}")) .breakdown-fill`);
+            if (barElement) {
+                const total = Object.values(analyst.recommendations).reduce((a, b) => a + b, 0);
+                const percentage = (analyst.recommendations[key] / total) * 100;
+                barElement.style.width = `${percentage}%`;
+            }
+        });
+    }
+
+    updatePeerComparison(peers) {
+        const peersList = document.querySelector('.peers-list');
+        if (!peersList) return;
+        
+        peersList.innerHTML = peers.map(peer => {
+            const changeClass = peer.change >= 0 ? 'positive' : 'negative';
+            return `
+                <div class="peer-item" onclick="window.location.href='stock-detail.html?symbol=${peer.symbol}'">
+                    <div class="peer-info">
+                        <span class="peer-symbol financial-data">${peer.symbol}</span>
+                        <span class="peer-name ui-text">${peer.name}</span>
+                    </div>
+                    <div class="peer-metrics">
+                        <span class="peer-price financial-data">$${peer.price.toFixed(2)}</span>
+                        <span class="peer-change ${changeClass}">${peer.change >= 0 ? '+' : ''}${peer.change.toFixed(2)}%</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
     formatNumber(num) {
         if (num >= 1e9) {
             return (num / 1e9).toFixed(1) + 'B';

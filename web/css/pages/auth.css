@@ -704,6 +704,228 @@
   }
 }
 
+/* Enhanced Focus Ring Variables */
+:root {
+  --focus-ring: 0 0 0 3px rgba(52, 74, 251, 0.1);
+  --focus-ring-error: 0 0 0 3px rgba(249, 35, 100, 0.1);
+  --focus-ring-success: 0 0 0 3px rgba(0, 211, 149, 0.1);
+}
+
+/* Enhanced Input Group Focus States */
+.input-group.focused {
+  position: relative;
+  z-index: 2;
+}
+
+.input-group.focused .form-coinbase {
+  border-color: var(--interactive-blue);
+  box-shadow: var(--focus-ring);
+}
+
+.input-group.focused .input-icon {
+  color: var(--interactive-blue);
+  transform: translateY(-50%) scale(1.1);
+  transition: all var(--transition-base);
+}
+
+.input-group.focused .btn-password-toggle {
+  color: var(--interactive-blue);
+}
+
+/* Enhanced Password Strength Animation */
+.password-strength {
+  opacity: 0;
+  max-height: 0;
+  transition: all var(--transition-base);
+  overflow: hidden;
+}
+
+.password-strength.visible {
+  opacity: 1;
+  max-height: 40px;
+  margin-top: var(--space-sm);
+}
+
+.strength-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.strength-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.strength-fill.strong::after {
+  animation: strengthShimmer 2s infinite;
+}
+
+@keyframes strengthShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Social Button Enhancements */
+.btn-social {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-social::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-social:hover::before {
+  left: 100%;
+}
+
+/* Enhanced Form Switching */
+.auth-form-container {
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+.auth-form-container.switching-out {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.auth-form-container.switching-in {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+/* Enhanced Success/Error States */
+.form-coinbase.is-valid {
+  border-color: var(--success-green);
+  box-shadow: var(--focus-ring-success);
+  animation: validPulse 0.3s ease-in-out;
+}
+
+.form-coinbase.is-invalid {
+  border-color: var(--error-red);
+  box-shadow: var(--focus-ring-error);
+}
+
+@keyframes validPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* Enhanced Loading States */
+.btn-auth-submit.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-auth-submit.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: loadingShimmer 1.5s infinite;
+}
+
+@keyframes loadingShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Enhanced Alert Animations */
+.alert {
+  animation: alertSlideDown 0.3s ease-out;
+  transform-origin: top;
+}
+
+@keyframes alertSlideDown {
+  0% { 
+    transform: translateY(-20px) scaleY(0);
+    opacity: 0;
+  }
+  100% { 
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
+  }
+}
+
+.alert-success {
+  background: var(--status-success-bg);
+  color: var(--status-success);
+  border: 1px solid rgba(0, 211, 149, 0.2);
+}
+
+.alert-info {
+  background: var(--status-info-bg);
+  color: var(--status-info);
+  border: 1px solid rgba(0, 82, 255, 0.2);
+}
+
+/* Enhanced Checkbox Styling */
+.form-check-input {
+  background-color: var(--form-background);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  width: 1.25em;
+  height: 1.25em;
+  transition: all var(--transition-base);
+}
+
+.form-check-input:checked {
+  background-color: var(--interactive-blue);
+  border-color: var(--interactive-blue);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+  background-size: 0.75em;
+}
+
+.form-check-input:focus {
+  border-color: var(--interactive-blue);
+  box-shadow: var(--focus-ring);
+}
+
+/* Enhanced Link Styling */
+.text-link {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.text-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--interactive-blue);
+  transition: width var(--transition-base);
+}
+
+.text-link:hover::after {
+  width: 100%;
+}
+
 /* Dark Theme Specific Overrides */
 [data-theme="dark"] .auth-container {
   background: var(--glass-background);
@@ -729,4 +951,30 @@
 [data-theme="dark"] .toggle-btn.active {
   background: var(--surface-primary);
   color: var(--interactive-blue);
+}
+
+[data-theme="dark"] :root {
+  --focus-ring: 0 0 0 3px rgba(52, 74, 251, 0.2);
+  --focus-ring-error: 0 0 0 3px rgba(249, 35, 100, 0.2);
+  --focus-ring-success: 0 0 0 3px rgba(0, 211, 149, 0.2);
+}
+
+/* Additional Mobile Optimizations */
+@media (max-width: 576px) {
+  .auth-forms {
+    padding: var(--space-lg) var(--space-md);
+  }
+  
+  .social-auth {
+    gap: var(--space-xs);
+  }
+  
+  .btn-social {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-sm);
+  }
+  
+  .strength-text {
+    font-size: var(--font-size-xs);
+  }
 }

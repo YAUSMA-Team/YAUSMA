@@ -13,6 +13,11 @@ class NewsManager {
         this.allArticles = [];
         this.filteredArticles = [];
         this.isLoading = false;
+        this.viewCounts = new Map();
+        this.bookmarkedArticles = new Set();
+        this.readArticles = new Set();
+        this.trendingTicker = null;
+        this.marketSummaryInterval = null;
         
         this.init();
     }
@@ -23,6 +28,10 @@ class NewsManager {
         this.loadNews();
         this.setupStickyFilters();
         this.setupInfiniteScroll();
+        this.initializeTrendingTicker();
+        this.updateMarketSummary();
+        this.loadUserPreferences();
+        this.setupKeyboardShortcuts();
     }
 
     bindEvents() {
@@ -79,18 +88,45 @@ class NewsManager {
                 this.handleReadMore(e);
             }
         });
+
+        // Bookmark functionality
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('bookmark-btn') || e.target.parentElement.classList.contains('bookmark-btn')) {
+                this.handleBookmark(e);
+            }
+        });
+
+        // Article preview on hover
+        document.addEventListener('mouseenter', (e) => {
+            if (e.target.classList.contains('news-card')) {
+                this.showArticlePreview(e.target);
+            }
+        }, true);
+
+        document.addEventListener('mouseleave', (e) => {
+            if (e.target.classList.contains('news-card')) {
+                this.hideArticlePreview();
+            }
+        }, true);
+
+        // Economic calendar interactions
+        document.querySelectorAll('.event-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                this.handleEconomicEvent(e);
+            });
+        });
     }
 
     generateMockNewsData() {
         const categories = ['markets', 'stocks', 'crypto', 'earnings', 'economy', 'politics', 'tech'];
         const sources = [
-            { name: 'Reuters', logo: '=ð' },
-            { name: 'Bloomberg', logo: '=Ê' },
-            { name: 'CNBC', logo: '=ú' },
-            { name: 'Financial Times', logo: '=È' },
-            { name: 'Wall Street Journal', logo: '=Ä' },
+            { name: 'Reuters', logo: '=ï¿½' },
+            { name: 'Bloomberg', logo: '=ï¿½' },
+            { name: 'CNBC', logo: '=ï¿½' },
+            { name: 'Financial Times', logo: '=ï¿½' },
+            { name: 'Wall Street Journal', logo: '=ï¿½' },
             { name: 'MarketWatch', logo: '' },
-            { name: 'Yahoo Finance', logo: '=°' }
+            { name: 'Yahoo Finance', logo: '=ï¿½' }
         ];
 
         const newsData = [
@@ -368,6 +404,9 @@ class NewsManager {
                             </button>
                             <button class="share-btn" data-share="copy" data-article-id="${article.id}" title="Copy Link">
                                 <i class="bi bi-link-45deg"></i>
+                            </button>
+                            <button class="bookmark-btn ${this.bookmarkedArticles.has(article.id) ? 'bookmarked' : ''}" data-article-id="${article.id}" title="Bookmark Article">
+                                <i class="bi ${this.bookmarkedArticles.has(article.id) ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i>
                             </button>
                         </div>
                     </div>
@@ -713,8 +752,474 @@ class NewsManager {
     }
 
     trackArticleClick(articleId) {
+        // Track view count
+        const currentCount = this.viewCounts.get(articleId) || 0;
+        this.viewCounts.set(articleId, currentCount + 1);
+        
+        // Mark as read
+        this.readArticles.add(articleId);
+        
+        // Update most read articles
+        this.updateMostReadArticles();
+        
+        // Save to localStorage
+        this.saveUserPreferences();
+        
         // In a real app, this would send analytics data
-        console.log(`Article ${articleId} clicked`);
+        console.log(`Article ${articleId} clicked - Total views: ${currentCount + 1}`);
+    }
+
+    handleBookmark(event) {
+        event.preventDefault();
+        const articleId = parseInt(event.target.dataset.articleId || event.target.parentElement.dataset.articleId);
+        const bookmarkBtn = event.target.classList.contains('bookmark-btn') ? event.target : event.target.parentElement;
+        
+        if (this.bookmarkedArticles.has(articleId)) {
+            this.bookmarkedArticles.delete(articleId);
+            bookmarkBtn.classList.remove('bookmarked');
+            bookmarkBtn.querySelector('i').className = 'bi bi-bookmark';
+            this.showToast('Bookmark removed', 'info');
+        } else {
+            this.bookmarkedArticles.add(articleId);
+            bookmarkBtn.classList.add('bookmarked');
+            bookmarkBtn.querySelector('i').className = 'bi bi-bookmark-fill';
+            this.showToast('Article bookmarked', 'success');
+        }
+        
+        this.saveUserPreferences();
+    }
+
+    initializeTrendingTicker() {
+        const trendingScroll = document.querySelector('.trending-news-scroll');
+        if (!trendingScroll) return;
+
+        let scrollPosition = 0;
+        const scrollSpeed = 1;
+        const maxScroll = trendingScroll.scrollWidth - trendingScroll.clientWidth;
+
+        const ticker = () => {
+            if (scrollPosition >= maxScroll) {
+                scrollPosition = 0;
+            } else {
+                scrollPosition += scrollSpeed;
+            }
+            trendingScroll.scrollLeft = scrollPosition;
+        };
+
+        // Auto-scroll every 50ms when not hovered
+        this.trendingTicker = setInterval(ticker, 50);
+
+        // Pause on hover
+        trendingScroll.addEventListener('mouseenter', () => {
+            clearInterval(this.trendingTicker);
+        });
+
+        trendingScroll.addEventListener('mouseleave', () => {
+            this.trendingTicker = setInterval(ticker, 50);
+        });
+    }
+
+    updateMarketSummary() {
+        const marketItems = document.querySelectorAll('.market-item');
+        if (marketItems.length === 0) return;
+
+        const updateMarketData = () => {
+            marketItems.forEach(item => {
+                const priceElement = item.querySelector('.market-price');
+                const changeElement = item.querySelector('.market-change');
+                
+                if (priceElement && changeElement) {
+                    // Simulate real-time price updates
+                    const currentPrice = parseFloat(priceElement.textContent.replace(/,/g, ''));
+                    const change = (Math.random() - 0.5) * 0.02; // Â±1% max change
+                    const newPrice = currentPrice * (1 + change);
+                    const changePercent = (change * 100).toFixed(2);
+                    
+                    priceElement.textContent = newPrice.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    
+                    changeElement.textContent = `${change >= 0 ? '+' : ''}${changePercent}%`;
+                    changeElement.className = `market-change ${change >= 0 ? 'positive' : 'negative'}`;
+                    
+                    // Add flash effect
+                    item.classList.add('market-update-flash');
+                    setTimeout(() => {
+                        item.classList.remove('market-update-flash');
+                    }, 500);
+                }
+            });
+        };
+
+        // Update every 30 seconds
+        this.marketSummaryInterval = setInterval(updateMarketData, 30000);
+    }
+
+    updateMostReadArticles() {
+        const mostReadContainer = document.querySelector('.most-read-articles');
+        if (!mostReadContainer) return;
+
+        // Sort articles by view count
+        const sortedByViews = [...this.viewCounts.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 4)
+            .map(([id, count]) => ({ 
+                ...this.allArticles.find(article => article.id === id), 
+                viewCount: count 
+            }))
+            .filter(article => article.title); // Filter out undefined articles
+
+        mostReadContainer.innerHTML = sortedByViews.map((article, index) => {
+            const timeAgo = this.getTimeAgo(article.publishedAt);
+            return `
+                <div class="most-read-item">
+                    <span class="rank">${index + 1}</span>
+                    <div class="article-info">
+                        <a href="#" class="article-title" data-article-id="${article.id}">${article.title}</a>
+                        <span class="article-time">${timeAgo} â€¢ ${article.viewCount} views</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    handleEconomicEvent(event) {
+        const eventItem = event.currentTarget;
+        const eventTitle = eventItem.querySelector('.event-title').textContent;
+        const eventTime = eventItem.querySelector('.time').textContent;
+        const eventDate = eventItem.querySelector('.date').textContent;
+        
+        this.showEventModal({
+            title: eventTitle,
+            date: eventDate,
+            time: eventTime,
+            impact: eventItem.querySelector('.event-impact').textContent
+        });
+    }
+
+    showEventModal(event) {
+        const modal = document.createElement('div');
+        modal.className = 'event-modal-overlay';
+        modal.innerHTML = `
+            <div class="event-modal">
+                <div class="event-modal-header">
+                    <h4>${event.title}</h4>
+                    <button class="modal-close-btn">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="event-modal-content">
+                    <div class="event-details">
+                        <div class="event-meta">
+                            <span class="event-date"><i class="bi bi-calendar"></i> ${event.date}</span>
+                            <span class="event-time"><i class="bi bi-clock"></i> ${event.time}</span>
+                            <span class="event-impact ${event.impact.toLowerCase()}">${event.impact}</span>
+                        </div>
+                        <p class="event-description">
+                            This economic event could significantly impact market movements. 
+                            Stay tuned for real-time updates and analysis.
+                        </p>
+                        <div class="event-actions">
+                            <button class="btn btn-coinbase-primary btn-sm" onclick="newsManager.addToCalendar('${event.title}', '${event.date}', '${event.time}')">
+                                <i class="bi bi-calendar-plus me-1"></i> Add to Calendar
+                            </button>
+                            <button class="btn btn-coinbase-secondary btn-sm" onclick="newsManager.setEventReminder('${event.title}')">
+                                <i class="bi bi-bell me-1"></i> Set Reminder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add modal styles
+        this.addModalStyles();
+
+        document.body.appendChild(modal);
+        
+        // Close modal events
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal || e.target.classList.contains('modal-close-btn') || e.target.parentElement.classList.contains('modal-close-btn')) {
+                document.body.removeChild(modal);
+            }
+        });
+
+        // ESC key to close
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                document.body.removeChild(modal);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    }
+
+    addToCalendar(title, date, time) {
+        // Create calendar event (simplified)
+        const startDate = new Date(`${date} ${time}`);
+        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
+        
+        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`;
+        
+        window.open(calendarUrl, '_blank');
+        this.showToast('Calendar event created', 'success');
+    }
+
+    setEventReminder(title) {
+        // Store reminder in localStorage (simplified)
+        const reminders = JSON.parse(localStorage.getItem('eventReminders') || '[]');
+        reminders.push({ title, timestamp: Date.now() });
+        localStorage.setItem('eventReminders', JSON.stringify(reminders));
+        
+        this.showToast('Reminder set successfully', 'success');
+    }
+
+    showArticlePreview(cardElement) {
+        const articleId = parseInt(cardElement.dataset.articleId);
+        const article = this.allArticles.find(a => a.id === articleId);
+        
+        if (!article || window.innerWidth <= 768) return; // Skip on mobile
+
+        const preview = document.createElement('div');
+        preview.className = 'article-preview-tooltip';
+        preview.innerHTML = `
+            <div class="preview-content">
+                <h5>${article.title}</h5>
+                <p>${article.excerpt}</p>
+                <div class="preview-meta">
+                    <span class="preview-source">${article.source.name}</span>
+                    <span class="preview-time">${this.getTimeAgo(article.publishedAt)}</span>
+                    <span class="preview-read-time">${article.readTime} min read</span>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(preview);
+        
+        // Position tooltip
+        const rect = cardElement.getBoundingClientRect();
+        preview.style.left = `${rect.right + 10}px`;
+        preview.style.top = `${rect.top}px`;
+        
+        // Remove after delay
+        setTimeout(() => {
+            if (document.body.contains(preview)) {
+                document.body.removeChild(preview);
+            }
+        }, 3000);
+    }
+
+    hideArticlePreview() {
+        const preview = document.querySelector('.article-preview-tooltip');
+        if (preview) {
+            document.body.removeChild(preview);
+        }
+    }
+
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Only trigger if not typing in input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            switch (e.key) {
+                case 'r':
+                    // Refresh news
+                    this.loadNews();
+                    break;
+                case 's':
+                    // Focus search
+                    document.getElementById('newsSearch').focus();
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                    // Quick category selection
+                    const categoryButtons = document.querySelectorAll('.filter-pill');
+                    const index = parseInt(e.key) - 1;
+                    if (categoryButtons[index]) {
+                        categoryButtons[index].click();
+                    }
+                    break;
+            }
+        });
+    }
+
+    loadUserPreferences() {
+        try {
+            const preferences = localStorage.getItem('newsPreferences');
+            if (preferences) {
+                const parsed = JSON.parse(preferences);
+                this.bookmarkedArticles = new Set(parsed.bookmarked || []);
+                this.readArticles = new Set(parsed.read || []);
+                this.viewCounts = new Map(parsed.viewCounts || []);
+            }
+        } catch (error) {
+            console.error('Failed to load user preferences:', error);
+        }
+    }
+
+    saveUserPreferences() {
+        try {
+            const preferences = {
+                bookmarked: Array.from(this.bookmarkedArticles),
+                read: Array.from(this.readArticles),
+                viewCounts: Array.from(this.viewCounts.entries())
+            };
+            localStorage.setItem('newsPreferences', JSON.stringify(preferences));
+        } catch (error) {
+            console.error('Failed to save user preferences:', error);
+        }
+    }
+
+    addModalStyles() {
+        if (document.querySelector('#event-modal-styles')) return;
+        
+        const styles = document.createElement('style');
+        styles.id = 'event-modal-styles';
+        styles.textContent = `
+            .event-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(4px);
+                z-index: var(--z-modal);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease-out;
+            }
+            .event-modal {
+                background: var(--card-background);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-xl);
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                animation: slideInUp 0.3s ease-out;
+            }
+            .event-modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: var(--space-lg);
+                border-bottom: 1px solid var(--border-light);
+            }
+            .event-modal-header h4 {
+                margin: 0;
+                color: var(--text-primary);
+            }
+            .modal-close-btn {
+                background: none;
+                border: none;
+                font-size: var(--font-size-lg);
+                color: var(--text-secondary);
+                cursor: pointer;
+                padding: var(--space-xs);
+                border-radius: var(--radius-sm);
+                transition: all var(--transition-base);
+            }
+            .modal-close-btn:hover {
+                background: var(--background-secondary);
+                color: var(--text-primary);
+            }
+            .event-modal-content {
+                padding: var(--space-lg);
+            }
+            .event-meta {
+                display: flex;
+                gap: var(--space-md);
+                margin-bottom: var(--space-md);
+                flex-wrap: wrap;
+            }
+            .event-meta span {
+                display: flex;
+                align-items: center;
+                gap: var(--space-xs);
+                font-size: var(--font-size-sm);
+                color: var(--text-secondary);
+            }
+            .event-description {
+                color: var(--text-primary);
+                line-height: var(--line-height-base);
+                margin-bottom: var(--space-lg);
+            }
+            .event-actions {
+                display: flex;
+                gap: var(--space-sm);
+                flex-wrap: wrap;
+            }
+            .article-preview-tooltip {
+                position: fixed;
+                background: var(--card-background);
+                border: 1px solid var(--border-light);
+                border-radius: var(--radius-md);
+                padding: var(--space-md);
+                box-shadow: var(--shadow-lg);
+                z-index: var(--z-tooltip);
+                max-width: 300px;
+                animation: fadeIn 0.2s ease-out;
+            }
+            .preview-content h5 {
+                margin: 0 0 var(--space-sm) 0;
+                font-size: var(--font-size-base);
+                color: var(--text-primary);
+            }
+            .preview-content p {
+                margin: 0 0 var(--space-sm) 0;
+                font-size: var(--font-size-sm);
+                color: var(--text-secondary);
+                line-height: var(--line-height-base);
+            }
+            .preview-meta {
+                display: flex;
+                gap: var(--space-sm);
+                font-size: var(--font-size-xs);
+                color: var(--text-tertiary);
+            }
+            .market-update-flash {
+                background: var(--background-secondary) !important;
+                transition: background-color 0.5s ease-out;
+            }
+            .bookmark-btn {
+                background: transparent;
+                border: 1px solid var(--border-light);
+                border-radius: var(--radius-sm);
+                padding: var(--space-xs);
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-tertiary);
+                transition: all var(--transition-base);
+                cursor: pointer;
+            }
+            .bookmark-btn:hover {
+                border-color: var(--interactive-blue);
+                color: var(--interactive-blue);
+                background: rgba(52, 74, 251, 0.05);
+            }
+            .bookmark-btn.bookmarked {
+                color: var(--warning-yellow);
+                border-color: var(--warning-yellow);
+                background: rgba(255, 201, 71, 0.1);
+            }
+            @keyframes slideInUp {
+                from { transform: translateY(30px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(styles);
     }
 }
 

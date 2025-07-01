@@ -245,12 +245,26 @@ class StocksDashboard {
             return;
         }
 
-        searchSuggestions.innerHTML = results.map(stock => `
-            <div class="suggestion-item" onclick="stocksDashboard.selectStock('${stock.symbol}')">
-                <div class="suggestion-symbol">${stock.symbol}</div>
-                <div class="suggestion-name">${stock.name}</div>
-            </div>
-        `).join('');
+        searchSuggestions.innerHTML = results.map(stock => {
+            const changeClass = stock.change.percent >= 0 ? 'positive' : 'negative';
+            const changeIcon = stock.change.percent >= 0 ? 'bi-arrow-up' : 'bi-arrow-down';
+            
+            return `
+                <div class="suggestion-item" onclick="stocksDashboard.selectStock('${stock.symbol}')">
+                    <div class="suggestion-main">
+                        <div class="suggestion-symbol">${stock.symbol}</div>
+                        <div class="suggestion-name">${stock.name}</div>
+                    </div>
+                    <div class="suggestion-metrics">
+                        <div class="suggestion-price">$${stock.price.toFixed(2)}</div>
+                        <div class="suggestion-change ${changeClass}">
+                            <i class="bi ${changeIcon}"></i>
+                            ${Math.abs(stock.change.percent).toFixed(2)}%
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     selectStock(symbol) {
@@ -429,16 +443,23 @@ class StocksDashboard {
         const changeIcon = stock.change.percent >= 0 ? 'bi-arrow-up' : 'bi-arrow-down';
         const watchlistClass = this.watchlist.has(stock.symbol) ? 'active' : '';
         
+        // Calculate 52W range percentage
+        const rangePercent = ((stock.price - stock.low52w) / (stock.high52w - stock.low52w)) * 100;
+        
         return `
-            <div class="stock-card" onclick="stocksDashboard.showStockDetail(${JSON.stringify(stock).replace(/"/g, '&quot;')})">
+            <div class="stock-card" onclick="stocksDashboard.navigateToStockDetail('${stock.symbol}')">
                 <div class="stock-card-header">
                     <div class="stock-info">
                         <div class="stock-symbol">${stock.symbol}</div>
                         <div class="stock-name">${stock.name}</div>
+                        <div class="stock-sector">${this.formatSectorName(stock.sector)}</div>
                     </div>
                     <div class="stock-actions">
-                        <button class="btn-watchlist ${watchlistClass}" onclick="event.stopPropagation(); stocksDashboard.toggleWatchlist('${stock.symbol}')" title="Add to watchlist">
+                        <button class="btn-watchlist ${watchlistClass}" onclick="event.stopPropagation(); stocksDashboard.toggleWatchlist('${stock.symbol}')" title="${this.watchlist.has(stock.symbol) ? 'Remove from' : 'Add to'} watchlist">
                             <i class="bi bi-bookmark${this.watchlist.has(stock.symbol) ? '-fill' : ''}"></i>
+                        </button>
+                        <button class="btn-trade" onclick="event.stopPropagation(); stocksDashboard.showQuickTrade('${stock.symbol}')" title="Quick trade">
+                            <i class="bi bi-lightning-fill"></i>
                         </button>
                     </div>
                 </div>
@@ -469,8 +490,13 @@ class StocksDashboard {
                         <span class="metadata-value">${stock.peRatio}</span>
                     </div>
                     <div class="metadata-item">
-                        <span class="metadata-label">52W High</span>
-                        <span class="metadata-value">$${stock.high52w.toFixed(2)}</span>
+                        <span class="metadata-label">52W Range</span>
+                        <span class="metadata-value">
+                            <div class="range-bar">
+                                <div class="range-fill" style="width: ${rangePercent}%"></div>
+                                <div class="range-indicator" style="left: ${rangePercent}%"></div>
+                            </div>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -809,19 +835,143 @@ class StocksDashboard {
 
     updateStockPrices() {
         this.stocksData.forEach(stock => {
-            // Small random price movement
-            const change = (Math.random() - 0.5) * 2;
+            // Store previous price for animation
+            const previousPrice = stock.price;
+            
+            // Small random price movement (0.1% to 0.5%)
+            const changePercent = (Math.random() - 0.5) * 1;
+            const change = (stock.price * changePercent) / 100;
             stock.price = Math.max(1, stock.price + change);
             
-            // Update change values
-            const changePercent = (Math.random() - 0.5) * 2;
-            stock.change.percent += changePercent;
-            stock.change.amount = (stock.price * stock.change.percent) / 100;
+            // Update change values from previous close
+            const newChangePercent = ((stock.price - stock.previousClose) / stock.previousClose) * 100;
+            stock.change.percent = newChangePercent;
+            stock.change.amount = stock.price - stock.previousClose;
+            
+            // Update volume with realistic fluctuation
+            const volumeChange = (Math.random() - 0.5) * 0.2; // ±10%
+            stock.volume = Math.max(100000, stock.volume * (1 + volumeChange));
+            
+            // Animate price change in UI
+            this.animatePriceChange(stock.symbol, previousPrice, stock.price);
         });
 
+        // Update market indices
+        this.updateMarketIndices();
+        
+        // Re-render current tab if not sectors
         if (this.currentTab !== 'sectors') {
             this.renderCurrentTab();
         }
+    }
+
+    animatePriceChange(symbol, oldPrice, newPrice) {
+        const priceElement = document.querySelector(`[onclick*="${symbol}"] .stock-price`);
+        if (!priceElement) return;
+        
+        priceElement.classList.remove('price-flash-up', 'price-flash-down');
+        
+        if (newPrice > oldPrice) {
+            priceElement.classList.add('price-flash-up');
+        } else if (newPrice < oldPrice) {
+            priceElement.classList.add('price-flash-down');
+        }
+        
+        setTimeout(() => {
+            priceElement.classList.remove('price-flash-up', 'price-flash-down');
+        }, 1000);
+    }
+
+    // Navigation functions
+    navigateToStockDetail(symbol) {
+        // In a real application, this would navigate to stock detail page
+        window.location.href = `stock-detail.html?symbol=${symbol}`;
+    }
+
+    showQuickTrade(symbol) {
+        const stock = this.stocksData.find(s => s.symbol === symbol);
+        if (!stock) return;
+
+        // Create quick trade modal
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Quick Trade - ${stock.symbol}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="trade-summary">
+                            <div class="trade-symbol">${stock.symbol}</div>
+                            <div class="trade-price">$${stock.price.toFixed(2)}</div>
+                            <div class="trade-change ${stock.change.percent >= 0 ? 'positive' : 'negative'}">
+                                ${stock.change.percent >= 0 ? '+' : ''}${stock.change.percent.toFixed(2)}%
+                            </div>
+                        </div>
+                        <div class="trade-actions mt-4">
+                            <button class="btn btn-success btn-lg me-2" onclick="stocksDashboard.executeTrade('${stock.symbol}', 'buy')">
+                                <i class="bi bi-plus-circle me-2"></i>Buy
+                            </button>
+                            <button class="btn btn-danger btn-lg" onclick="stocksDashboard.executeTrade('${stock.symbol}', 'sell')">
+                                <i class="bi bi-dash-circle me-2"></i>Sell
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        
+        modal.addEventListener('hidden.bs.modal', () => {
+            modal.remove();
+        });
+    }
+
+    executeTrade(symbol, action) {
+        // Simulate trade execution
+        const stock = this.stocksData.find(s => s.symbol === symbol);
+        const actionText = action === 'buy' ? 'purchased' : 'sold';
+        
+        // Close the modal
+        const modal = document.querySelector('.modal.show');
+        if (modal) {
+            bootstrap.Modal.getInstance(modal).hide();
+        }
+        
+        // Show success notification
+        this.showTradeNotification(`Successfully ${actionText} ${stock.symbol} at $${stock.price.toFixed(2)}`, 'success');
+    }
+
+    showTradeNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show trade-notification`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1060;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        
+        notification.innerHTML = `
+            <i class="bi bi-check-circle-fill me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.classList.add('fade');
+                setTimeout(() => notification.remove(), 150);
+            }
+        }, 4000);
     }
 
     // Utility functions

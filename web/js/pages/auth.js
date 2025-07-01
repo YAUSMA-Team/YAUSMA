@@ -1,18 +1,47 @@
 /**
  * YAUSMA Authentication Page JavaScript
  * Handles form validation, toggle functionality, and UI interactions
+ * Coinbase-inspired professional authentication experience
  */
 
 class AuthManager {
     constructor() {
         this.currentForm = 'signin';
         this.isLoading = false;
+        this.rememberMeData = null;
+        this.lastValidEmail = '';
+        this.focusTimeout = null;
+        
+        // Password strength configuration
         this.passwordStrengthRules = {
             minLength: 8,
             hasUpperCase: /[A-Z]/,
             hasLowerCase: /[a-z]/,
             hasNumbers: /\d/,
             hasSpecialChars: /[!@#$%^&*(),.?":{}|<>]/
+        };
+        
+        // Form validation rules
+        this.validationRules = {
+            email: {
+                pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Please enter a valid email address'
+            },
+            firstName: {
+                pattern: /^[a-zA-Z\s]{2,30}$/,
+                message: 'First name must be 2-30 characters, letters only'
+            },
+            lastName: {
+                pattern: /^[a-zA-Z\s]{2,30}$/,
+                message: 'Last name must be 2-30 characters, letters only'
+            }
+        };
+        
+        // Animation configuration
+        this.animations = {
+            formSwitch: 300,
+            validation: 200,
+            loading: 150
         };
         
         this.init();
@@ -23,7 +52,11 @@ class AuthManager {
         this.initFormToggle();
         this.initPasswordToggles();
         this.initFormValidation();
-        console.log('AuthManager initialized');
+        this.initRememberMe();
+        this.initKeyboardNavigation();
+        this.initAccessibilityFeatures();
+        this.preloadFormData();
+        console.log('🔐 AuthManager initialized - Coinbase-style authentication ready');
     }
 
     bindEvents() {
@@ -56,6 +89,24 @@ class AuthManager {
         document.querySelectorAll('.btn-social').forEach(btn => {
             btn.addEventListener('click', (e) => this.handleSocialAuth(e));
         });
+
+        // Enhanced focus management
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', (e) => this.handleInputFocus(e));
+            input.addEventListener('blur', (e) => this.handleInputBlur(e));
+        });
+
+        // Remember me functionality
+        document.getElementById('remember-me')?.addEventListener('change', (e) => this.handleRememberMeToggle(e));
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+
+        // Window events for better UX
+        window.addEventListener('beforeunload', (e) => this.handleBeforeUnload(e));
+        
+        // Theme integration for forms
+        document.addEventListener('themeChanged', (e) => this.handleThemeChange(e));
     }
 
     initFormToggle() {
@@ -80,19 +131,42 @@ class AuthManager {
     }
 
     initRealTimeValidation() {
-        // Email validation
+        // Email validation with debouncing
         document.querySelectorAll('input[type="email"]').forEach(input => {
             input.addEventListener('blur', (e) => this.validateEmail(e.target));
-            input.addEventListener('input', (e) => this.clearValidation(e.target));
+            input.addEventListener('input', (e) => {
+                this.clearValidation(e.target);
+                this.debounceValidation(e.target, () => this.validateEmail(e.target));
+            });
+        });
+
+        // Name field validation
+        ['signup-firstname', 'signup-lastname'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('blur', (e) => this.validateName(e.target));
+                input.addEventListener('input', (e) => {
+                    this.clearValidation(e.target);
+                    this.debounceValidation(e.target, () => this.validateName(e.target));
+                });
+            }
         });
 
         // Password validation
         document.querySelectorAll('input[type="password"]').forEach(input => {
             if (input.id === 'signup-password') {
-                input.addEventListener('input', (e) => this.validatePassword(e.target));
+                let debounceTimer;
+                input.addEventListener('input', (e) => {
+                    this.checkPasswordStrength(e);
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => this.validatePassword(e.target), 500);
+                });
             }
             if (input.id === 'signup-confirm-password') {
-                input.addEventListener('input', (e) => this.validatePasswordConfirm(e.target));
+                input.addEventListener('input', (e) => {
+                    this.clearValidation(e.target);
+                    this.debounceValidation(e.target, () => this.validatePasswordConfirm(e.target));
+                });
             }
         });
 
@@ -121,23 +195,37 @@ class AuthManager {
     switchToForm(formType) {
         if (this.isLoading) return;
 
-        // Update toggle buttons
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.target === formType);
+        const currentContainer = document.querySelector('.auth-form-container.active');
+        const nextContainer = document.getElementById(`${formType}-form`);
+        
+        if (!nextContainer || nextContainer === currentContainer) return;
+
+        // Add switching animation
+        this.animateFormSwitch(currentContainer, nextContainer, () => {
+            // Update toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.target === formType);
+            });
+
+            // Update form containers
+            document.querySelectorAll('.auth-form-container').forEach(container => {
+                container.classList.toggle('active', container.id === `${formType}-form`);
+            });
+
+            // Update footer
+            document.querySelector('.signin-footer').classList.toggle('d-none', formType === 'signin');
+            document.querySelector('.signup-footer').classList.toggle('d-none', formType === 'signup');
+
+            this.currentForm = formType;
+            this.clearAllErrors();
+            this.resetAllForms();
+            
+            // Focus first input of new form
+            this.focusFirstInput(nextContainer);
+            
+            // Announce form change for accessibility
+            this.announceFormChange(formType);
         });
-
-        // Update form containers
-        document.querySelectorAll('.auth-form-container').forEach(container => {
-            container.classList.toggle('active', container.id === `${formType}-form`);
-        });
-
-        // Update footer
-        document.querySelector('.signin-footer').classList.toggle('d-none', formType === 'signin');
-        document.querySelector('.signup-footer').classList.toggle('d-none', formType === 'signup');
-
-        this.currentForm = formType;
-        this.clearAllErrors();
-        this.resetAllForms();
     }
 
     showForm(formType) {
@@ -178,12 +266,21 @@ class AuthManager {
         this.clearError('signin-error');
 
         try {
-            // Simulate API call
-            await this.simulateAuth({
+            const authData = {
                 email: formData.get('email'),
                 password: formData.get('password'),
                 remember: formData.get('remember') === 'on'
-            }, 'signin');
+            };
+
+            // Simulate API call
+            await this.simulateAuth(authData, 'signin');
+
+            // Handle remember me functionality
+            if (authData.remember) {
+                this.saveRememberedCredentials({ email: authData.email });
+            } else {
+                this.clearRememberedCredentials();
+            }
 
             // Success - would redirect in real app
             this.showSuccess('Welcome back! Redirecting to your dashboard...');
@@ -195,6 +292,12 @@ class AuthManager {
 
         } catch (error) {
             this.showError('signin-error', error.message);
+            
+            // Focus back to form for better UX
+            setTimeout(() => {
+                const firstInput = form.querySelector('.form-control:not([disabled])');
+                if (firstInput) firstInput.focus();
+            }, 100);
         } finally {
             this.setLoadingState(form, false);
         }
@@ -223,18 +326,23 @@ class AuthManager {
         this.clearError('signup-error');
 
         try {
-            // Simulate API call
-            await this.simulateAuth({
+            const authData = {
                 firstName: formData.get('firstName'),
                 lastName: formData.get('lastName'),
                 email: formData.get('email'),
                 password: formData.get('password'),
                 terms: formData.get('terms') === 'on',
                 marketing: formData.get('marketing') === 'on'
-            }, 'signup');
+            };
+
+            // Simulate API call
+            await this.simulateAuth(authData, 'signup');
+
+            // Auto-save email for future sign-ins
+            this.saveRememberedCredentials({ email: authData.email });
 
             // Success - would redirect in real app
-            this.showSuccess('Account created successfully! Welcome to YAUSMA!');
+            this.showSuccess('🎉 Account created successfully! Welcome to YAUSMA!');
             
             // Simulate redirect delay
             setTimeout(() => {
@@ -243,6 +351,13 @@ class AuthManager {
 
         } catch (error) {
             this.showError('signup-error', error.message);
+            
+            // Focus back to first error field for better UX
+            setTimeout(() => {
+                const errorField = form.querySelector('.form-control.is-invalid');
+                const firstInput = errorField || form.querySelector('.form-control:not([disabled])');
+                if (firstInput) firstInput.focus();
+            }, 100);
         } finally {
             this.setLoadingState(form, false);
         }
@@ -405,41 +520,75 @@ class AuthManager {
 
     checkPasswordStrength(e) {
         const password = e.target.value;
+        const strengthContainer = document.querySelector('.password-strength');
         const strengthBar = document.querySelector('.strength-fill');
         const strengthText = document.querySelector('.strength-text');
         
-        if (!strengthBar || !strengthText) return;
+        if (!strengthBar || !strengthText || !strengthContainer) return;
+
+        // Show/hide strength indicator based on password content
+        if (password.length > 0) {
+            strengthContainer.classList.add('visible');
+        } else {
+            strengthContainer.classList.remove('visible');
+            return;
+        }
 
         const rules = this.passwordStrengthRules;
         let score = 0;
         let strength = 'weak';
+        let strengthDescription = '';
 
+        // Calculate score
         if (password.length >= rules.minLength) score++;
         if (rules.hasUpperCase.test(password)) score++;
         if (rules.hasLowerCase.test(password)) score++;
         if (rules.hasNumbers.test(password)) score++;
         if (rules.hasSpecialChars.test(password)) score++;
 
-        // Determine strength
-        if (score === 0) {
+        // Determine strength level and description
+        if (score === 0 || password.length < 4) {
             strength = 'weak';
-            strengthText.textContent = 'Password strength: Very weak';
+            strengthDescription = 'Very weak';
         } else if (score <= 2) {
             strength = 'weak';
-            strengthText.textContent = 'Password strength: Weak';
+            strengthDescription = 'Weak';
         } else if (score === 3) {
             strength = 'fair';
-            strengthText.textContent = 'Password strength: Fair';
+            strengthDescription = 'Fair';
         } else if (score === 4) {
             strength = 'good';
-            strengthText.textContent = 'Password strength: Good';
+            strengthDescription = 'Good';
         } else {
             strength = 'strong';
-            strengthText.textContent = 'Password strength: Strong';
+            strengthDescription = 'Strong';
         }
 
-        // Update visual indicator
+        // Update visual indicator with animation
         strengthBar.className = `strength-fill ${strength}`;
+        strengthText.textContent = `Password strength: ${strengthDescription}`;
+
+        // Add strength tips
+        if (strength === 'weak' || strength === 'fair') {
+            const tips = [];
+            if (password.length < rules.minLength) tips.push('8+ characters');
+            if (!rules.hasUpperCase.test(password)) tips.push('uppercase letter');
+            if (!rules.hasLowerCase.test(password)) tips.push('lowercase letter');
+            if (!rules.hasNumbers.test(password)) tips.push('number');
+            if (!rules.hasSpecialChars.test(password)) tips.push('special character');
+            
+            if (tips.length > 0) {
+                strengthText.textContent += ` (Add: ${tips.slice(0, 2).join(', ')})`;
+            }
+        }
+
+        // Trigger visual feedback
+        if (strength === 'strong') {
+            strengthContainer.style.animation = 'none';
+            setTimeout(() => {
+                strengthContainer.style.animation = 'pulse 0.3s ease-in-out';
+            }, 10);
+        }
     }
 
     setFieldError(input, message) {
@@ -569,9 +718,376 @@ class AuthManager {
             strengthText.textContent = 'Password strength';
         }
     }
+
+    // ============================================
+    // NEW ENHANCED METHODS
+    // ============================================
+
+    /**
+     * Initialize remember me functionality
+     */
+    initRememberMe() {
+        // Load saved credentials if available
+        const savedData = this.loadRememberedCredentials();
+        if (savedData && savedData.email) {
+            const emailInput = document.getElementById('signin-email');
+            const rememberCheckbox = document.getElementById('remember-me');
+            
+            if (emailInput && rememberCheckbox) {
+                emailInput.value = savedData.email;
+                rememberCheckbox.checked = true;
+                this.lastValidEmail = savedData.email;
+            }
+        }
+    }
+
+    /**
+     * Initialize keyboard navigation
+     */
+    initKeyboardNavigation() {
+        // Enable keyboard navigation for form elements
+        document.querySelectorAll('.auth-form input, .auth-form button').forEach((element, index, elements) => {
+            element.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.target.type !== 'submit') {
+                    e.preventDefault();
+                    const nextElement = elements[index + 1];
+                    if (nextElement) {
+                        nextElement.focus();
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize accessibility features
+     */
+    initAccessibilityFeatures() {
+        // Add ARIA labels and descriptions
+        this.enhanceAccessibility();
+        
+        // Announce validation errors for screen readers
+        this.setupScreenReaderAnnouncements();
+    }
+
+    /**
+     * Preload form data from localStorage or URL params
+     */
+    preloadFormData() {
+        // Check for URL parameters (e.g., email from referral)
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailParam = urlParams.get('email');
+        
+        if (emailParam) {
+            const emailInput = document.getElementById('signin-email');
+            if (emailInput) {
+                emailInput.value = emailParam;
+                this.validateEmail(emailInput);
+            }
+        }
+    }
+
+    /**
+     * Enhanced form switching with smooth animations
+     */
+    animateFormSwitch(currentContainer, nextContainer, callback) {
+        if (!currentContainer || !nextContainer) {
+            callback();
+            return;
+        }
+
+        // Fade out current form
+        currentContainer.style.transition = `opacity ${this.animations.formSwitch}ms ease-out`;
+        currentContainer.style.opacity = '0';
+
+        setTimeout(() => {
+            callback();
+            
+            // Fade in next form
+            nextContainer.style.opacity = '0';
+            nextContainer.style.transition = `opacity ${this.animations.formSwitch}ms ease-in`;
+            
+            setTimeout(() => {
+                nextContainer.style.opacity = '1';
+                setTimeout(() => {
+                    nextContainer.style.transition = '';
+                    nextContainer.style.opacity = '';
+                    currentContainer.style.transition = '';
+                    currentContainer.style.opacity = '';
+                }, this.animations.formSwitch);
+            }, 50);
+        }, this.animations.formSwitch);
+    }
+
+    /**
+     * Focus first visible input in a form container
+     */
+    focusFirstInput(container) {
+        if (!container) return;
+        
+        const firstInput = container.querySelector('input:not([type="hidden"]):not(:disabled)');
+        if (firstInput) {
+            // Delayed focus to ensure form is visible
+            setTimeout(() => {
+                firstInput.focus();
+            }, this.animations.formSwitch + 50);
+        }
+    }
+
+    /**
+     * Announce form changes for screen readers
+     */
+    announceFormChange(formType) {
+        const announcement = formType === 'signin' ? 'Sign in form displayed' : 'Sign up form displayed';
+        this.announceToScreenReader(announcement);
+    }
+
+    /**
+     * Debounced validation to improve performance
+     */
+    debounceValidation(input, validationFunction, delay = 500) {
+        if (input.validationTimeout) {
+            clearTimeout(input.validationTimeout);
+        }
+        
+        input.validationTimeout = setTimeout(() => {
+            if (input.value.trim()) {
+                validationFunction();
+            }
+        }, delay);
+    }
+
+    /**
+     * Enhanced name validation
+     */
+    validateName(input) {
+        const value = input.value.trim();
+        const fieldName = input.id.includes('firstname') ? 'firstName' : 'lastName';
+        const rule = this.validationRules[fieldName];
+        
+        if (!value) {
+            return true; // Empty is handled by required validation
+        }
+
+        if (!rule.pattern.test(value)) {
+            this.setFieldError(input, rule.message);
+            return false;
+        }
+
+        this.setFieldValid(input);
+        return true;
+    }
+
+    /**
+     * Handle input focus with enhanced UX
+     */
+    handleInputFocus(e) {
+        const input = e.target;
+        const inputGroup = input.closest('.input-group');
+        
+        if (inputGroup) {
+            inputGroup.classList.add('focused');
+        }
+        
+        // Clear any previous validation on focus
+        this.clearValidation(input);
+    }
+
+    /**
+     * Handle input blur with validation
+     */
+    handleInputBlur(e) {
+        const input = e.target;
+        const inputGroup = input.closest('.input-group');
+        
+        if (inputGroup) {
+            inputGroup.classList.remove('focused');
+        }
+        
+        // Validate on blur if field has content
+        if (input.value.trim()) {
+            setTimeout(() => this.validateField(input), 100);
+        }
+    }
+
+    /**
+     * Handle remember me toggle
+     */
+    handleRememberMeToggle(e) {
+        const isChecked = e.target.checked;
+        const emailInput = document.getElementById('signin-email');
+        
+        if (isChecked && emailInput && emailInput.value) {
+            this.saveRememberedCredentials({ email: emailInput.value });
+        } else if (!isChecked) {
+            this.clearRememberedCredentials();
+        }
+    }
+
+    /**
+     * Handle keyboard shortcuts for better UX
+     */
+    handleKeyboardShortcuts(e) {
+        // Escape key clears current form
+        if (e.key === 'Escape') {
+            if (this.isLoading) {
+                return; // Don't allow escape during loading
+            }
+            
+            const activeForm = document.querySelector('.auth-form-container.active .auth-form');
+            if (activeForm) {
+                this.resetAllForms();
+                this.clearAllErrors();
+            }
+        }
+        
+        // Ctrl/Cmd + Enter submits form
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            const activeForm = document.querySelector('.auth-form-container.active .auth-form');
+            if (activeForm && !this.isLoading) {
+                const submitButton = activeForm.querySelector('[type="submit"]');
+                if (submitButton) {
+                    submitButton.click();
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle before unload to save form data
+     */
+    handleBeforeUnload(e) {
+        if (this.isLoading) {
+            e.preventDefault();
+            e.returnValue = 'Authentication in progress. Are you sure you want to leave?';
+            return e.returnValue;
+        }
+    }
+
+    /**
+     * Handle theme changes
+     */
+    handleThemeChange(e) {
+        // Update form styling based on theme
+        const isDark = e.detail?.theme === 'dark';
+        this.updateFormTheme(isDark);
+    }
+
+    /**
+     * Update form theme
+     */
+    updateFormTheme(isDark) {
+        const authContainer = document.querySelector('.auth-container');
+        if (authContainer) {
+            authContainer.classList.toggle('dark-theme', isDark);
+        }
+    }
+
+    /**
+     * Remember me functionality - save credentials
+     */
+    saveRememberedCredentials(data) {
+        try {
+            const encryptedData = btoa(JSON.stringify(data)); // Basic encoding
+            localStorage.setItem('yausma_remember_me', encryptedData);
+        } catch (error) {
+            console.warn('Could not save remembered credentials:', error);
+        }
+    }
+
+    /**
+     * Remember me functionality - load credentials
+     */
+    loadRememberedCredentials() {
+        try {
+            const encryptedData = localStorage.getItem('yausma_remember_me');
+            if (encryptedData) {
+                return JSON.parse(atob(encryptedData));
+            }
+        } catch (error) {
+            console.warn('Could not load remembered credentials:', error);
+            this.clearRememberedCredentials();
+        }
+        return null;
+    }
+
+    /**
+     * Remember me functionality - clear credentials
+     */
+    clearRememberedCredentials() {
+        try {
+            localStorage.removeItem('yausma_remember_me');
+        } catch (error) {
+            console.warn('Could not clear remembered credentials:', error);
+        }
+    }
+
+    /**
+     * Enhanced accessibility support
+     */
+    enhanceAccessibility() {
+        // Add live region for announcements
+        if (!document.getElementById('auth-announcements')) {
+            const liveRegion = document.createElement('div');
+            liveRegion.id = 'auth-announcements';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            liveRegion.className = 'visually-hidden';
+            document.body.appendChild(liveRegion);
+        }
+
+        // Enhance form labels and descriptions
+        document.querySelectorAll('.form-control').forEach(input => {
+            const label = document.querySelector(`label[for="${input.id}"]`);
+            if (label && !input.getAttribute('aria-labelledby')) {
+                input.setAttribute('aria-labelledby', label.id || `${input.id}-label`);
+                if (!label.id) {
+                    label.id = `${input.id}-label`;
+                }
+            }
+        });
+    }
+
+    /**
+     * Setup screen reader announcements
+     */
+    setupScreenReaderAnnouncements() {
+        // Announce validation errors
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    const element = mutation.target;
+                    if (element.classList.contains('is-invalid')) {
+                        const errorMessage = element.closest('.form-group')?.querySelector('.invalid-feedback')?.textContent;
+                        if (errorMessage) {
+                            this.announceToScreenReader(`Error: ${errorMessage}`);
+                        }
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.form-control').forEach(input => {
+            observer.observe(input, { attributes: true });
+        });
+    }
+
+    /**
+     * Announce message to screen readers
+     */
+    announceToScreenReader(message) {
+        const liveRegion = document.getElementById('auth-announcements');
+        if (liveRegion) {
+            liveRegion.textContent = message;
+            // Clear after announcement
+            setTimeout(() => {
+                liveRegion.textContent = '';
+            }, 1000);
+        }
+    }
 }
 
-// Enhanced form validation styles
+// Enhanced form validation styles and animations
 const ValidationStyles = {
     init() {
         // Add custom validation styles
@@ -580,6 +1096,7 @@ const ValidationStyles = {
             /* Custom validation feedback animations */
             .invalid-feedback {
                 animation: shake 0.3s ease-in-out;
+                transform-origin: center;
             }
             
             @keyframes shake {
@@ -602,6 +1119,8 @@ const ValidationStyles = {
             /* Loading button animation */
             .btn-auth-submit.loading {
                 pointer-events: none;
+                position: relative;
+                overflow: hidden;
             }
             
             .btn-auth-submit .spinner-border {
@@ -611,6 +1130,186 @@ const ValidationStyles = {
             @keyframes spin {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
+            }
+            
+            /* Enhanced input focus states */
+            .input-group.focused {
+                z-index: 2;
+            }
+            
+            .input-group.focused .form-control {
+                border-color: var(--interactive-blue);
+                box-shadow: 0 0 0 3px rgba(52, 74, 251, 0.1);
+            }
+            
+            .input-group.focused .input-icon {
+                color: var(--interactive-blue);
+            }
+            
+            /* Form switching animations */
+            .auth-form-container {
+                transform-origin: center;
+            }
+            
+            .auth-form-container.switching-out {
+                animation: slideOutLeft 0.3s ease-in-out;
+            }
+            
+            .auth-form-container.switching-in {
+                animation: slideInRight 0.3s ease-in-out;
+            }
+            
+            @keyframes slideOutLeft {
+                0% { transform: translateX(0); opacity: 1; }
+                100% { transform: translateX(-20px); opacity: 0; }
+            }
+            
+            @keyframes slideInRight {
+                0% { transform: translateX(20px); opacity: 0; }
+                100% { transform: translateX(0); opacity: 1; }
+            }
+            
+            /* Password strength indicator enhancements */
+            .password-strength {
+                transition: all 0.3s ease;
+            }
+            
+            .strength-fill {
+                transition: width 0.4s ease, background-color 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .strength-fill::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+                animation: strength-shimmer 2s infinite;
+            }
+            
+            .strength-fill.strong::after {
+                animation: strength-shimmer 1s infinite;
+            }
+            
+            @keyframes strength-shimmer {
+                0% { left: -100%; }
+                100% { left: 100%; }
+            }
+            
+            /* Enhanced social button hover effects */
+            .btn-social {
+                position: relative;
+                overflow: hidden;
+                transition: all 0.2s ease;
+            }
+            
+            .btn-social::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                transition: left 0.5s ease;
+            }
+            
+            .btn-social:hover::before {
+                left: 100%;
+            }
+            
+            /* Alert animations */
+            .alert {
+                animation: alertSlideIn 0.3s ease-out;
+                transform-origin: top;
+            }
+            
+            @keyframes alertSlideIn {
+                0% { transform: translateY(-10px); opacity: 0; }
+                100% { transform: translateY(0); opacity: 1; }
+            }
+            
+            /* Dark theme form enhancements */
+            .auth-container.dark-theme {
+                background: var(--dark-bg-secondary);
+                border-color: var(--dark-border);
+            }
+            
+            .auth-container.dark-theme .form-control {
+                background: var(--dark-bg-primary);
+                border-color: var(--dark-border);
+                color: var(--dark-text-primary);
+            }
+            
+            .auth-container.dark-theme .form-control:focus {
+                background: var(--dark-bg-primary);
+                border-color: var(--interactive-blue);
+                color: var(--dark-text-primary);
+                box-shadow: 0 0 0 3px rgba(52, 74, 251, 0.2);
+            }
+            
+            /* Accessibility improvements */
+            .visually-hidden {
+                position: absolute !important;
+                width: 1px !important;
+                height: 1px !important;
+                padding: 0 !important;
+                margin: -1px !important;
+                overflow: hidden !important;
+                clip: rect(0, 0, 0, 0) !important;
+                white-space: nowrap !important;
+                border: 0 !important;
+            }
+            
+            /* High contrast mode support */
+            @media (prefers-contrast: high) {
+                .form-control.is-valid {
+                    border-width: 3px;
+                }
+                
+                .form-control.is-invalid {
+                    border-width: 3px;
+                }
+                
+                .btn-auth-submit {
+                    border: 2px solid;
+                }
+            }
+            
+            /* Reduced motion support */
+            @media (prefers-reduced-motion: reduce) {
+                .invalid-feedback,
+                .form-control.is-valid,
+                .btn-auth-submit .spinner-border,
+                .auth-form-container,
+                .strength-fill,
+                .btn-social,
+                .alert {
+                    animation: none !important;
+                    transition: none !important;
+                }
+            }
+            
+            /* Touch device improvements */
+            @media (hover: none) and (pointer: coarse) {
+                .btn-social {
+                    padding: 16px 24px;
+                }
+                
+                .form-control {
+                    padding: 16px;
+                    font-size: 16px; /* Prevents zoom on iOS */
+                }
+                
+                .btn-password-toggle {
+                    padding: 12px;
+                    min-width: 44px;
+                    min-height: 44px;
+                }
             }
         `;
         document.head.appendChild(style);
