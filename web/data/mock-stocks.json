@@ -1,3 +1,206 @@
 {
-    "stocks": []
-} 
+  "stocks": [
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "sector": "technology",
+      "marketCap": "large",
+      "price": 175.43,
+      "change": {
+        "percent": 2.87,
+        "amount": 4.89
+      },
+      "volume": 89234567,
+      "marketCapValue": 2800,
+      "high52w": 198.23,
+      "low52w": 124.17,
+      "peRatio": 28.5,
+      "dividend": 0.53,
+      "beta": 1.23
+    },
+    {
+      "symbol": "MSFT",
+      "name": "Microsoft Corporation",
+      "sector": "technology",
+      "marketCap": "large",
+      "price": 387.92,
+      "change": {
+        "percent": 1.19,
+        "amount": 4.56
+      },
+      "volume": 34567890,
+      "marketCapValue": 2900,
+      "high52w": 423.45,
+      "low52w": 213.43,
+      "peRatio": 32.1,
+      "dividend": 0.68,
+      "beta": 0.95
+    },
+    {
+      "symbol": "GOOGL",
+      "name": "Alphabet Inc.",
+      "sector": "technology",
+      "marketCap": "large",
+      "price": 134.56,
+      "change": {
+        "percent": -1.23,
+        "amount": -1.67
+      },
+      "volume": 45678901,
+      "marketCapValue": 1700,
+      "high52w": 151.55,
+      "low52w": 83.34,
+      "peRatio": 25.4,
+      "dividend": 0.0,
+      "beta": 1.15
+    },
+    {
+      "symbol": "AMZN",
+      "name": "Amazon.com Inc.",
+      "sector": "technology",
+      "marketCap": "large",
+      "price": 151.94,
+      "change": {
+        "percent": 0.78,
+        "amount": 1.17
+      },
+      "volume": 56789012,
+      "marketCapValue": 1600,
+      "high52w": 188.11,
+      "low52w": 81.43,
+      "peRatio": 52.8,
+      "dividend": 0.0,
+      "beta": 1.33
+    },
+    {
+      "symbol": "TSLA",
+      "name": "Tesla Inc.",
+      "sector": "technology",
+      "marketCap": "large",
+      "price": 234.56,
+      "change": {
+        "percent": -3.65,
+        "amount": -8.90
+      },
+      "volume": 123456789,
+      "marketCapValue": 750,
+      "high52w": 414.50,
+      "low52w": 101.81,
+      "peRatio": 73.2,
+      "dividend": 0.0,
+      "beta": 2.11
+    },
+    {
+      "symbol": "NVDA",
+      "name": "NVIDIA Corporation",
+      "sector": "technology",
+      "marketCap": "large",
+      "price": 456.78,
+      "change": {
+        "percent": 2.78,
+        "amount": 12.34
+      },
+      "volume": 67890123,
+      "marketCapValue": 1100,
+      "high52w": 502.66,
+      "low52w": 108.13,
+      "peRatio": 65.7,
+      "dividend": 0.16,
+      "beta": 1.68
+    },
+    {
+      "symbol": "JPM",
+      "name": "JPMorgan Chase & Co.",
+      "sector": "finance",
+      "marketCap": "large",
+      "price": 154.32,
+      "change": {
+        "percent": 1.45,
+        "amount": 2.21
+      },
+      "volume": 23456789,
+      "marketCapValue": 450,
+      "high52w": 172.96,
+      "low52w": 104.40,
+      "peRatio": 10.8,
+      "dividend": 4.0,
+      "beta": 1.08
+    },
+    {
+      "symbol": "JNJ",
+      "name": "Johnson & Johnson",
+      "sector": "healthcare",
+      "marketCap": "large",
+      "price": 168.45,
+      "change": {
+        "percent": -0.32,
+        "amount": -0.54
+      },
+      "volume": 12345678,
+      "marketCapValue": 420,
+      "high52w": 181.83,
+      "low52w": 143.38,
+      "peRatio": 15.3,
+      "dividend": 2.68,
+      "beta": 0.69
+    }
+  ],
+  "sectors": [
+    {
+      "name": "technology",
+      "displayName": "Technology",
+      "averageChange": 1.42,
+      "stockCount": 85
+    },
+    {
+      "name": "healthcare",
+      "displayName": "Healthcare",
+      "averageChange": 0.78,
+      "stockCount": 67
+    },
+    {
+      "name": "finance",
+      "displayName": "Finance",
+      "averageChange": 1.23,
+      "stockCount": 54
+    },
+    {
+      "name": "energy",
+      "displayName": "Energy",
+      "averageChange": -0.45,
+      "stockCount": 43
+    },
+    {
+      "name": "consumer",
+      "displayName": "Consumer",
+      "averageChange": 0.89,
+      "stockCount": 78
+    },
+    {
+      "name": "industrial",
+      "displayName": "Industrial",
+      "averageChange": 0.34,
+      "stockCount": 56
+    }
+  ],
+  "indices": [
+    {
+      "symbol": "SPY",
+      "name": "S&P 500",
+      "value": 4567.89,
+      "change": 1.2
+    },
+    {
+      "symbol": "QQQ",
+      "name": "NASDAQ 100",
+      "value": 14234.56,
+      "change": 0.8
+    },
+    {
+      "symbol": "DIA",
+      "name": "Dow Jones",
+      "value": 34789.12,
+      "change": -0.3
+    }
+  ]
+}

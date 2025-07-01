@@ -1,328 +1,58 @@
-// Enhanced Home Page Logic with Real-time Data and Interactivity
+// YAUSMA Home Page JavaScript - Coinbase-Inspired Interactions
+
 class HomePage {
     constructor() {
-        this.apiClient = new APIClient();
-        this.marketData = [];
-        this.updateInterval = null;
+        this.charts = {};
+        this.animations = new Map();
+        this.isVisible = true;
         
         this.init();
     }
 
-    async init() {
-        // Wait for DOM to be ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initialize());
-        } else {
-            this.initialize();
-        }
+    init() {
+        this.setupEventListeners();
+        this.initializeCharts();
+        this.setupScrollAnimations();
+        this.setupMarketTabs();
+        this.startRealTimeSimulation();
+        this.setupIntersectionObserver();
     }
 
-    async initialize() {
-        console.log('Initializing YAUSMA Homepage...');
-        
-        // Initialize components
-        this.initializeAnimations();
-        this.initializeMarketData();
-        this.initializeUserLocation();
-        this.initializeEventListeners();
-        
-        // Load initial data
-        await this.loadMarketOverview();
-        
-        // Start real-time updates
-        this.startRealTimeUpdates();
-        
-        console.log('Homepage initialized successfully');
-    }
-
-    initializeAnimations() {
-        // Add intersection observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-fadeInUp');
-                }
-            });
-        }, observerOptions);
-
-        // Observe sections for animation
-        document.querySelectorAll('.feature-card, .product-card, .market-overview-card').forEach(el => {
-            observer.observe(el);
-        });
-    }
-
-    initializeEventListeners() {
+    setupEventListeners() {
         // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
+        const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
-            themeToggle.addEventListener('click', this.toggleTheme.bind(this));
+            themeToggle.addEventListener('click', this.handleThemeToggle.bind(this));
         }
 
-        // Market card click handlers
-        document.addEventListener('click', (e) => {
-            const marketCard = e.target.closest('.market-overview-card');
-            if (marketCard) {
-                this.handleMarketCardClick(marketCard);
-            }
-        });
+        // Mobile navigation
+        this.setupMobileNavigation();
 
-        // CTA button tracking
-        document.querySelectorAll('.btn[href*="auth.html"]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.trackEvent('cta_click', { location: 'homepage', action: 'signup' });
-            });
-        });
+        // Market card hover effects
+        this.setupMarketCardInteractions();
 
-        // Handle page visibility changes for data updates
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.pauseRealTimeUpdates();
-            } else {
-                this.resumeRealTimeUpdates();
-            }
-        });
+        // Feature card animations
+        this.setupFeatureCardAnimations();
+
+        // Smooth scrolling for CTA buttons
+        this.setupSmoothScrolling();
+
+        // Visibility change handling
+        document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+
+        // Window resize handling
+        window.addEventListener('resize', this.debounce(this.handleResize.bind(this), 250));
     }
 
-    async initializeUserLocation() {
-        try {
-            // Get user's location for market personalization
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        this.userLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        this.personalizeMarketData();
-                    },
-                    (error) => {
-                        console.warn('Geolocation access denied:', error);
-                        this.useDefaultLocation();
-                    }
-                );
-            } else {
-                this.useDefaultLocation();
-            }
-        } catch (error) {
-            console.error('Error initializing location:', error);
-            this.useDefaultLocation();
-        }
-    }
-
-    useDefaultLocation() {
-        // Default to Berlin, Germany as per project requirements
-        this.userLocation = { lat: 52.5200, lng: 13.4050, country: 'DE' };
-        this.personalizeMarketData();
-    }
-
-    async personalizeMarketData() {
-        // Customize market data based on user location
-        const countryMarkets = {
-            'US': ['S&P 500', 'NASDAQ', 'DOW'],
-            'DE': ['DAX', 'MDAX', 'TecDAX'],
-            'GB': ['FTSE 100', 'FTSE 250'],
-            'FR': ['CAC 40'],
-            'JP': ['Nikkei 225'],
-            default: ['S&P 500', 'NASDAQ', 'DAX', 'FTSE 100']
-        };
-
-        const country = this.userLocation?.country || 'default';
-        this.preferredMarkets = countryMarkets[country] || countryMarkets.default;
+    handleThemeToggle() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
-        await this.updateMarketOverview();
-    }
-
-    async initializeMarketData() {
-        // Initialize with mock data that will be replaced by real data
-        this.marketData = [
-            { symbol: 'AAPL', name: 'Apple Inc.', price: 175.43, change: 2.34, changePercent: 1.35 },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 2834.21, change: -31.75, changePercent: -1.12 },
-            { symbol: 'MSFT', name: 'Microsoft Corp.', price: 338.11, change: 2.99, changePercent: 0.89 },
-            { symbol: 'TSLA', name: 'Tesla Inc.', price: 248.55, change: -5.12, changePercent: -2.02 },
-            { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 3342.88, change: 15.67, changePercent: 0.47 }
-        ];
-
-        this.updateHeroMarketData();
-    }
-
-    updateHeroMarketData() {
-        const heroMarketContainer = document.getElementById('hero-market-data');
-        if (!heroMarketContainer) return;
-
-        heroMarketContainer.innerHTML = '';
-
-        // Show top 3 stocks in hero section
-        this.marketData.slice(0, 3).forEach(stock => {
-            const marketItem = document.createElement('div');
-            marketItem.className = 'market-item';
-            marketItem.innerHTML = `
-                <div class="market-symbol">${stock.symbol}</div>
-                <div class="market-price">$${stock.price.toFixed(2)}</div>
-                <div class="market-change ${stock.change >= 0 ? 'positive' : 'negative'}">
-                    ${stock.change >= 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%
-                </div>
-            `;
-            
-            // Add click handler
-            marketItem.addEventListener('click', () => {
-                window.location.href = `pages/stock-detail.html?symbol=${stock.symbol}`;
-            });
-            
-            marketItem.style.cursor = 'pointer';
-            heroMarketContainer.appendChild(marketItem);
-        });
-    }
-
-    async loadMarketOverview() {
-        try {
-            // Simulate API call to get market indices
-            const indices = await this.fetchMarketIndices();
-            this.updateMarketOverviewCards(indices);
-        } catch (error) {
-            console.error('Error loading market overview:', error);
-            this.showErrorMessage('Failed to load market data. Please try again later.');
-        }
-    }
-
-    async fetchMarketIndices() {
-        // Mock data - replace with real API calls
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve([
-                    { name: 'S&P 500', symbol: 'SPX', price: 4567.89, change: 1.23, country: 'US' },
-                    { name: 'NASDAQ', symbol: 'IXIC', price: 14234.56, change: -0.67, country: 'US' },
-                    { name: 'DAX', symbol: 'DAX', price: 15678.90, change: 0.45, country: 'DE' },
-                    { name: 'FTSE 100', symbol: 'UKX', price: 7456.78, change: 0.89, country: 'GB' }
-                ]);
-            }, 1000);
-        });
-    }
-
-    updateMarketOverviewCards(indices) {
-        const container = document.getElementById('market-overview-cards');
-        if (!container) return;
-
-        // Remove loading states
-        container.querySelectorAll('[data-loading]').forEach(el => {
-            el.removeAttribute('data-loading');
-        });
-
-        // Update existing cards or create new ones
-        const cards = container.querySelectorAll('.market-overview-card');
+        // Add transition class for smooth theme switching
+        document.body.classList.add('theme-transitioning');
         
-        indices.forEach((index, i) => {
-            if (cards[i]) {
-                this.updateMarketCard(cards[i], index);
-            } else {
-                this.createMarketCard(container, index);
-            }
-        });
-    }
-
-    updateMarketCard(card, data) {
-        const titleEl = card.querySelector('.card-title');
-        const priceEl = card.querySelector('.price');
-        const changeEl = card.querySelector('.change');
-        
-        if (titleEl) titleEl.textContent = data.name;
-        if (priceEl) priceEl.textContent = data.price.toLocaleString();
-        
-        if (changeEl) {
-            changeEl.textContent = `${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)}%`;
-            changeEl.className = `change ${data.change >= 0 ? 'positive' : 'negative'}`;
-        }
-
-        // Add country flag or region indicator
-        const subtitleEl = card.querySelector('.card-subtitle');
-        if (subtitleEl) {
-            const countryFlags = { 'US': '🇺🇸', 'DE': '🇩🇪', 'GB': '🇬🇧', 'FR': '🇫🇷' };
-            subtitleEl.textContent = `${countryFlags[data.country] || ''} ${data.country}`;
-        }
-    }
-
-    createMarketCard(container, data) {
-        const colDiv = document.createElement('div');
-        colDiv.className = 'col-lg-3 col-md-6';
-        
-        colDiv.innerHTML = `
-            <div class="market-overview-card">
-                <div class="card-header">
-                    <h5 class="card-title">${data.name}</h5>
-                    <span class="card-subtitle">${data.country}</span>
-                </div>
-                <div class="card-body">
-                    <div class="price">${data.price.toLocaleString()}</div>
-                    <div class="change ${data.change >= 0 ? 'positive' : 'negative'}">
-                        ${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)}%
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        container.appendChild(colDiv);
-    }
-
-    handleMarketCardClick(card) {
-        const title = card.querySelector('.card-title')?.textContent;
-        if (title) {
-            this.trackEvent('market_card_click', { market: title });
-            // Navigate to detailed view
-            window.location.href = `pages/stocks.html?market=${encodeURIComponent(title)}`;
-        }
-    }
-
-    startRealTimeUpdates() {
-        // Update market data every 30 seconds
-        this.updateInterval = setInterval(() => {
-            this.updateMarketData();
-        }, 30000);
-    }
-
-    pauseRealTimeUpdates() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-            this.updateInterval = null;
-        }
-    }
-
-    resumeRealTimeUpdates() {
-        if (!this.updateInterval) {
-            this.startRealTimeUpdates();
-        }
-    }
-
-    async updateMarketData() {
-        try {
-            // Simulate real-time price updates
-            this.marketData = this.marketData.map(stock => ({
-                ...stock,
-                price: stock.price + (Math.random() - 0.5) * 2,
-                change: (Math.random() - 0.5) * 4,
-                changePercent: (Math.random() - 0.5) * 3
-            }));
-
-            this.updateHeroMarketData();
-            await this.loadMarketOverview();
-            
-        } catch (error) {
-            console.error('Error updating market data:', error);
-        }
-    }
-
-    async updateMarketOverview() {
-        // Refresh market overview data
-        await this.loadMarketOverview();
-    }
-
-    toggleTheme() {
-        const currentTheme = document.body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        
+        // Update theme
+        document.documentElement.setAttribute('data-theme', newTheme);
         document.body.setAttribute('data-theme', newTheme);
         
         // Update theme stylesheet
@@ -331,94 +61,564 @@ class HomePage {
             themeStylesheet.href = `css/themes/${newTheme}.css`;
         }
         
-        // Update theme toggle icon
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            const icon = themeToggle.querySelector('i');
-            if (icon) {
-                icon.className = `bi bi-${newTheme === 'light' ? 'moon' : 'sun'}-fill`;
+        // Store theme preference
+        localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, newTheme);
+        
+        // Update charts for new theme
+        this.updateChartsTheme(newTheme);
+        
+        // Remove transition class after animation
+        setTimeout(() => {
+            document.body.classList.remove('theme-transitioning');
+        }, 300);
+
+        // Dispatch theme change event
+        window.dispatchEvent(new CustomEvent('themeChanged', {
+            detail: { theme: newTheme }
+        }));
+    }
+
+    setupMobileNavigation() {
+        const navbarToggler = document.querySelector('.navbar-toggler');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        
+        if (navbarToggler && navbarCollapse) {
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!navbarCollapse.contains(e.target) && 
+                    !navbarToggler.contains(e.target) && 
+                    navbarCollapse.classList.contains('show')) {
+                    navbarCollapse.classList.remove('show');
+                }
+            });
+
+            // Close mobile menu when clicking on nav links
+            const navLinks = navbarCollapse.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 992) {
+                        navbarCollapse.classList.remove('show');
+                    }
+                });
+            });
+        }
+    }
+
+    setupMarketCardInteractions() {
+        const marketCards = document.querySelectorAll('.market-card, .market-item');
+        
+        marketCards.forEach(card => {
+            // Add hover effect with micro-interaction
+            card.addEventListener('mouseenter', (e) => {
+                this.animateMarketCard(e.target, 'enter');
+            });
+            
+            card.addEventListener('mouseleave', (e) => {
+                this.animateMarketCard(e.target, 'leave');
+            });
+
+            // Add click ripple effect
+            card.addEventListener('click', (e) => {
+                this.createRippleEffect(e);
+            });
+        });
+    }
+
+    animateMarketCard(card, type) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+
+        const chart = card.querySelector('canvas');
+        
+        if (type === 'enter') {
+            card.style.transform = 'translateY(-8px) scale(1.02)';
+            if (chart) {
+                chart.style.opacity = '1';
+                chart.style.transform = 'scale(1.05)';
+            }
+        } else {
+            card.style.transform = '';
+            if (chart) {
+                chart.style.opacity = '0.8';
+                chart.style.transform = '';
             }
         }
-        
-        // Save theme preference
-        localStorage.setItem('yausma_theme', newTheme);
-        
-        this.trackEvent('theme_toggle', { theme: newTheme });
     }
 
-    showErrorMessage(message) {
-        const errorContainer = document.getElementById('error-container');
-        if (errorContainer) {
-            errorContainer.textContent = message;
-            errorContainer.style.display = 'block';
+    createRippleEffect(e) {
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        const ripple = document.createElement('div');
+        ripple.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+            background: rgba(52, 74, 251, 0.2);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+            z-index: 1;
+        `;
+        
+        // Add ripple animation CSS if not exists
+        if (!document.getElementById('ripple-animation')) {
+            const style = document.createElement('style');
+            style.id = 'ripple-animation';
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(2);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        card.style.position = 'relative';
+        card.style.overflow = 'hidden';
+        card.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    }
+
+    setupFeatureCardAnimations() {
+        const featureCards = document.querySelectorAll('.feature-card');
+        
+        featureCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.6s ease-out';
+            card.style.transitionDelay = `${index * 0.1}s`;
+        });
+    }
+
+    setupScrollAnimations() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+
+        // Hero stats animation
+        const heroStats = document.querySelectorAll('.stat-number');
+        heroStats.forEach(stat => {
+            this.animateCounter(stat);
+        });
+
+        // Parallax effect for hero background
+        this.setupParallaxEffect();
+    }
+
+    animateCounter(element) {
+        const target = element.textContent;
+        const numericValue = parseFloat(target.replace(/[^\d.]/g, ''));
+        const suffix = target.replace(/[\d.,]/g, '');
+        const duration = 2000;
+        const increment = numericValue / (duration / 16);
+        let current = 0;
+
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= numericValue) {
+                current = numericValue;
+                clearInterval(timer);
+            }
             
-            // Auto-hide after 5 seconds
+            let displayValue = current.toFixed(1);
+            if (suffix.includes('K') || suffix.includes('T')) {
+                displayValue = current.toFixed(1);
+            } else if (suffix.includes('%')) {
+                displayValue = current.toFixed(1);
+            }
+            
+            element.textContent = displayValue + suffix;
+        }, 16);
+
+        this.animations.set(element, timer);
+    }
+
+    setupParallaxEffect() {
+        const heroBackground = document.querySelector('.hero-background');
+        if (!heroBackground) return;
+
+        window.addEventListener('scroll', this.throttle(() => {
+            const scrolled = window.pageYOffset;
+            const parallax = scrolled * 0.5;
+            heroBackground.style.transform = `translateY(${parallax}px)`;
+        }, 16));
+    }
+
+    setupMarketTabs() {
+        const marketTabs = document.querySelectorAll('#marketTabs .nav-link');
+        
+        marketTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all tabs
+                marketTabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding tab content
+                const targetId = tab.getAttribute('data-bs-target');
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                
+                tabPanes.forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                });
+                
+                const targetPane = document.querySelector(targetId);
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                    
+                    // Animate market items
+                    this.animateMarketItems(targetPane);
+                }
+            });
+        });
+    }
+
+    animateMarketItems(container) {
+        const items = container.querySelectorAll('.market-item');
+        
+        items.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            
             setTimeout(() => {
-                errorContainer.style.display = 'none';
-            }, 5000);
+                item.style.transition = 'all 0.4s ease-out';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    }
+
+    initializeCharts() {
+        // Initialize hero section mini charts
+        this.initializeHeroCharts();
+    }
+
+    initializeHeroCharts() {
+        const chartIds = ['heroChart1', 'heroChart2', 'heroChart3'];
+        
+        chartIds.forEach((id, index) => {
+            const canvas = document.getElementById(id);
+            if (canvas) {
+                this.createMiniChart(canvas, this.generateMockData(index));
+            }
+        });
+    }
+
+    createMiniChart(canvas, data) {
+        const ctx = canvas.getContext('2d');
+        
+        // Check if Chart.js is available
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js not loaded, skipping chart creation');
+            return;
+        }
+        
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.values,
+                    borderColor: data.trend === 'up' ? '#00d395' : '#f92364',
+                    backgroundColor: data.trend === 'up' 
+                        ? 'rgba(0, 211, 149, 0.1)' 
+                        : 'rgba(249, 35, 100, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+
+        this.charts[canvas.id] = chart;
+    }
+
+    generateMockData(index) {
+        const points = 20;
+        const labels = Array.from({length: points}, (_, i) => i);
+        const trend = index !== 2 ? 'up' : 'down'; // Make third chart go down
+        
+        let values = [];
+        let current = 100 + (Math.random() * 50);
+        
+        for (let i = 0; i < points; i++) {
+            const change = (Math.random() - 0.5) * 10;
+            const trendInfluence = trend === 'up' ? 0.5 : -0.5;
+            current += change + trendInfluence;
+            values.push(current);
+        }
+        
+        return { labels, values, trend };
+    }
+
+    updateChartsTheme(newTheme) {
+        Object.values(this.charts).forEach(chart => {
+            if (chart && chart.data && chart.data.datasets) {
+                chart.update('none');
+            }
+        });
+    }
+
+    startRealTimeSimulation() {
+        // Simulate real-time price updates
+        setInterval(() => {
+            if (!this.isVisible) return;
+            
+            this.updateMarketPrices();
+            this.updateHeroCharts();
+        }, 5000);
+    }
+
+    updateMarketPrices() {
+        const priceElements = document.querySelectorAll('.market-price');
+        const changeElements = document.querySelectorAll('.market-change');
+        
+        priceElements.forEach((element, index) => {
+            const currentPrice = parseFloat(element.textContent.replace(/[^0-9.]/g, ''));
+            const change = (Math.random() - 0.5) * 2;
+            const newPrice = (currentPrice + change).toFixed(2);
+            
+            // Animate price change
+            this.animatePriceChange(element, newPrice);
+            
+            // Update corresponding change element
+            if (changeElements[index]) {
+                const changePercent = ((change / currentPrice) * 100).toFixed(2);
+                const changeText = `${change >= 0 ? '+' : ''}$${Math.abs(change).toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent}%)`;
+                
+                changeElements[index].textContent = changeText;
+                changeElements[index].className = `market-change ${change >= 0 ? 'positive' : 'negative'}`;
+            }
+        });
+    }
+
+    animatePriceChange(element, newPrice) {
+        element.style.transition = 'all 0.3s ease-out';
+        element.style.transform = 'scale(1.05)';
+        element.style.color = 'var(--interactive-blue)';
+        
+        setTimeout(() => {
+            element.textContent = `$${newPrice}`;
+            element.style.transform = '';
+            element.style.color = '';
+        }, 150);
+    }
+
+    updateHeroCharts() {
+        Object.values(this.charts).forEach(chart => {
+            if (chart && chart.data && chart.data.datasets[0]) {
+                const dataset = chart.data.datasets[0];
+                const newValue = dataset.data[dataset.data.length - 1] + (Math.random() - 0.5) * 5;
+                
+                // Remove first point and add new one
+                dataset.data.shift();
+                dataset.data.push(newValue);
+                chart.update('none');
+            }
+        });
+    }
+
+    setupIntersectionObserver() {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -10% 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.animateElement(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Observe market items
+        document.querySelectorAll('.market-item').forEach(item => {
+            observer.observe(item);
+        });
+    }
+
+    animateElement(element) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            element.style.opacity = '1';
+            element.style.transform = 'none';
+            return;
+        }
+
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+    }
+
+    setupSmoothScrolling() {
+        const ctaButtons = document.querySelectorAll('a[href^="#"]');
+        
+        ctaButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const href = button.getAttribute('href');
+                if (href === '#') return;
+                
+                e.preventDefault();
+                const target = document.querySelector(href);
+                
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    }
+
+    handleVisibilityChange() {
+        this.isVisible = !document.hidden;
+        
+        if (this.isVisible) {
+            // Resume animations when page becomes visible
+            this.startRealTimeSimulation();
         }
     }
 
-    trackEvent(eventName, properties = {}) {
-        // Analytics tracking - implement with your preferred analytics service
-        console.log('Event tracked:', eventName, properties);
-        
-        // Example: Google Analytics 4
-        if (typeof gtag !== 'undefined') {
-            gtag('event', eventName, properties);
-        }
-        
-        // Example: Custom analytics
-        if (window.analytics) {
-            window.analytics.track(eventName, properties);
-        }
+    handleResize() {
+        // Redraw charts on resize
+        Object.values(this.charts).forEach(chart => {
+            if (chart) {
+                chart.resize();
+            }
+        });
     }
 
-    // Cleanup when page unloads
+    // Utility functions
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+
+    // Public methods for external control
+    updateTheme(newTheme) {
+        this.handleThemeToggle();
+    }
+
+    pauseAnimations() {
+        this.isVisible = false;
+        this.animations.forEach(animation => {
+            clearInterval(animation);
+        });
+    }
+
+    resumeAnimations() {
+        this.isVisible = true;
+        this.startRealTimeSimulation();
+    }
+
     destroy() {
-        this.pauseRealTimeUpdates();
+        // Clean up event listeners and intervals
+        this.pauseAnimations();
         
-        // Remove event listeners
-        document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+        // Destroy charts
+        Object.values(this.charts).forEach(chart => {
+            if (chart) {
+                chart.destroy();
+            }
+        });
         
-        console.log('Homepage destroyed');
+        this.charts = {};
+        this.animations.clear();
     }
 }
 
-// Initialize homepage when DOM is ready
-let homePage;
-
+// Initialize home page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Load saved theme
-    const savedTheme = localStorage.getItem('yausma_theme') || 'light';
-    document.body.setAttribute('data-theme', savedTheme);
-    
-    const themeStylesheet = document.getElementById('theme-stylesheet');
-    if (themeStylesheet) {
-        themeStylesheet.href = `css/themes/${savedTheme}.css`;
-    }
-    
-    // Update theme toggle icon
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-        const icon = themeToggle.querySelector('i');
-        if (icon) {
-            icon.className = `bi bi-${savedTheme === 'light' ? 'moon' : 'sun'}-fill`;
+    // Check if we're on the home page
+    if (window.location.pathname === '/' || 
+        window.location.pathname.endsWith('index.html') ||
+        window.location.pathname.endsWith('/')) {
+        
+        window.homePage = new HomePage();
+        
+        // Global theme management
+        const savedTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.body.setAttribute('data-theme', savedTheme);
+        
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        if (themeStylesheet) {
+            themeStylesheet.href = `css/themes/${savedTheme}.css`;
         }
     }
-    
-    // Initialize homepage
-    homePage = new HomePage();
 });
 
-// Cleanup on page unload
+// Clean up on page unload
 window.addEventListener('beforeunload', () => {
-    if (homePage) {
-        homePage.destroy();
+    if (window.homePage) {
+        window.homePage.destroy();
     }
 });
 
-// Export for potential use in other modules
+// Export for potential module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = HomePage;
 }

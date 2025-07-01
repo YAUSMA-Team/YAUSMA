@@ -1,21 +1,729 @@
-<!-- JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Apple Inc. (AAPL) Stock Analysis - Real-time price, charts, financial data and analysis on YAUSMA">
+    <meta name="keywords" content="AAPL, Apple stock, stock analysis, real-time price, financial data, charts">
+    <meta name="author" content="YAUSMA">
+    
+    <title>Apple Inc. (AAPL) Stock Analysis - YAUSMA</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link id="theme-stylesheet" rel="stylesheet" href="../css/themes/light.css">
+    <link rel="stylesheet" href="../css/pages/stock-detail.css">
+</head>
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand" href="../index.html">
+                <div class="logo-container">
+                    <i class="bi bi-graph-up-arrow logo-icon"></i>
+                    <span class="logo-text">YAUSMA</span>
+                </div>
+            </a>
+            
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Menu -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="stocks.html">Markets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="news.html">News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="portfolio.html">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pro.html">Pro</a>
+                    </li>
+                </ul>
+                
+                <!-- Right Side Actions -->
+                <div class="navbar-actions">
+                    <!-- Theme Toggle -->
+                    <button class="btn btn-theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                        <i class="bi bi-sun-fill theme-icon-light"></i>
+                        <i class="bi bi-moon-fill theme-icon-dark"></i>
+                    </button>
+                    
+                    <!-- Auth Buttons -->
+                    <div class="auth-buttons" data-auth-anonymous>
+                        <a href="auth.html" class="btn btn-coinbase-secondary btn-sm me-2">Sign In</a>
+                        <a href="auth.html" class="btn btn-coinbase-primary btn-sm">Get Started</a>
+                    </div>
+                    
+                    <!-- User Menu (Hidden by default) -->
+                    <div class="user-menu" data-auth-required style="display: none;">
+                        <div class="dropdown">
+                            <button class="btn btn-user-menu dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="portfolio.html">Portfolio</a></li>
+                                <li><a class="dropdown-item" href="pro.html">Upgrade to Pro</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<!-- Core utilities (load first) -->
-<script src="../js/utils/global-theme-manager.js"></script>
-<script src="../js/utils/bootstrap-init.js"></script>
-<script src="../js/utils/app-initializer.js"></script>
+    <!-- Stock Header Section -->
+    <section class="stock-header-section">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mt-4 mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="../index.html">Home</a></li>
+                    <li class="breadcrumb-item"><a href="stocks.html">Markets</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AAPL</li>
+                </ol>
+            </nav>
 
-<!-- Configuration and API -->
-<script src="../js/config.js"></script>
-<script src="../js/api/client.js"></script>
-<script src="../js/api/auth.js"></script>
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="stock-info">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stock-logo me-3">
+                                <i class="bi bi-apple"></i>
+                            </div>
+                            <div>
+                                <h1 class="stock-symbol">AAPL</h1>
+                                <p class="stock-company-name mb-0">Apple Inc.</p>
+                            </div>
+                            <div class="stock-badges ms-3">
+                                <span class="badge bg-primary">NASDAQ</span>
+                                <span class="badge bg-success">S&P 500</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stock-price-info">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="current-price financial-data" id="currentPrice">$175.43</div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="price-change positive" id="priceChange">
+                                        <span class="change-amount">+$2.87</span>
+                                        <span class="change-percent">(+1.66%)</span>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="market-status">
+                                        <span class="status-dot open"></span>
+                                        <span class="status-text ui-text">Market Open</span>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="last-update ui-text" id="lastUpdate">
+                                        Last updated: 10:45 AM EST
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 text-lg-end">
+                    <div class="stock-actions">
+                        <button class="btn btn-coinbase-primary me-2" id="buyBtn">
+                            <i class="bi bi-plus-circle me-2"></i>Buy
+                        </button>
+                        <button class="btn btn-coinbase-secondary me-2" id="sellBtn">
+                            <i class="bi bi-dash-circle me-2"></i>Sell
+                        </button>
+                        <button class="btn btn-outline-secondary" id="watchlistBtn">
+                            <i class="bi bi-heart me-2"></i>Watchlist
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Main application -->
-<script src="../js/main.js"></script>
+    <!-- Main Content -->
+    <section class="stock-content-section">
+        <div class="container">
+            <div class="row">
+                <!-- Left Column - Chart and Analysis -->
+                <div class="col-lg-8">
+                    <!-- Price Chart -->
+                    <div class="chart-section card-coinbase mb-4">
+                        <div class="chart-header d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="section-heading mb-0">Price Chart</h3>
+                            <div class="chart-controls">
+                                <div class="btn-group" role="group" id="timeRangeButtons">
+                                    <input type="radio" class="btn-check" name="timeRange" id="1D" autocomplete="off" checked>
+                                    <label class="btn btn-outline-primary btn-sm" for="1D">1D</label>
+                                    
+                                    <input type="radio" class="btn-check" name="timeRange" id="5D" autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-sm" for="5D">5D</label>
+                                    
+                                    <input type="radio" class="btn-check" name="timeRange" id="1M" autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-sm" for="1M">1M</label>
+                                    
+                                    <input type="radio" class="btn-check" name="timeRange" id="3M" autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-sm" for="3M">3M</label>
+                                    
+                                    <input type="radio" class="btn-check" name="timeRange" id="1Y" autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-sm" for="1Y">1Y</label>
+                                    
+                                    <input type="radio" class="btn-check" name="timeRange" id="5Y" autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-sm" for="5Y">5Y</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="priceChart" width="800" height="400"></canvas>
+                        </div>
+                    </div>
 
-<!-- Components -->
-<script src="../js/components/navbar.js"></script>
+                    <!-- Financial Metrics -->
+                    <div class="metrics-section card-coinbase mb-4">
+                        <h3 class="section-heading mb-3">Financial Metrics</h3>
+                        <div class="row">
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">Market Cap</div>
+                                    <div class="metric-value financial-data">$2.74T</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">P/E Ratio</div>
+                                    <div class="metric-value financial-data">28.67</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">Volume</div>
+                                    <div class="metric-value financial-data">47.2M</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">52W High</div>
+                                    <div class="metric-value financial-data">$199.62</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">52W Low</div>
+                                    <div class="metric-value financial-data">$124.17</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">Avg Volume</div>
+                                    <div class="metric-value financial-data">52.1M</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">Dividend Yield</div>
+                                    <div class="metric-value financial-data">0.50%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">EPS</div>
+                                    <div class="metric-value financial-data">$6.13</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="metric-item">
+                                    <div class="metric-label ui-text">Beta</div>
+                                    <div class="metric-value financial-data">1.24</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-<!-- Page-specific scripts -->
-<script src="../js/pages/[page-name].js"></script>
+                    <!-- Company Information -->
+                    <div class="company-info-section card-coinbase mb-4">
+                        <h3 class="section-heading mb-3">About Apple Inc.</h3>
+                        <p class="body-text">
+                            Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. It also sells various related services. The company's iPhone line includes the iPhone 15 Pro, iPhone 15 Pro Max, iPhone 15, iPhone 15 Plus, iPhone 14, iPhone 14 Plus, iPhone 13 mini, iPhone 13, iPhone 12, and iPhone SE. Its Mac line includes the MacBook Air and MacBook Pro laptops, and the iMac, Mac Pro, Mac Studio, and Mac mini desktop computers.
+                        </p>
+                        <div class="company-details mt-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="detail-item">
+                                        <span class="detail-label ui-text">CEO:</span>
+                                        <span class="detail-value">Timothy D. Cook</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label ui-text">Founded:</span>
+                                        <span class="detail-value">April 1, 1976</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label ui-text">Employees:</span>
+                                        <span class="detail-value">161,000</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="detail-item">
+                                        <span class="detail-label ui-text">Sector:</span>
+                                        <span class="detail-value">Technology</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label ui-text">Industry:</span>
+                                        <span class="detail-value">Consumer Electronics</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label ui-text">Headquarters:</span>
+                                        <span class="detail-value">Cupertino, CA</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Statements -->
+                    <div class="financials-section card-coinbase mb-4">
+                        <h3 class="section-heading mb-3">Financial Statements</h3>
+                        <div class="financials-tabs">
+                            <ul class="nav nav-pills mb-3" id="financialsTabs">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#income">Income Statement</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#balance">Balance Sheet</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#cashflow">Cash Flow</button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="income">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Metric</th>
+                                                    <th class="text-end">2023</th>
+                                                    <th class="text-end">2022</th>
+                                                    <th class="text-end">2021</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Revenue</td>
+                                                    <td class="text-end financial-data">$383.3B</td>
+                                                    <td class="text-end financial-data">$394.3B</td>
+                                                    <td class="text-end financial-data">$365.8B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Gross Profit</td>
+                                                    <td class="text-end financial-data">$169.1B</td>
+                                                    <td class="text-end financial-data">$170.8B</td>
+                                                    <td class="text-end financial-data">$152.8B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Operating Income</td>
+                                                    <td class="text-end financial-data">$114.3B</td>
+                                                    <td class="text-end financial-data">$119.4B</td>
+                                                    <td class="text-end financial-data">$108.9B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Net Income</td>
+                                                    <td class="text-end financial-data">$97.0B</td>
+                                                    <td class="text-end financial-data">$99.8B</td>
+                                                    <td class="text-end financial-data">$94.7B</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="balance">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Metric</th>
+                                                    <th class="text-end">2023</th>
+                                                    <th class="text-end">2022</th>
+                                                    <th class="text-end">2021</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Total Assets</td>
+                                                    <td class="text-end financial-data">$352.8B</td>
+                                                    <td class="text-end financial-data">$352.8B</td>
+                                                    <td class="text-end financial-data">$351.0B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Cash & Equivalents</td>
+                                                    <td class="text-end financial-data">$29.0B</td>
+                                                    <td class="text-end financial-data">$23.6B</td>
+                                                    <td class="text-end financial-data">$34.9B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Total Debt</td>
+                                                    <td class="text-end financial-data">$111.1B</td>
+                                                    <td class="text-end financial-data">$120.1B</td>
+                                                    <td class="text-end financial-data">$124.7B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Shareholders' Equity</td>
+                                                    <td class="text-end financial-data">$62.1B</td>
+                                                    <td class="text-end financial-data">$50.7B</td>
+                                                    <td class="text-end financial-data">$63.1B</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="cashflow">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Metric</th>
+                                                    <th class="text-end">2023</th>
+                                                    <th class="text-end">2022</th>
+                                                    <th class="text-end">2021</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Operating Cash Flow</td>
+                                                    <td class="text-end financial-data">$110.5B</td>
+                                                    <td class="text-end financial-data">$122.2B</td>
+                                                    <td class="text-end financial-data">$104.0B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Investing Cash Flow</td>
+                                                    <td class="text-end financial-data">$-3.7B</td>
+                                                    <td class="text-end financial-data">$-22.4B</td>
+                                                    <td class="text-end financial-data">$-14.5B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Financing Cash Flow</td>
+                                                    <td class="text-end financial-data">$-108.5B</td>
+                                                    <td class="text-end financial-data">$-113.0B</td>
+                                                    <td class="text-end financial-data">$-93.4B</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Free Cash Flow</td>
+                                                    <td class="text-end financial-data">$99.6B</td>
+                                                    <td class="text-end financial-data">$111.4B</td>
+                                                    <td class="text-end financial-data">$92.9B</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - News and Analysis -->
+                <div class="col-lg-4">
+                    <!-- Key Stats -->
+                    <div class="key-stats-section card-coinbase mb-4">
+                        <h3 class="section-heading mb-3">Key Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat-row">
+                                <span class="stat-label ui-text">Previous Close</span>
+                                <span class="stat-value financial-data">$172.56</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label ui-text">Open</span>
+                                <span class="stat-value financial-data">$173.80</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label ui-text">Day's Range</span>
+                                <span class="stat-value financial-data">$172.40 - $176.25</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label ui-text">52W Range</span>
+                                <span class="stat-value financial-data">$124.17 - $199.62</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label ui-text">Volume</span>
+                                <span class="stat-value financial-data">47.2M</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label ui-text">Avg Volume</span>
+                                <span class="stat-value financial-data">52.1M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analyst Recommendations -->
+                    <div class="analyst-section card-coinbase mb-4">
+                        <h3 class="section-heading mb-3">Analyst Recommendations</h3>
+                        <div class="recommendation-summary mb-3">
+                            <div class="recommendation-score">
+                                <span class="score-value">4.2</span>
+                                <span class="score-label ui-text">out of 5.0</span>
+                            </div>
+                            <div class="recommendation-text">
+                                <strong>Strong Buy</strong>
+                                <p class="ui-text mb-0">Based on 32 analyst ratings</p>
+                            </div>
+                        </div>
+                        <div class="recommendation-breakdown">
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Strong Buy</span>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill" style="width: 62.5%"></div>
+                                </div>
+                                <span class="breakdown-count">20</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Buy</span>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill" style="width: 25%"></div>
+                                </div>
+                                <span class="breakdown-count">8</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Hold</span>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill" style="width: 12.5%"></div>
+                                </div>
+                                <span class="breakdown-count">4</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Sell</span>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="breakdown-count">0</span>
+                            </div>
+                        </div>
+                        <div class="price-targets mt-3">
+                            <div class="price-target-item">
+                                <span class="target-label ui-text">Price Target</span>
+                                <span class="target-value financial-data">$195.00</span>
+                            </div>
+                            <div class="price-target-item">
+                                <span class="target-label ui-text">High Target</span>
+                                <span class="target-value financial-data">$225.00</span>
+                            </div>
+                            <div class="price-target-item">
+                                <span class="target-label ui-text">Low Target</span>
+                                <span class="target-value financial-data">$165.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Peer Comparison -->
+                    <div class="peers-section card-coinbase mb-4">
+                        <h3 class="section-heading mb-3">Peer Comparison</h3>
+                        <div class="peers-list">
+                            <div class="peer-item">
+                                <div class="peer-info">
+                                    <span class="peer-symbol financial-data">MSFT</span>
+                                    <span class="peer-name ui-text">Microsoft</span>
+                                </div>
+                                <div class="peer-metrics">
+                                    <span class="peer-price financial-data">$387.92</span>
+                                    <span class="peer-change positive">+1.19%</span>
+                                </div>
+                            </div>
+                            <div class="peer-item">
+                                <div class="peer-info">
+                                    <span class="peer-symbol financial-data">GOOGL</span>
+                                    <span class="peer-name ui-text">Alphabet</span>
+                                </div>
+                                <div class="peer-metrics">
+                                    <span class="peer-price financial-data">$142.56</span>
+                                    <span class="peer-change negative">-0.85%</span>
+                                </div>
+                            </div>
+                            <div class="peer-item">
+                                <div class="peer-info">
+                                    <span class="peer-symbol financial-data">AMZN</span>
+                                    <span class="peer-name ui-text">Amazon</span>
+                                </div>
+                                <div class="peer-metrics">
+                                    <span class="peer-price financial-data">$167.89</span>
+                                    <span class="peer-change positive">+2.34%</span>
+                                </div>
+                            </div>
+                            <div class="peer-item">
+                                <div class="peer-info">
+                                    <span class="peer-symbol financial-data">META</span>
+                                    <span class="peer-name ui-text">Meta</span>
+                                </div>
+                                <div class="peer-metrics">
+                                    <span class="peer-price financial-data">$501.23</span>
+                                    <span class="peer-change negative">-1.45%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Related News -->
+                    <div class="news-section card-coinbase mb-4">
+                        <h3 class="section-heading mb-3">Related News</h3>
+                        <div class="news-list" id="relatedNews">
+                            <div class="news-item">
+                                <h4 class="news-title">Apple Reports Strong Q4 Earnings</h4>
+                                <p class="news-summary ui-text">Apple Inc. reported better-than-expected quarterly earnings, driven by strong iPhone sales and services revenue growth.</p>
+                                <div class="news-meta">
+                                    <span class="news-source ui-text">Reuters</span>
+                                    <span class="news-time ui-text">2 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <h4 class="news-title">New iPhone Models Drive Sales</h4>
+                                <p class="news-summary ui-text">The latest iPhone 15 series continues to show strong demand across global markets, boosting Apple's market position.</p>
+                                <div class="news-meta">
+                                    <span class="news-source ui-text">Bloomberg</span>
+                                    <span class="news-time ui-text">4 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="news-item">
+                                <h4 class="news-title">Apple Invests in AI Technology</h4>
+                                <p class="news-summary ui-text">Apple announces significant investments in artificial intelligence capabilities for future product development.</p>
+                                <div class="news-meta">
+                                    <span class="news-source ui-text">TechCrunch</span>
+                                    <span class="news-time ui-text">6 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="footer-brand">
+                        <div class="logo-container mb-3">
+                            <i class="bi bi-graph-up-arrow logo-icon"></i>
+                            <span class="logo-text">YAUSMA</span>
+                        </div>
+                        <p class="body-text">
+                            Your Advanced User Stock Market Analysis platform. 
+                            Professional trading tools for the modern investor.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h4 class="footer-heading">Platform</h4>
+                    <ul class="footer-links">
+                        <li><a href="stocks.html">Markets</a></li>
+                        <li><a href="news.html">News</a></li>
+                        <li><a href="portfolio.html">Portfolio</a></li>
+                        <li><a href="pro.html">Pro Features</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h4 class="footer-heading">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#careers">Careers</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#press">Press</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h4 class="footer-heading">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="#help">Help Center</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#api">API</a></li>
+                        <li><a href="#status">Status</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#privacy">Privacy</a></li>
+                        <li><a href="#terms">Terms</a></li>
+                        <li><a href="#security">Security</a></li>
+                        <li><a href="#disclosure">Disclosure</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="footer-divider">
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="ui-text mb-0">
+                            © 2024 YAUSMA. All rights reserved. 
+                            <span class="text-muted">Investment involves risk.</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="social-links">
+                            <a href="#" aria-label="Twitter"><i class="bi bi-twitter"></i></a>
+                            <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                            <a href="#" aria-label="GitHub"><i class="bi bi-github"></i></a>
+                            <a href="#" aria-label="Discord"><i class="bi bi-discord"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/utils/storage.js"></script>
+    <script src="../js/utils/global-theme-manager.js"></script>
+    <script src="../js/utils/bootstrap-init.js"></script>
+    <script src="../js/components/theme-switcher.js"></script>
+    <script src="../js/pages/stock-detail.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

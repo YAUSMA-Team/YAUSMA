@@ -1,1296 +1,740 @@
-// Complete News Page Implementation
-class NewsPage {
+/**
+ * YAUSMA News Page JavaScript
+ * Handles news article display, filtering, search, and interactions
+ */
+
+class NewsManager {
     constructor() {
         this.currentPage = 1;
+        this.articlesPerPage = 5;
         this.currentCategory = 'all';
-        this.currentSearchQuery = '';
+        this.currentSort = 'latest';
+        this.searchQuery = '';
+        this.allArticles = [];
+        this.filteredArticles = [];
         this.isLoading = false;
-        this.newsData = [];
-        this.hasMoreData = true;
-        this.useRealAPI = false;
-        this.refreshInterval = null;
-        this.marketUpdateInterval = null;
         
         this.init();
     }
 
-    async init() {
-        console.log('Initializing News Page...');
-        
-        // Initialize event listeners
-        this.initializeEventListeners();
-        
-        // Load initial data
-        await this.loadNews();
-        await this.loadTrendingNews();
-        await this.loadMarketSummary();
-        
-        // Update auth-specific content
-        this.updateAuthContent();
-        
-        // Show breaking news for registered users
-        this.showBreakingNews();
-        
-        // Start auto-refresh for real-time updates
-        this.startAutoRefresh();
-        
-        console.log('News page initialized successfully');
+    init() {
+        this.generateMockNewsData();
+        this.bindEvents();
+        this.loadNews();
+        this.setupStickyFilters();
+        this.setupInfiniteScroll();
     }
 
-    initializeEventListeners() {
-        // Filter category clicks
-        document.querySelectorAll('.filter-chip').forEach(chip => {
-            chip.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleCategoryFilter(e.target);
-            });
-        });
-
-        // Search functionality with debouncing
+    bindEvents() {
+        // Search functionality
         const searchInput = document.getElementById('newsSearch');
         if (searchInput) {
-            let searchTimeout;
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    this.handleSearch(e.target.value);
-                }, 500);
-            });
+            searchInput.addEventListener('input', this.debounce((e) => {
+                this.searchQuery = e.target.value.toLowerCase();
+                this.filterAndDisplayNews();
+            }, 300));
         }
+
+        // Category filters
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                this.setActiveCategory(e.target.dataset.category);
+                this.filterAndDisplayNews();
+            });
+        });
+
+        // Sort options
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.setActiveSort(e.target.dataset.sort);
+                this.filterAndDisplayNews();
+            });
+        });
 
         // Load more button
-        const loadMoreBtn = document.getElementById('load-more-btn');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', () => {
-                this.loadMoreNews();
+                this.loadMoreArticles();
             });
         }
 
-        // API testing toggle
-        const apiToggle = document.getElementById('use-real-api');
-        if (apiToggle) {
-            apiToggle.addEventListener('change', (e) => {
-                this.toggleAPIMode(e.target.checked);
-            });
+        // Newsletter form
+        const newsletterForm = document.querySelector('.newsletter-form');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', this.handleNewsletterSubmit.bind(this));
         }
 
-        // Keyboard navigation support
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.classList.contains('news-card')) {
-                e.target.click();
+        // Share buttons (event delegation)
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('share-btn')) {
+                this.handleShare(e);
             }
         });
 
-        // Handle page visibility changes
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.pauseAutoRefresh();
-            } else {
-                this.resumeAutoRefresh();
+        // Read more buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('read-more-btn')) {
+                this.handleReadMore(e);
             }
         });
     }
 
-    async loadNews(category = 'all', page = 1, append = false, searchQuery = '') {
-        if (this.isLoading) return;
-        
-        this.isLoading = true;
-        const container = document.getElementById('news-container');
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        
-        // Update button state
-        if (loadMoreBtn) {
-            loadMoreBtn.disabled = true;
-            loadMoreBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i>Loading...';
-        }
-        
-        if (!append) {
-            this.showLoadingSkeletons();
-        }
+    generateMockNewsData() {
+        const categories = ['markets', 'stocks', 'crypto', 'earnings', 'economy', 'politics', 'tech'];
+        const sources = [
+            { name: 'Reuters', logo: '=ð' },
+            { name: 'Bloomberg', logo: '=Ê' },
+            { name: 'CNBC', logo: '=ú' },
+            { name: 'Financial Times', logo: '=È' },
+            { name: 'Wall Street Journal', logo: '=Ä' },
+            { name: 'MarketWatch', logo: '' },
+            { name: 'Yahoo Finance', logo: '=°' }
+        ];
 
-        try {
-            let newsData;
-            
-            if (this.useRealAPI) {
-                newsData = await this.fetchRealNews(category, page, searchQuery);
-            } else {
-                newsData = await this.fetchMockNews(category, page, searchQuery);
-            }
-            
-            if (!append) {
-                container.innerHTML = '';
-                this.newsData = newsData;
-            } else {
-                this.newsData = [...this.newsData, ...newsData];
-            }
-            
-            this.renderNews(newsData, append);
-            this.hasMoreData = newsData.length > 0;
-            
-        } catch (error) {
-            console.error('Error loading news:', error);
-            this.showError('Failed to load news articles. Please try again.');
-        } finally {
-            this.isLoading = false;
-            
-            // Reset button state
-            if (loadMoreBtn) {
-                loadMoreBtn.disabled = false;
-                loadMoreBtn.innerHTML = '<i class="bi bi-arrow-down-circle me-2"></i>Load More Articles';
-                
-                if (!this.hasMoreData) {
-                    loadMoreBtn.style.display = 'none';
-                } else {
-                    loadMoreBtn.style.display = 'block';
-                }
-            }
-        }
-    }
-
-    async fetchRealNews(category, page, searchQuery = '') {
-        try {
-            // Placeholder for real API integration
-            // You would implement actual API calls here
-            const apiKey = 'YOUR_NEWS_API_KEY';
-            const baseUrl = 'https://newsapi.org/v2/everything';
-            
-            const params = new URLSearchParams({
-                apiKey: apiKey,
-                q: searchQuery || 'finance stock market',
-                category: category === 'all' ? 'business' : category,
-                pageSize: 6,
-                page: page,
-                sortBy: 'publishedAt'
-            });
-            
-            const response = await fetch(`${baseUrl}?${params}`);
-            
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            return data.articles.map(item => ({
-                id: this.hashCode(item.url),
-                title: item.title,
-                excerpt: item.description || 'No description available.',
-                category: this.categorizeNews(item.title + ' ' + item.description),
-                source: item.source.name,
-                image: item.urlToImage || `https://via.placeholder.com/400x200/007bff/ffffff?text=News`,
-                publishedAt: new Date(item.publishedAt),
-                url: item.url
-            }));
-            
-        } catch (error) {
-            console.error('Error fetching real news:', error);
-            this.updateAPIStatus('error', 'Failed to fetch from API');
-            // Fallback to mock data
-            return this.fetchMockNews(category, page, searchQuery);
-        }
-    }
-
-    async fetchMockNews(category, page, searchQuery = '') {
-        const allMockData = [
+        const newsData = [
             {
                 id: 1,
-                title: "Tech Stocks Rally as AI Breakthrough Drives Market Optimism",
-                excerpt: "Major technology companies saw significant gains following announcements of breakthrough AI developments that could reshape multiple industries.",
-                category: "stocks",
-                source: "Financial Times",
-                image: "https://via.placeholder.com/400x200/007bff/ffffff?text=Tech+News",
-                publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-                url: "#"
+                title: "Federal Reserve Signals Potential Rate Cuts as Inflation Shows Signs of Cooling",
+                excerpt: "Fed Chair Jerome Powell indicated that the central bank may consider lowering interest rates if inflation continues its downward trend, marking a significant shift in monetary policy stance.",
+                category: "economy",
+                source: sources[0],
+                image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+                readTime: 4,
+                trending: true,
+                featured: true
             },
             {
                 id: 2,
-                title: "Federal Reserve Signals Potential Rate Changes in Next Quarter",
-                excerpt: "Central bank officials hint at monetary policy adjustments as inflation data shows mixed signals across different sectors.",
-                category: "economics",
-                source: "Reuters",
-                image: "https://via.placeholder.com/400x200/28a745/ffffff?text=Economics",
-                publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
-                url: "#"
+                title: "S&P 500 Reaches New All-Time High Amid Strong Corporate Earnings",
+                excerpt: "The benchmark index surged 1.2% to close at a record high, driven by better-than-expected quarterly results from major technology companies.",
+                category: "markets",
+                source: sources[1],
+                image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+                readTime: 3,
+                trending: true,
+                featured: true
             },
             {
                 id: 3,
-                title: "Cryptocurrency Market Sees Mixed Performance Amid Regulatory Updates",
-                excerpt: "Bitcoin and Ethereum show divergent trends as new regulatory frameworks take effect in major markets worldwide.",
-                category: "crypto",
-                source: "CoinDesk",
-                image: "https://via.placeholder.com/400x200/ffc107/ffffff?text=Crypto",
-                publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-                url: "#"
+                title: "Tesla Stock Jumps 8% on Record Q4 Vehicle Deliveries",
+                excerpt: "The electric vehicle manufacturer reported delivering 484,000 vehicles in the fourth quarter, beating analyst expectations and sending shares soaring in after-hours trading.",
+                category: "stocks",
+                source: sources[2],
+                image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+                readTime: 5,
+                trending: true
             },
             {
                 id: 4,
-                title: "Quarterly Earnings Beat Expectations for Major Retail Chains",
-                excerpt: "Consumer spending resilience drives strong performance across retail sector despite economic headwinds and supply chain challenges.",
-                category: "earnings",
-                source: "Bloomberg",
-                image: "https://via.placeholder.com/400x200/dc3545/ffffff?text=Earnings",
-                publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
-                url: "#"
+                title: "Bitcoin Surges Past $45,000 as Institutional Adoption Accelerates",
+                excerpt: "The world's largest cryptocurrency gained 12% this week following announcements from major corporations about Bitcoin treasury adoptions and payment integrations.",
+                category: "crypto",
+                source: sources[3],
+                image: "https://images.unsplash.com/photo-1640161704729-cbe966a08476?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
+                readTime: 4,
+                trending: true
             },
             {
                 id: 5,
-                title: "Global Markets React to Geopolitical Developments",
-                excerpt: "International trade agreements and diplomatic developments create volatility across emerging and developed market indices.",
-                category: "markets",
-                source: "Wall Street Journal",
-                image: "https://via.placeholder.com/400x200/6f42c1/ffffff?text=Markets",
-                publishedAt: new Date(Date.now() - 10 * 60 * 60 * 1000),
-                url: "#"
+                title: "Apple Reports Record Q4 Revenue Despite Supply Chain Challenges",
+                excerpt: "The tech giant posted quarterly revenue of $123.9 billion, up 11% year-over-year, with strong iPhone sales offsetting production delays.",
+                category: "earnings",
+                source: sources[4],
+                image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 10 * 60 * 60 * 1000), // 10 hours ago
+                readTime: 6,
+                trending: true
             },
             {
                 id: 6,
-                title: "Expert Analysis: Is the Current Bull Market Sustainable?",
-                excerpt: "Financial analysts debate whether current market conditions can continue given economic indicators and historical patterns.",
-                category: "analysis",
-                source: "MarketWatch",
-                image: "https://via.placeholder.com/400x200/20c997/ffffff?text=Analysis",
-                publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-                url: "#"
+                title: "AI Stocks Lead Technology Sector Rally Amid ChatGPT Success",
+                excerpt: "Artificial intelligence companies saw significant gains as investors bet on the transformative potential of generative AI technologies across industries.",
+                category: "tech",
+                source: sources[5],
+                image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
+                readTime: 4
             },
             {
                 id: 7,
-                title: "European Central Bank Maintains Dovish Stance on Interest Rates",
-                excerpt: "ECB officials emphasize commitment to supporting economic recovery while monitoring inflation trends across eurozone countries.",
-                category: "economics",
-                source: "Financial Times",
-                image: "https://via.placeholder.com/400x200/17a2b8/ffffff?text=ECB+News",
-                publishedAt: new Date(Date.now() - 14 * 60 * 60 * 1000),
-                url: "#"
+                title: "Oil Prices Rise on OPEC+ Production Cut Announcement",
+                excerpt: "Crude oil futures jumped 3.5% after OPEC+ announced plans to extend production cuts through the second quarter, supporting higher energy prices.",
+                category: "markets",
+                source: sources[6],
+                image: "https://images.unsplash.com/photo-1615364937620-4853f5c82e5c?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 14 * 60 * 60 * 1000), // 14 hours ago
+                readTime: 3
             },
             {
                 id: 8,
-                title: "Energy Stocks Surge on New Oil Discovery Announcements",
-                excerpt: "Major oil companies report significant new reserves discovered in offshore drilling operations, boosting sector confidence.",
+                title: "Microsoft Beats Earnings Expectations with Cloud Revenue Growth",
+                excerpt: "The software giant reported a 27% increase in Azure cloud revenue, demonstrating strong demand for enterprise cloud services and AI capabilities.",
+                category: "earnings",
+                source: sources[0],
+                image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 16 * 60 * 60 * 1000), // 16 hours ago
+                readTime: 5
+            },
+            {
+                id: 9,
+                title: "Gold Hits Six-Month High as Dollar Weakens",
+                excerpt: "Precious metals rallied as the US dollar declined against major currencies, with gold futures reaching their highest level since July.",
+                category: "markets",
+                source: sources[1],
+                image: "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 18 * 60 * 60 * 1000), // 18 hours ago
+                readTime: 3
+            },
+            {
+                id: 10,
+                title: "European Central Bank Maintains Hawkish Stance on Inflation",
+                excerpt: "ECB President Christine Lagarde emphasized the need for continued vigilance against inflation risks, suggesting rates may remain elevated longer than expected.",
+                category: "politics",
+                source: sources[2],
+                image: "https://images.unsplash.com/photo-1586497019160-0b2b8b7a8f8c?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 20 * 60 * 60 * 1000), // 20 hours ago
+                readTime: 4
+            },
+            {
+                id: 11,
+                title: "Nvidia Stock Soars on AI Chip Demand Surge",
+                excerpt: "The semiconductor company's shares reached new highs as data center demand for AI processors continues to accelerate across the technology sector.",
                 category: "stocks",
-                source: "Energy Today",
-                image: "https://via.placeholder.com/400x200/fd7e14/ffffff?text=Energy",
-                publishedAt: new Date(Date.now() - 16 * 60 * 60 * 1000),
-                url: "#"
+                source: sources[3],
+                image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 22 * 60 * 60 * 1000), // 22 hours ago
+                readTime: 4
+            },
+            {
+                id: 12,
+                title: "Ethereum Upgrade Promises Lower Transaction Fees",
+                excerpt: "The blockchain network's latest protocol upgrade aims to reduce gas fees by up to 50%, potentially boosting adoption of decentralized applications.",
+                category: "crypto",
+                source: sources[4],
+                image: "https://images.unsplash.com/photo-1639762681485-074bfd8d7ffc?w=600&h=300&fit=crop",
+                publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+                readTime: 5
             }
         ];
 
-        // Filter by category
-        let filteredData = category === 'all' ? allMockData : allMockData.filter(item => item.category === category);
+        this.allArticles = newsData;
+        this.filteredArticles = [...this.allArticles];
+    }
+
+    setActiveCategory(category) {
+        this.currentCategory = category;
+        this.currentPage = 1;
         
+        // Update UI
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.classList.remove('active');
+        });
+        document.querySelector(`[data-category="${category}"]`).classList.add('active');
+    }
+
+    setActiveSort(sort) {
+        this.currentSort = sort;
+        this.currentPage = 1;
+        
+        // Update UI
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        document.querySelector(`[data-sort="${sort}"]`).classList.add('active');
+    }
+
+    filterAndDisplayNews() {
+        // Filter by category
+        let filtered = this.currentCategory === 'all' 
+            ? [...this.allArticles]
+            : this.allArticles.filter(article => article.category === this.currentCategory);
+
         // Filter by search query
-        if (searchQuery && searchQuery.length > 2) {
-            filteredData = filteredData.filter(item => 
-                item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.source.toLowerCase().includes(searchQuery.toLowerCase())
+        if (this.searchQuery) {
+            filtered = filtered.filter(article => 
+                article.title.toLowerCase().includes(this.searchQuery) ||
+                article.excerpt.toLowerCase().includes(this.searchQuery) ||
+                article.category.toLowerCase().includes(this.searchQuery)
             );
         }
-        
-        // Simulate pagination
-        const itemsPerPage = 6;
-        const start = (page - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        return filteredData.slice(start, end);
+
+        // Sort articles
+        filtered.sort((a, b) => {
+            switch (this.currentSort) {
+                case 'latest':
+                    return new Date(b.publishedAt) - new Date(a.publishedAt);
+                case 'trending':
+                    return (b.trending ? 1 : 0) - (a.trending ? 1 : 0) || 
+                           new Date(b.publishedAt) - new Date(a.publishedAt);
+                case 'popular':
+                    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0) ||
+                           new Date(b.publishedAt) - new Date(a.publishedAt);
+                default:
+                    return new Date(b.publishedAt) - new Date(a.publishedAt);
+            }
+        });
+
+        this.filteredArticles = filtered;
+        this.currentPage = 1;
+        this.displayNews();
     }
 
-    renderNews(newsItems, append = false) {
-        const container = document.getElementById('news-container');
+    loadNews() {
+        this.showLoading();
         
-        if (newsItems.length === 0 && !append) {
-            this.showNoResults();
+        // Simulate API call delay
+        setTimeout(() => {
+            this.hideLoading();
+            this.filterAndDisplayNews();
+        }, 1000);
+    }
+
+    displayNews() {
+        const container = document.getElementById('newsContainer');
+        if (!container) return;
+
+        const startIndex = 0;
+        const endIndex = this.currentPage * this.articlesPerPage;
+        const articlesToShow = this.filteredArticles.slice(startIndex, endIndex);
+
+        container.innerHTML = '';
+
+        if (articlesToShow.length === 0) {
+            container.innerHTML = this.createNoResultsMessage();
             return;
         }
-        
-        newsItems.forEach(item => {
-            const newsCard = this.createNewsCard(item);
-            container.appendChild(newsCard);
+
+        articlesToShow.forEach((article, index) => {
+            const articleElement = this.createNewsCard(article, index < 2);
+            container.appendChild(articleElement);
         });
+
+        // Update load more button visibility
+        this.updateLoadMoreButton();
         
-        // Add animations
-        this.animateNewsCards();
+        // Animate new articles
+        this.animateNewArticles();
     }
 
-    createNewsCard(item) {
-        const col = document.createElement('div');
-        col.className = 'col-md-6 mb-4';
-        
-        col.innerHTML = `
-            <article class="news-card" onclick="this.openArticle('${item.url}')" tabindex="0" role="button" aria-label="Read article: ${item.title}">
-                <img src="${item.image}" alt="${item.title}" class="news-image" loading="lazy" onerror="this.handleImageError(this)">
-                <div class="news-content">
-                    <span class="news-category ${item.category}">${this.formatCategory(item.category)}</span>
-                    <h3 class="news-title">${item.title}</h3>
-                    <p class="news-excerpt">${item.excerpt}</p>
-                    <div class="news-meta">
-                        <div class="news-date">
-                            <i class="bi bi-clock"></i>
-                            <span>${this.formatDate(item.publishedAt)}</span>
-                        </div>
-                        <div class="news-source">${item.source}</div>
-                    </div>
+    createNewsCard(article, isFeatured = false) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `news-card ${!isFeatured ? 'compact' : ''} fade-in`;
+        cardDiv.dataset.articleId = article.id;
+
+        const timeAgo = this.getTimeAgo(article.publishedAt);
+        const categoryCapitalized = article.category.charAt(0).toUpperCase() + article.category.slice(1);
+
+        if (isFeatured) {
+            cardDiv.innerHTML = `
+                <div class="news-card-image">
+                    <img src="${article.image}" alt="${article.title}" loading="lazy">
+                    <div class="news-card-category">${categoryCapitalized}</div>
                 </div>
-            </article>
-        `;
-        
-        // Add click handler
-        const newsCard = col.querySelector('.news-card');
-        newsCard.openArticle = (url) => {
-            this.trackEvent('news_article_click', { 
-                title: item.title, 
-                category: item.category,
-                source: item.source 
-            });
-            
-            if (url === '#') {
-                this.showComingSoon();
-            } else {
-                window.open(url, '_blank', 'noopener,noreferrer');
-            }
-        };
-        
-        newsCard.handleImageError = (img) => {
-            img.src = `https://via.placeholder.com/400x200/6c757d/ffffff?text=${encodeURIComponent(item.category.toUpperCase())}`;
-        };
-        
-        return col;
-    }
-
-    showLoadingSkeletons() {
-        const container = document.getElementById('news-container');
-        container.innerHTML = '';
-        
-        for (let i = 0; i < 6; i++) {
-            const col = document.createElement('div');
-            col.className = 'col-md-6 mb-4';
-            col.innerHTML = `
-                <div class="news-card">
-                    <div class="loading-skeleton" style="height: 200px;"></div>
-                    <div class="news-content">
-                        <div class="loading-skeleton" style="height: 20px; width: 80px; margin-bottom: 1rem;"></div>
-                        <div class="loading-skeleton" style="height: 24px; margin-bottom: 0.75rem;"></div>
-                        <div class="loading-skeleton" style="height: 60px; margin-bottom: 1rem;"></div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <div class="loading-skeleton" style="height: 16px; width: 100px;"></div>
-                            <div class="loading-skeleton" style="height: 16px; width: 80px;"></div>
+                <div class="news-card-content">
+                    <div class="news-card-header">
+                        <h2 class="news-card-title">
+                            <a href="#" data-article-id="${article.id}">${article.title}</a>
+                        </h2>
+                        <p class="news-card-excerpt">${article.excerpt}</p>
+                    </div>
+                    <div class="news-card-meta">
+                        <div class="news-card-source">
+                            <div class="source-logo">${article.source.logo}</div>
+                            <span>${article.source.name}</span>
+                        </div>
+                        <div class="news-card-time">
+                            <i class="bi bi-clock"></i>
+                            <span>${timeAgo}</span>
+                            <span class="read-time">" ${article.readTime} min read</span>
+                        </div>
+                    </div>
+                    <div class="news-card-actions">
+                        <button class="read-more-btn" data-article-id="${article.id}">
+                            Read Full Article
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <div class="share-buttons">
+                            <button class="share-btn" data-share="twitter" data-article-id="${article.id}" title="Share on Twitter">
+                                <i class="bi bi-twitter"></i>
+                            </button>
+                            <button class="share-btn" data-share="linkedin" data-article-id="${article.id}" title="Share on LinkedIn">
+                                <i class="bi bi-linkedin"></i>
+                            </button>
+                            <button class="share-btn" data-share="copy" data-article-id="${article.id}" title="Copy Link">
+                                <i class="bi bi-link-45deg"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
-            container.appendChild(col);
+        } else {
+            cardDiv.innerHTML = `
+                <div class="news-card-content">
+                    <div class="news-card-image">
+                        <img src="${article.image}" alt="${article.title}" loading="lazy">
+                    </div>
+                    <div class="news-card-text">
+                        <div class="news-card-category">${categoryCapitalized}</div>
+                        <h3 class="news-card-title">
+                            <a href="#" data-article-id="${article.id}">${article.title}</a>
+                        </h3>
+                        <p class="news-card-excerpt">${article.excerpt}</p>
+                        <div class="news-card-meta">
+                            <div class="news-card-source">
+                                <div class="source-logo">${article.source.logo}</div>
+                                <span>${article.source.name}</span>
+                            </div>
+                            <div class="news-card-time">
+                                <i class="bi bi-clock"></i>
+                                <span>${timeAgo}</span>
+                                <span class="read-time">" ${article.readTime} min read</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
+
+        return cardDiv;
     }
 
-    showNoResults() {
-        const container = document.getElementById('news-container');
-        container.innerHTML = `
-            <div class="col-12">
-                <div class="no-results">
-                    <i class="bi bi-search"></i>
-                    <h4>No articles found</h4>
-                    <p>Try adjusting your search terms or category filter.</p>
-                    <button class="btn btn-primary" onclick="location.reload()">Reset Filters</button>
-                </div>
+    createNoResultsMessage() {
+        return `
+            <div class="no-results-message text-center py-5">
+                <i class="bi bi-search display-1 text-muted mb-3"></i>
+                <h3 class="section-heading">No articles found</h3>
+                <p class="body-text text-muted">
+                    ${this.searchQuery ? 
+                        `No articles match your search for "${this.searchQuery}".` : 
+                        'No articles found for the selected category.'
+                    }
+                </p>
+                <button class="btn btn-coinbase-secondary mt-3" onclick="newsManager.clearFilters()">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Clear Filters
+                </button>
             </div>
         `;
     }
 
-    showError(message) {
-        const container = document.getElementById('news-container');
-        container.innerHTML = `
-            <div class="col-12">
-                <div class="error-message">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    <h4>Error Loading News</h4>
-                    <p>${message}</p>
-                    <button class="btn btn-primary" onclick="location.reload()">Try Again</button>
-                </div>
+    loadMoreArticles() {
+        if (this.isLoading) return;
+        
+        this.isLoading = true;
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        
+        // Update button state
+        loadMoreBtn.innerHTML = `
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
+            Loading...
         `;
-    }
+        loadMoreBtn.disabled = true;
 
-    async loadTrendingNews() {
-        const container = document.getElementById('trending-container');
-        
-        try {
-            // Mock trending data
-            const trendingItems = [
-                "Market volatility reaches new highs amid uncertainty",
-                "Tech giants report record quarterly revenues",
-                "Central bank policy changes expected next month",
-                "Energy sector shows strong recovery signals",
-                "Emerging markets attract increased investment"
-            ];
+        // Simulate loading delay
+        setTimeout(() => {
+            this.currentPage++;
+            this.displayNews();
+            this.isLoading = false;
             
-            container.innerHTML = '';
-            trendingItems.forEach((item, index) => {
-                const trendingElement = document.createElement('a');
-                trendingElement.href = '#';
-                trendingElement.className = 'trending-item';
-                trendingElement.setAttribute('role', 'button');
-                trendingElement.setAttribute('tabindex', '0');
-                trendingElement.innerHTML = `
-                    <div class="trending-number">${index + 1}</div>
-                    <div class="trending-text">${item}</div>
-                `;
-                
-                trendingElement.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.trackEvent('trending_click', { item: item, position: index + 1 });
-                    this.showComingSoon();
-                });
-                
-                container.appendChild(trendingElement);
-            });
-        } catch (error) {
-            console.error('Error loading trending news:', error);
-        }
+            // Reset button
+            loadMoreBtn.innerHTML = `
+                <i class="bi bi-arrow-down-circle me-2"></i>Load More Articles
+            `;
+            loadMoreBtn.disabled = false;
+        }, 800);
     }
 
-    async loadMarketSummary() {
-        const container = document.getElementById('market-summary');
+    updateLoadMoreButton() {
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadMoreContainer = document.querySelector('.load-more-container');
         
-        try {
-            let marketData;
-            
-            if (this.useRealAPI) {
-                marketData = await this.fetchRealMarketData();
-            } else {
-                // Mock market data
-                marketData = [
-                    { name: 'S&P 500', value: '4,567.89', change: '+1.23%', positive: true },
-                    { name: 'NASDAQ', value: '14,234.56', change: '-0.67%', positive: false },
-                    { name: 'DOW', value: '34,567.12', change: '+0.89%', positive: true },
-                    { name: 'FTSE 100', value: '7,456.78', change: '+0.45%', positive: true }
-                ];
-            }
-            
-            container.innerHTML = '';
-            marketData.forEach(item => {
-                const marketItem = document.createElement('div');
-                marketItem.className = 'market-summary-item';
-                marketItem.innerHTML = `
-                    <div>
-                        <div class="market-name">${item.name}</div>
-                        <div class="market-value">${item.value}</div>
-                    </div>
-                    <div class="market-change ${item.positive ? 'positive' : 'negative'}">
-                        ${item.change}
-                    </div>
-                `;
-                container.appendChild(marketItem);
-            });
-        } catch (error) {
-            console.error('Error loading market summary:', error);
-        }
+        if (!loadMoreBtn || !loadMoreContainer) return;
+
+        const hasMoreArticles = this.currentPage * this.articlesPerPage < this.filteredArticles.length;
+        loadMoreContainer.style.display = hasMoreArticles ? 'block' : 'none';
     }
 
-    async fetchRealMarketData() {
-        try {
-            // Placeholder for real market data API
-            const symbols = ['SPY', 'QQQ', 'DIA', 'VTI'];
-            
-            const promises = symbols.map(async (symbol) => {
-                // Mock API response
-                const price = (Math.random() * 500 + 100).toFixed(2);
-                const change = ((Math.random() - 0.5) * 10).toFixed(2);
-                
-                return {
-                    name: symbol,
-                    value: price,
-                    change: `${change >= 0 ? '+' : ''}${change}%`,
-                    positive: change >= 0
-                };
-            });
-            
-            return await Promise.all(promises);
-            
-        } catch (error) {
-            console.error('Error fetching real market data:', error);
-            throw error;
-        }
-    }
-
-    handleCategoryFilter(target) {
-        // Update active state
-        document.querySelectorAll('.filter-chip').forEach(chip => {
-            chip.classList.remove('active');
-        });
-        target.classList.add('active');
+    showLoading() {
+        const loadingElement = document.getElementById('newsLoading');
+        const containerElement = document.getElementById('newsContainer');
         
-        // Get category and load news
-        this.currentCategory = target.dataset.category;
-        this.currentPage = 1;
-        this.hasMoreData = true;
-        
-        // Track filter usage
-        this.trackEvent('category_filter', { category: this.currentCategory });
-        
-        this.loadNews(this.currentCategory, this.currentPage, false, this.currentSearchQuery);
+        if (loadingElement) loadingElement.style.display = 'block';
+        if (containerElement) containerElement.style.display = 'none';
     }
 
-    handleSearch(query) {
-        this.currentSearchQuery = query;
-        this.currentPage = 1;
-        this.hasMoreData = true;
+    hideLoading() {
+        const loadingElement = document.getElementById('newsLoading');
+        const containerElement = document.getElementById('newsContainer');
         
-        if (query.length > 2) {
-            this.trackEvent('news_search', { query: query });
-            this.loadNews(this.currentCategory, this.currentPage, false, query);
-        } else if (query.length === 0) {
-            this.loadNews(this.currentCategory, this.currentPage, false, '');
-        }
+        if (loadingElement) loadingElement.style.display = 'none';
+        if (containerElement) containerElement.style.display = 'block';
     }
 
-    loadMoreNews() {
-        this.currentPage++;
-        this.loadNews(this.currentCategory, this.currentPage, true, this.currentSearchQuery);
-    }
-
-    toggleAPIMode(useReal) {
-        this.useRealAPI = useReal;
-        
-        if (useReal) {
-            this.updateAPIStatus('loading', 'Switching to real APIs...');
-            
-            // Test API connection
-            this.testAPIConnection().then(success => {
-                if (success) {
-                    this.updateAPIStatus('success', 'Connected to real APIs');
-                    this.loadNews(this.currentCategory, 1, false, this.currentSearchQuery);
-                    this.loadMarketSummary();
-                } else {
-                    this.updateAPIStatus('error', 'API connection failed - using mock data');
-                    this.useRealAPI = false;
-                    document.getElementById('use-real-api').checked = false;
-                }
-            });
-        } else {
-            this.updateAPIStatus('', 'Currently using mock data');
-            this.loadNews(this.currentCategory, 1, false, this.currentSearchQuery);
-            this.loadMarketSummary();
-        }
-    }
-
-    async testAPIConnection() {
-        try {
-            // Test with a simple API call
-            const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
-            return response.ok;
-        } catch (error) {
-            console.error('API test failed:', error);
-            return false;
-        }
-    }
-
-    updateAPIStatus(type, message) {
-        const statusElement = document.getElementById('api-status');
-        if (statusElement) {
-            statusElement.textContent = message;
-            statusElement.className = `small api-status ${type}`;
-        }
-    }
-
-    updateAuthContent() {
-        const isAuthenticated = !!localStorage.getItem('yausma_user_token');
-        
-        // Show/hide auth-specific elements
-        document.querySelectorAll('[data-auth-required]').forEach(el => {
-            el.style.display = isAuthenticated ? 'block' : 'none';
-        });
-        
-        document.querySelectorAll('[data-auth-anonymous]').forEach(el => {
-            el.style.display = isAuthenticated ? 'none' : 'block';
-        });
-        
-        // Update navigation
-        const authButtons = document.getElementById('auth-buttons');
-        const userMenu = document.getElementById('user-menu');
-        const portfolioLink = document.getElementById('portfolio-link');
-        
-        if (isAuthenticated) {
-            if (authButtons) authButtons.style.display = 'none';
-            if (userMenu) userMenu.style.display = 'block';
-            if (portfolioLink) portfolioLink.style.display = 'block';
-        } else {
-            if (authButtons) authButtons.style.display = 'flex';
-            if (userMenu) userMenu.style.display = 'none';
-            if (portfolioLink) portfolioLink.style.display = 'none';
-        }
-    }
-
-    showBreakingNews() {
-        const isAuthenticated = !!localStorage.getItem('yausma_user_token');
-        if (isAuthenticated) {
-            const breakingAlert = document.getElementById('breaking-news-alert');
-            if (breakingAlert) {
-                breakingAlert.style.display = 'block';
-                
-                // Simulate random alert count
-                const alertCount = Math.floor(Math.random() * 5) + 1;
-                const alertCountEl = document.getElementById('alert-count');
-                if (alertCountEl) {
-                    alertCountEl.textContent = alertCount;
-                }
-            }
-        }
-    }
-
-    animateNewsCards() {
-        // Add entrance animations
-        const cards = document.querySelectorAll('.news-card');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            
+    animateNewArticles() {
+        const newsCards = document.querySelectorAll('.news-card.fade-in');
+        newsCards.forEach((card, index) => {
             setTimeout(() => {
-                card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                 card.style.opacity = '1';
                 card.style.transform = 'translateY(0)';
             }, index * 100);
         });
     }
 
-    startAutoRefresh() {
-        const isAuthenticated = !!localStorage.getItem('yausma_user_token');
-        
-        if (isAuthenticated) {
-            this.refreshInterval = setInterval(() => {
-                this.refreshBreakingNews();
-            }, 5 * 60 * 1000); // Refresh every 5 minutes
-            
-            this.marketUpdateInterval = setInterval(() => {
-                this.loadMarketSummary();
-            }, 30 * 1000); // Update market data every 30 seconds
-        }
-    }
+    setupStickyFilters() {
+        const filtersSection = document.querySelector('.news-filters-section');
+        if (!filtersSection) return;
 
-    pauseAutoRefresh() {
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-        }
-        if (this.marketUpdateInterval) {
-            clearInterval(this.marketUpdateInterval);
-        }
-    }
-
-    resumeAutoRefresh() {
-        this.startAutoRefresh();
-    }
-
-    async refreshBreakingNews() {
-        try {
-            const hasNewAlerts = Math.random() > 0.7; // 30% chance of new alerts
-            
-            if (hasNewAlerts) {
-                const alertCount = Math.floor(Math.random() * 3) + 1;
-                const alertElement = document.getElementById('alert-count');
-                if (alertElement) {
-                    alertElement.textContent = alertCount;
-                    
-                    // Add a subtle animation to indicate new alerts
-                    const alertContainer = document.getElementById('breaking-news-alert');
-                    if (alertContainer) {
-                        alertContainer.style.animation = 'pulse 0.5s ease-in-out';
-                        setTimeout(() => {
-                            alertContainer.style.animation = '';
-                        }, 500);
-                    }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    filtersSection.classList.remove('scrolled');
+                } else {
+                    filtersSection.classList.add('scrolled');
                 }
-            }
-        } catch (error) {
-            console.error('Error refreshing breaking news:', error);
+            });
+        }, { threshold: 0.1 });
+
+        observer.observe(document.querySelector('.news-header-section'));
+    }
+
+    setupInfiniteScroll() {
+        // Optional: Enable infinite scroll on mobile
+        if (window.innerWidth <= 768) {
+            let isScrolling = false;
+            
+            window.addEventListener('scroll', () => {
+                if (isScrolling || this.isLoading) return;
+                
+                const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+                
+                if (scrollTop + clientHeight >= scrollHeight - 1000) {
+                    isScrolling = true;
+                    
+                    if (this.currentPage * this.articlesPerPage < this.filteredArticles.length) {
+                        this.loadMoreArticles();
+                    }
+                    
+                    setTimeout(() => {
+                        isScrolling = false;
+                    }, 1000);
+                }
+            });
         }
+    }
+
+    handleShare(event) {
+        event.preventDefault();
+        const shareType = event.target.dataset.share || event.target.parentElement.dataset.share;
+        const articleId = event.target.dataset.articleId || event.target.parentElement.dataset.articleId;
+        const article = this.allArticles.find(a => a.id == articleId);
+        
+        if (!article) return;
+
+        const url = `${window.location.origin}${window.location.pathname}#article-${articleId}`;
+        const title = article.title;
+        const text = article.excerpt;
+
+        switch (shareType) {
+            case 'twitter':
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+                break;
+            case 'linkedin':
+                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+                break;
+            case 'copy':
+                navigator.clipboard.writeText(url).then(() => {
+                    this.showToast('Link copied to clipboard!');
+                }).catch(() => {
+                    this.showToast('Failed to copy link');
+                });
+                break;
+        }
+    }
+
+    handleReadMore(event) {
+        event.preventDefault();
+        const articleId = event.target.dataset.articleId;
+        
+        // In a real app, this would navigate to the full article
+        this.showToast('Full article would open here');
+        
+        // Track reading engagement
+        this.trackArticleClick(articleId);
+    }
+
+    handleNewsletterSubmit(event) {
+        event.preventDefault();
+        const emailInput = event.target.querySelector('input[type="email"]');
+        const email = emailInput.value;
+        
+        if (!this.isValidEmail(email)) {
+            this.showToast('Please enter a valid email address', 'error');
+            return;
+        }
+
+        // Show loading state
+        const submitButton = event.target.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        submitButton.innerHTML = `
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            Subscribing...
+        `;
+        submitButton.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            this.showToast('Successfully subscribed to newsletter!', 'success');
+            emailInput.value = '';
+            
+            // Reset button
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+        }, 1500);
+    }
+
+    clearFilters() {
+        this.searchQuery = '';
+        this.currentCategory = 'all';
+        this.currentSort = 'latest';
+        this.currentPage = 1;
+        
+        // Reset UI
+        document.getElementById('newsSearch').value = '';
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.classList.remove('active');
+        });
+        document.querySelector('[data-category="all"]').classList.add('active');
+        
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        document.querySelector('[data-sort="latest"]').classList.add('active');
+        
+        this.filterAndDisplayNews();
     }
 
     // Utility methods
-    formatDate(date) {
+    getTimeAgo(date) {
         const now = new Date();
-        const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+        const diffInMs = now - new Date(date);
+        const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
         
         if (diffInHours < 1) {
-            return 'Just now';
+            const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+            return `${diffInMinutes} min ago`;
         } else if (diffInHours < 24) {
-            return `${diffInHours}h ago`;
+            return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
         } else {
             const diffInDays = Math.floor(diffInHours / 24);
-            return `${diffInDays}d ago`;
+            return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
         }
     }
 
-    formatCategory(category) {
-        return category.charAt(0).toUpperCase() + category.slice(1);
-    }
-
-    categorizeNews(text) {
-        const categories = {
-            'crypto': ['bitcoin', 'ethereum', 'cryptocurrency', 'blockchain'],
-            'stocks': ['stock', 'share', 'equity', 'dividend'],
-            'economics': ['federal reserve', 'inflation', 'gdp', 'economic'],
-            'earnings': ['earnings', 'revenue', 'profit', 'quarterly'],
-            'markets': ['market', 'trading', 'index', 'dow', 'nasdaq', 's&p']
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
         };
-        
-        const lowerText = text.toLowerCase();
-        
-        for (const [category, keywords] of Object.entries(categories)) {
-            if (keywords.some(keyword => lowerText.includes(keyword))) {
-                return category;
-            }
-        }
-        
-        return 'analysis';
     }
 
-    hashCode(str) {
-        let hash = 0;
-        if (str.length === 0) return hash;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
-        }
-        return Math.abs(hash);
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
-    showComingSoon() {
-        alert('This feature is coming soon! Stay tuned for updates.');
-    }
-
-    showSuccessMessage(message) {
-        const container = document.getElementById('error-container');
-        if (container) {
-            container.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
-            container.textContent = message;
-            container.style.display = 'block';
-            container.style.zIndex = '9999';
-            
-            setTimeout(() => {
-                container.style.display = 'none';
-            }, 3000);
-        }
-    }
-
-    showErrorMessage(message) {
-        const container = document.getElementById('error-container');
-        if (container) {
-            container.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3';
-            container.textContent = message;
-            container.style.display = 'block';
-            container.style.zIndex = '9999';
-            
-            setTimeout(() => {
-                container.style.display = 'none';
-            }, 3000);
-        }
-    }
-
-    trackEvent(eventName, properties = {}) {
-        // Analytics tracking
-        console.log('Event tracked:', eventName, properties);
-        
-        // Example: Google Analytics 4
-        if (typeof gtag !== 'undefined') {
-            gtag('event', eventName, properties);
-        }
-        
-        // Example: Custom analytics
-        if (window.analytics) {
-            window.analytics.track(eventName, properties);
-        }
-    }
-
-    // Cleanup when page unloads
-    destroy() {
-        this.pauseAutoRefresh();
-        
-        // Remove event listeners
-        document.removeEventListener('keydown', this.handleKeydown);
-        
-        console.log('News page destroyed');
-    }
-}
-
-// Initialize news page when DOM is ready
-let newsPageInstance;
-
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        // Load saved theme
-        const savedTheme = localStorage.getItem('yausma_theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
-        
-        const themeStylesheet = document.getElementById('theme-stylesheet');
-        if (themeStylesheet) {
-            themeStylesheet.href = `../css/themes/${savedTheme}.css`;
-        }
-        
-        // Initialize news page
-        newsPageInstance = new NewsPage();
-        
-    } catch (error) {
-        console.error('Failed to initialize news page:', error);
-        
-        // Fallback error display
-        const container = document.getElementById('news-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="col-12">
-                    <div class="alert alert-danger">
-                        <h4>Error Loading News</h4>
-                        <p>We're having trouble loading the news feed. Please refresh the page to try again.</p>
-                        <button class="btn btn-primary" onclick="location.reload()">Refresh Page</button>
-                    </div>
-                </div>
-            `;
-        }
-    }
-});
-
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-    if (newsPageInstance) {
-        newsPageInstance.destroy();
-    }
-});
-
-// Global logout handler
-window.handleLogout = () => {
-    localStorage.removeItem('yausma_user_token');
-    localStorage.removeItem('yausma_user_data');
-    
-    // Update UI
-    if (newsPageInstance) {
-        newsPageInstance.updateAuthContent();
-    }
-    
-    // Redirect to home page
-    window.location.href = '../index.html';
-};
-
-// Enhanced search functionality with suggestions
-class NewsSearchEnhancer {
-    constructor(newsPage) {
-        this.newsPage = newsPage;
-        this.searchInput = document.getElementById('newsSearch');
-        this.suggestions = [
-            'Federal Reserve', 'Stock Market', 'Cryptocurrency', 'Tech Earnings',
-            'Oil Prices', 'Interest Rates', 'Market Volatility', 'Economic Indicators',
-            'Bitcoin', 'Ethereum', 'Apple', 'Tesla', 'Amazon', 'Google', 'Microsoft'
-        ];
-        this.initializeSearchEnhancements();
-    }
-
-    initializeSearchEnhancements() {
-        if (!this.searchInput) return;
-
-        // Create suggestions dropdown
-        this.createSuggestionsDropdown();
-        
-        // Enhanced search with autocomplete
-        this.searchInput.addEventListener('input', (e) => {
-            this.handleSearchInput(e.target.value);
-        });
-
-        // Hide suggestions when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!this.searchInput.contains(e.target)) {
-                this.hideSuggestions();
-            }
-        });
-    }
-
-    createSuggestionsDropdown() {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'position-relative';
-        this.searchInput.parentNode.insertBefore(wrapper, this.searchInput);
-        wrapper.appendChild(this.searchInput);
-
-        this.suggestionsDropdown = document.createElement('div');
-        this.suggestionsDropdown.className = 'search-suggestions position-absolute w-100 bg-white border rounded shadow-sm';
-        this.suggestionsDropdown.style.display = 'none';
-        this.suggestionsDropdown.style.zIndex = '1000';
-        this.suggestionsDropdown.style.top = '100%';
-        wrapper.appendChild(this.suggestionsDropdown);
-    }
-
-    handleSearchInput(query) {
-        if (query.length < 2) {
-            this.hideSuggestions();
-            return;
-        }
-
-        const matchingSuggestions = this.suggestions.filter(suggestion =>
-            suggestion.toLowerCase().includes(query.toLowerCase())
-        ).slice(0, 5);
-
-        if (matchingSuggestions.length > 0) {
-            this.showSuggestions(matchingSuggestions, query);
-        } else {
-            this.hideSuggestions();
-        }
-    }
-
-    showSuggestions(suggestions, query) {
-        this.suggestionsDropdown.innerHTML = '';
-        
-        suggestions.forEach(suggestion => {
-            const item = document.createElement('div');
-            item.className = 'search-suggestion-item p-2 cursor-pointer';
-            item.style.cursor = 'pointer';
-            
-            // Highlight matching text
-            const highlightedText = suggestion.replace(
-                new RegExp(query, 'gi'),
-                `<mark>    } catch (error) {
-        console.error('Faile</mark>`
-            );
-            item.innerHTML = highlightedText;
-            
-            item.addEventListener('click', () => {
-                this.searchInput.value = suggestion;
-                this.newsPage.handleSearch(suggestion);
-                this.hideSuggestions();
-            });
-            
-            item.addEventListener('mouseenter', () => {
-                item.style.backgroundColor = '#f8f9fa';
-            });
-            
-            item.addEventListener('mouseleave', () => {
-                item.style.backgroundColor = 'transparent';
-            });
-            
-            this.suggestionsDropdown.appendChild(item);
-        });
-        
-        this.suggestionsDropdown.style.display = 'block';
-    }
-
-    hideSuggestions() {
-        this.suggestionsDropdown.style.display = 'none';
-    }
-}
-
-// Enhanced bookmark functionality
-class NewsBookmarkManager {
-    constructor() {
-        this.bookmarks = JSON.parse(localStorage.getItem('yausma_bookmarks') || '[]');
-        this.initializeBookmarkSystem();
-    }
-
-    initializeBookmarkSystem() {
-        // Add bookmark buttons to news cards
-        this.addBookmarkButtons();
-        
-        // Listen for new news cards being added
-        const observer = new MutationObserver(() => {
-            this.addBookmarkButtons();
-        });
-        
-        const newsContainer = document.getElementById('news-container');
-        if (newsContainer) {
-            observer.observe(newsContainer, { childList: true, subtree: true });
-        }
-    }
-
-    addBookmarkButtons() {
-        const newsCards = document.querySelectorAll('.news-card:not([data-bookmark-added])');
-        
-        newsCards.forEach(card => {
-            const newsContent = card.querySelector('.news-content');
-            if (newsContent) {
-                const bookmarkBtn = document.createElement('button');
-                bookmarkBtn.className = 'btn btn-outline-secondary btn-sm bookmark-btn position-absolute top-0 end-0 m-2';
-                bookmarkBtn.style.zIndex = '10';
-                bookmarkBtn.innerHTML = '<i class="bi bi-bookmark"></i>';
-                bookmarkBtn.title = 'Bookmark this article';
-                
-                // Get article ID from title (simple hash)
-                const title = card.querySelector('.news-title')?.textContent;
-                const articleId = this.hashCode(title || '');
-                bookmarkBtn.dataset.articleId = articleId;
-                
-                // Check if already bookmarked
-                if (this.bookmarks.includes(articleId)) {
-                    bookmarkBtn.innerHTML = '<i class="bi bi-bookmark-fill"></i>';
-                    bookmarkBtn.classList.add('bookmarked');
-                }
-                
-                bookmarkBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.toggleBookmark(articleId, bookmarkBtn);
-                });
-                
-                card.style.position = 'relative';
-                card.appendChild(bookmarkBtn);
-                card.setAttribute('data-bookmark-added', 'true');
-            }
-        });
-    }
-
-    toggleBookmark(articleId, button) {
-        const isAuthenticated = !!localStorage.getItem('yausma_user_token');
-        
-        if (!isAuthenticated) {
-            alert('Please sign in to bookmark articles.');
-            return;
-        }
-        
-        const isBookmarked = this.bookmarks.includes(articleId);
-        
-        if (isBookmarked) {
-            this.bookmarks = this.bookmarks.filter(id => id !== articleId);
-            button.innerHTML = '<i class="bi bi-bookmark"></i>';
-            button.classList.remove('bookmarked');
-            this.showMessage('Article removed from bookmarks');
-        } else {
-            this.bookmarks.push(articleId);
-            button.innerHTML = '<i class="bi bi-bookmark-fill"></i>';
-            button.classList.add('bookmarked');
-            this.showMessage('Article bookmarked!');
-        }
-        
-        localStorage.setItem('yausma_bookmarks', JSON.stringify(this.bookmarks));
-    }
-
-    hashCode(str) {
-        let hash = 0;
-        if (str.length === 0) return hash;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-        }
-        return Math.abs(hash);
-    }
-
-    showMessage(message) {
+    showToast(message, type = 'info') {
         const toast = document.createElement('div');
-        toast.className = 'toast position-fixed bottom-0 end-0 m-3';
-        toast.style.zIndex = '9999';
+        toast.className = `toast-notification toast-${type}`;
         toast.innerHTML = `
-            <div class="toast-body">
-                ${message}
+            <div class="toast-content">
+                <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
             </div>
         `;
+        
+        // Add toast styles if not already present
+        if (!document.querySelector('#toast-styles')) {
+            const toastStyles = document.createElement('style');
+            toastStyles.id = 'toast-styles';
+            toastStyles.textContent = `
+                .toast-notification {
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: var(--card-background);
+                    border: 1px solid var(--border-light);
+                    border-radius: var(--radius-md);
+                    padding: var(--space-md);
+                    box-shadow: var(--shadow-lg);
+                    z-index: var(--z-tooltip);
+                    animation: slideInRight 0.3s ease-out;
+                    min-width: 250px;
+                }
+                .toast-success { border-left: 4px solid var(--success-green); }
+                .toast-error { border-left: 4px solid var(--error-red); }
+                .toast-info { border-left: 4px solid var(--interactive-blue); }
+                .toast-content {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--space-sm);
+                    color: var(--text-primary);
+                    font-size: var(--font-size-sm);
+                }
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(toastStyles);
+        }
         
         document.body.appendChild(toast);
         
-        // Auto-remove toast
         setTimeout(() => {
-            toast.remove();
+            toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
         }, 3000);
     }
-}
 
-// Advanced filtering system
-class NewsFilterManager {
-    constructor(newsPage) {
-        this.newsPage = newsPage;
-        this.activeFilters = {
-            category: 'all',
-            dateRange: 'all',
-            source: 'all'
-        };
-        this.initializeAdvancedFilters();
-    }
-
-    initializeAdvancedFilters() {
-        this.createAdvancedFilterPanel();
-        this.initializeFilterControls();
-    }
-
-    createAdvancedFilterPanel() {
-        const filterContainer = document.querySelector('.filter-chips').parentElement;
-        
-        const advancedPanel = document.createElement('div');
-        advancedPanel.className = 'advanced-filters bg-light p-3 rounded mb-4';
-        advancedPanel.style.display = 'none';
-        advancedPanel.innerHTML = `
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Date Range</label>
-                    <select class="form-select" id="date-filter">
-                        <option value="all">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Source</label>
-                    <select class="form-select" id="source-filter">
-                        <option value="all">All Sources</option>
-                        <option value="reuters">Reuters</option>
-                        <option value="bloomberg">Bloomberg</option>
-                        <option value="wsj">Wall Street Journal</option>
-                        <option value="ft">Financial Times</option>
-                    </select>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-primary me-2" id="apply-filters">Apply</button>
-                    <button class="btn btn-outline-secondary" id="reset-filters">Reset</button>
-                </div>
-            </div>
-        `;
-        
-        filterContainer.appendChild(advancedPanel);
-        
-        // Add toggle button
-        const toggleBtn = document.createElement('button');
-        toggleBtn.className = 'btn btn-outline-primary btn-sm mb-3';
-        toggleBtn.innerHTML = '<i class="bi bi-funnel"></i> Advanced Filters';
-        toggleBtn.addEventListener('click', () => {
-            const isVisible = advancedPanel.style.display !== 'none';
-            advancedPanel.style.display = isVisible ? 'none' : 'block';
-            toggleBtn.innerHTML = `<i class="bi bi-funnel"></i> ${isVisible ? 'Advanced' : 'Hide'} Filters`;
-        });
-        
-        filterContainer.insertBefore(toggleBtn, advancedPanel);
-    }
-
-    initializeFilterControls() {
-        const applyBtn = document.getElementById('apply-filters');
-        const resetBtn = document.getElementById('reset-filters');
-        
-        if (applyBtn) {
-            applyBtn.addEventListener('click', () => {
-                this.applyAdvancedFilters();
-            });
-        }
-        
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => {
-                this.resetFilters();
-            });
-        }
-    }
-
-    applyAdvancedFilters() {
-        const dateFilter = document.getElementById('date-filter')?.value || 'all';
-        const sourceFilter = document.getElementById('source-filter')?.value || 'all';
-        
-        this.activeFilters.dateRange = dateFilter;
-        this.activeFilters.source = sourceFilter;
-        
-        // Apply filters to news page
-        this.newsPage.currentPage = 1;
-        this.newsPage.hasMoreData = true;
-        this.newsPage.loadNews(this.newsPage.currentCategory, 1, false, this.newsPage.currentSearchQuery);
-        
-        // Track filter usage
-        this.newsPage.trackEvent('advanced_filter_applied', this.activeFilters);
-    }
-
-    resetFilters() {
-        this.activeFilters = {
-            category: 'all',
-            dateRange: 'all',
-            source: 'all'
-        };
-        
-        // Reset UI
-        document.getElementById('date-filter').value = 'all';
-        document.getElementById('source-filter').value = 'all';
-        
-        // Reset category chips
-        document.querySelectorAll('.filter-chip').forEach(chip => {
-            chip.classList.remove('active');
-        });
-        document.querySelector('.filter-chip[data-category="all"]')?.classList.add('active');
-        
-        // Reload news
-        this.newsPage.currentCategory = 'all';
-        this.newsPage.currentPage = 1;
-        this.newsPage.hasMoreData = true;
-        this.newsPage.loadNews('all', 1, false, '');
+    trackArticleClick(articleId) {
+        // In a real app, this would send analytics data
+        console.log(`Article ${articleId} clicked`);
     }
 }
 
-// News sharing functionality
-class NewsShareManager {
-    static shareArticle(article) {
-        if (navigator.share) {
-            navigator.share({
-                title: article.title,
-                text: article.excerpt,
-                url: article.url
-            }).catch(err => console.log('Error sharing:', err));
-        } else {
-            // Fallback to clipboard
-            const shareText = `${article.title}\n\n${article.excerpt}\n\nRead more: ${article.url}`;
-            navigator.clipboard.writeText(shareText).then(() => {
-                alert('Article link copied to clipboard!');
-            }).catch(() => {
-                alert('Failed to copy article link.');
-            });
-        }
+// CSS for initial fade-in animation
+const style = document.createElement('style');
+style.textContent = `
+    .news-card.fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     }
+`;
+document.head.appendChild(style);
 
-    static addShareButtons() {
-        const newsCards = document.querySelectorAll('.news-card:not([data-share-added])');
-        
-        newsCards.forEach(card => {
-            const meta = card.querySelector('.news-meta');
-            if (meta) {
-                const shareBtn = document.createElement('button');
-                shareBtn.className = 'btn btn-link btn-sm p-0 text-muted';
-                shareBtn.innerHTML = '<i class="bi bi-share"></i>';
-                shareBtn.title = 'Share this article';
-                
-                shareBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    
-                    const article = {
-                        title: card.querySelector('.news-title')?.textContent,
-                        excerpt: card.querySelector('.news-excerpt')?.textContent,
-                        url: window.location.href
-                    };
-                    
-                    NewsShareManager.shareArticle(article);
-                });
-                
-                meta.appendChild(shareBtn);
-                card.setAttribute('data-share-added', 'true');
-            }
-        });
-    }
-}
+// Initialize news manager when DOM is loaded
+let newsManager;
 
-// Initialize enhanced features after news page loads
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        if (newsPageInstance) {
-            // Initialize search enhancer
-            new NewsSearchEnhancer(newsPageInstance);
-            
-            // Initialize bookmark manager
-            new NewsBookmarkManager();
-            
-            // Initialize filter manager
-            new NewsFilterManager(newsPageInstance);
-            
-            // Add share buttons
-            NewsShareManager.addShareButtons();
-            
-            // Re-add share buttons when new content loads
-            const observer = new MutationObserver(() => {
-                NewsShareManager.addShareButtons();
-            });
-            
-            const newsContainer = document.getElementById('news-container');
-            if (newsContainer) {
-                observer.observe(newsContainer, { childList: true, subtree: true });
-            }
-        }
-    }, 1000);
+    newsManager = new NewsManager();
 });
 
-// Export for potential use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { NewsPage, NewsSearchEnhancer, NewsBookmarkManager, NewsFilterManager, NewsShareManager };
-}
+// Export for global access
+window.newsManager = newsManager;

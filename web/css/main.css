@@ -1,81 +1,681 @@
-:root {
-    /* Light theme (default) */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --text-primary: #212529;
-    --text-secondary: #6c757d;
-    --accent-positive: #28a745;
-    --accent-negative: #dc3545;
-    --accent-primary: #007bff;
-    --border-color: #dee2e6;
-    --card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+/* YAUSMA - Main CSS with Coinbase-Inspired Design System */
+
+/* CSS Reset and Base Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-/* Common styles */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-base);
+  color: var(--text-primary);
+  background-color: var(--background-light);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-main {
-    flex: 1 0 auto;
+/* Coinbase-Inspired Design System Variables */
+:root {
+  /* Font Families */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  
+  /* Font Sizes - Systematic Scale */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+  --font-size-5xl: 48px;
+  
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Coinbase 8px Grid Spacing System */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+  
+  /* Container Widths */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1200px;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+  
+  /* Z-Index Scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-base: 0.2s ease-in-out;
+  --transition-slow: 0.3s ease-in-out;
 }
 
-/* Stock price movement indicators */
-.price-up {
-    color: var(--accent-positive);
+/* Typography Classes */
+.display-heading {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.02em;
 }
 
-.price-down {
-    color: var(--accent-negative);
+.section-heading {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-md);
 }
 
-/* Card styles */
-.stock-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    box-shadow: var(--card-shadow);
-    transition: transform 0.2s ease;
+.body-text {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-base);
 }
 
-.stock-card:hover {
-    transform: translateY(-2px);
+.ui-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-base);
 }
 
-/* Loading states */
+.financial-data {
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--interactive-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Coinbase-Style Buttons */
+.btn-coinbase-primary {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--interactive-blue) 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: white;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  box-shadow: 0 2px 8px rgba(52, 74, 251, 0.2);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-coinbase-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 74, 251, 0.3);
+  color: white;
+}
+
+.btn-coinbase-primary:active {
+  transform: translateY(0);
+}
+
+.btn-coinbase-primary.btn-lg {
+  padding: 16px 32px;
+  font-size: var(--font-size-base);
+}
+
+.btn-coinbase-primary.btn-sm {
+  padding: 8px 16px;
+  font-size: var(--font-size-xs);
+}
+
+.btn-coinbase-secondary {
+  background: transparent;
+  border: 2px solid var(--interactive-blue);
+  color: var(--interactive-blue);
+  border-radius: var(--radius-md);
+  padding: 10px 22px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.btn-coinbase-secondary:hover {
+  background: var(--interactive-blue);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-coinbase-secondary.btn-lg {
+  padding: 14px 30px;
+  font-size: var(--font-size-base);
+}
+
+.btn-coinbase-secondary.btn-sm {
+  padding: 6px 14px;
+  font-size: var(--font-size-xs);
+}
+
+/* Form Elements */
+.form-coinbase {
+  background: var(--background-light);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-size: var(--font-size-base);
+  transition: all var(--transition-base);
+  width: 100%;
+  font-family: var(--font-family-primary);
+}
+
+.form-coinbase:focus {
+  outline: none;
+  border-color: var(--interactive-blue);
+  box-shadow: 0 0 0 3px rgba(52, 74, 251, 0.1);
+}
+
+.form-coinbase::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Cards */
+.card-coinbase {
+  background: var(--background-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.card-coinbase:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-coinbase-header {
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Navigation Styles */
+.navbar-custom {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-light);
+  padding: var(--space-md) 0;
+  transition: all var(--transition-base);
+}
+
+.navbar-brand {
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.navbar-brand:hover {
+  color: var(--text-primary);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.logo-icon {
+  font-size: var(--font-size-2xl);
+  color: var(--interactive-blue);
+}
+
+.logo-text {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  text-decoration: none;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--interactive-blue);
+  background: rgba(52, 74, 251, 0.1);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.btn-theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.btn-theme-toggle:hover {
+  background: var(--background-secondary);
+  border-color: var(--interactive-blue);
+}
+
+.theme-icon-light,
+.theme-icon-dark {
+  position: absolute;
+  transition: all var(--transition-base);
+}
+
+[data-theme="light"] .theme-icon-light {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+[data-theme="light"] .theme-icon-dark {
+  opacity: 0;
+  transform: rotate(180deg);
+}
+
+[data-theme="dark"] .theme-icon-light {
+  opacity: 0;
+  transform: rotate(180deg);
+}
+
+[data-theme="dark"] .theme-icon-dark {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.navbar-toggler {
+  border: none;
+  padding: var(--space-sm);
+  background: transparent;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* User Menu */
+.btn-user-menu {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  padding: var(--space-xs);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all var(--transition-base);
+}
+
+.btn-user-menu:hover {
+  background: var(--background-secondary);
+  border-color: var(--interactive-blue);
+  color: var(--interactive-blue);
+}
+
+.btn-user-menu i {
+  font-size: var(--font-size-lg);
+}
+
+/* Dropdown Styles */
+.dropdown-menu {
+  background: var(--background-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.dropdown-item {
+  color: var(--text-primary);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background: var(--background-secondary);
+  color: var(--interactive-blue);
+}
+
+.dropdown-divider {
+  border-color: var(--border-light);
+  margin: var(--space-sm) 0;
+}
+
+/* Market Data Styles */
+.market-change {
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+
+.market-change.positive {
+  color: var(--success-green);
+}
+
+.market-change.negative {
+  color: var(--error-red);
+}
+
+.market-price {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.market-symbol {
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.market-name {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+/* Loading States */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  backdrop-filter: blur(4px);
+}
+
+.loading-overlay.show {
+  display: flex;
+}
+
+.loading-spinner .spinner-border {
+  width: 3rem;
+  height: 3rem;
+  color: var(--interactive-blue);
+}
+
+/* Skeleton Loading */
 .skeleton-loading {
-    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
+  background: linear-gradient(90deg, var(--background-secondary) 25%, var(--border-light) 50%, var(--background-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: var(--radius-md);
 }
 
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
-/* Responsive breakpoints */
+/* Responsive Utilities */
+.container {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+/* Section Spacing */
+section {
+  padding: var(--space-3xl) 0;
+}
+
+.section-header {
+  margin-bottom: var(--space-2xl);
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Footer Styles */
+.footer-section {
+  background: var(--background-secondary);
+  border-top: 1px solid var(--border-light);
+  padding: var(--space-3xl) 0 var(--space-lg) 0;
+}
+
+.footer-heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: var(--space-sm);
+}
+
+.footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: color var(--transition-base);
+}
+
+.footer-links a:hover {
+  color: var(--interactive-blue);
+}
+
+.footer-divider {
+  border-color: var(--border-light);
+  margin: var(--space-2xl) 0 var(--space-lg) 0;
+}
+
+.footer-bottom {
+  margin-top: var(--space-lg);
+}
+
+.social-links {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--transition-base);
+}
+
+.social-links a:hover {
+  background: var(--interactive-blue);
+  border-color: var(--interactive-blue);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .display-heading {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .section-heading {
+    font-size: var(--font-size-xl);
+  }
+  
+  .navbar-actions {
+    gap: var(--space-sm);
+  }
+  
+  .auth-buttons {
+    flex-direction: column;
+    width: 100%;
+    margin-top: var(--space-md);
+  }
+  
+  .auth-buttons .btn {
+    width: 100%;
+    margin-bottom: var(--space-xs);
+  }
+  
+  section {
+    padding: var(--space-2xl) 0;
+  }
+  
+  .container {
+    padding: 0 var(--space-md);
+  }
+}
+
 @media (max-width: 576px) {
-    .container {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
+  .display-heading {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  
+  .hero-actions .btn {
+    width: 100%;
+  }
 }
 
-/* Utility classes */
-.text-truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-.cursor-pointer {
-    cursor: pointer;
-} 
+/* Focus States */
+.btn-coinbase-primary:focus,
+.btn-coinbase-secondary:focus,
+.btn-theme-toggle:focus,
+.nav-link:focus {
+  outline: 2px solid var(--interactive-blue);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .navbar-custom,
+  .footer-section,
+  .btn-theme-toggle,
+  .loading-overlay {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .card-coinbase {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+}
