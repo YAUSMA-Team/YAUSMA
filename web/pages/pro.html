@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YAUSMA Pro - Advanced Financial Analytics | YAUSMA</title>
+  <meta name="description" content="Unlock advanced financial analytics, real-time data, professional charting tools, and premium features with YAUSMA Pro. Start your professional trading journey today.">
+  <meta name="keywords" content="YAUSMA Pro, financial analytics, stock analysis, trading tools, premium features, real-time data">
+  
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="YAUSMA Pro - Advanced Financial Analytics">
+  <meta property="og:description" content="Professional trading tools and advanced analytics for serious investors.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yausma.com/pro">
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="YAUSMA Pro - Advanced Financial Analytics">
+  <meta name="twitter:description" content="Professional trading tools and advanced analytics for serious investors.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/themes/light.css">
+  <link rel="stylesheet" href="../css/themes/dark.css">
+  <link rel="stylesheet" href="../css/pages/pro.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="../index.html">
+        <div class="logo-container">
+          <i class="fas fa-chart-line logo-icon"></i>
+          <span class="logo-text">YAUSMA</span>
+        </div>
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="../index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="stocks.html">Markets</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="portfolio.html">Portfolio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="pro.html">Pro</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="news.html">News</a>
+          </li>
+        </ul>
+        
+        <div class="navbar-actions">
+          <button class="btn-theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <i class="fas fa-sun theme-icon-light"></i>
+            <i class="fas fa-moon theme-icon-dark"></i>
+          </button>
+          
+          <div class="auth-buttons d-none" id="authButtons">
+            <a href="auth.html" class="btn btn-coinbase-secondary btn-sm">Sign In</a>
+            <a href="auth.html?mode=signup" class="btn btn-coinbase-primary btn-sm">Get Started</a>
+          </div>
+          
+          <div class="dropdown d-none" id="userMenu">
+            <button class="btn-user-menu dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="portfolio.html"><i class="fas fa-briefcase me-2"></i>Portfolio</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="signOutBtn"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="pro-hero-section">
+    <div class="container">
+      <div class="row align-items-center min-vh-100">
+        <div class="col-lg-6">
+          <div class="hero-content">
+            <div class="hero-badge">
+              <i class="fas fa-crown me-2"></i>
+              Professional Trading Platform
+            </div>
+            <h1 class="hero-title">
+              <span class="gradient-text">YAUSMA Pro</span><br>
+              Advanced Financial Analytics
+            </h1>
+            <p class="hero-description">
+              Unlock professional-grade trading tools, real-time market data, advanced charting capabilities, and comprehensive portfolio analytics. Take your investment strategy to the next level.
+            </p>
+            <div class="hero-features">
+              <div class="feature-item">
+                <i class="fas fa-bolt text-warning"></i>
+                <span>Real-time Data</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-chart-bar text-success"></i>
+                <span>Advanced Charts</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-brain text-info"></i>
+                <span>AI Insights</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-shield-alt text-primary"></i>
+                <span>Priority Support</span>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <a href="#pricing" class="btn btn-coinbase-primary btn-lg">
+                <i class="fas fa-rocket me-2"></i>Start Pro Trial
+              </a>
+              <a href="#features" class="btn btn-coinbase-secondary btn-lg">
+                <i class="fas fa-play me-2"></i>See Features
+              </a>
+            </div>
+            <div class="hero-trust">
+              <div class="trust-stats">
+                <div class="stat">
+                  <strong>10,000+</strong>
+                  <span>Pro Users</span>
+                </div>
+                <div class="stat">
+                  <strong>$500M+</strong>
+                  <span>Assets Tracked</span>
+                </div>
+                <div class="stat">
+                  <strong>99.9%</strong>
+                  <span>Uptime</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="hero-visual">
+            <div class="dashboard-mockup">
+              <div class="mockup-header">
+                <div class="mockup-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="mockup-title">YAUSMA Pro Dashboard</div>
+              </div>
+              <div class="mockup-content">
+                <div class="chart-container">
+                  <div class="chart-header">
+                    <div class="chart-title">Portfolio Performance</div>
+                    <div class="chart-value">+24.8%</div>
+                  </div>
+                  <div class="chart-area">
+                    <svg class="performance-chart" viewBox="0 0 400 200">
+                      <defs>
+                        <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" style="stop-color:var(--success-green);stop-opacity:0.8" />
+                          <stop offset="100%" style="stop-color:var(--success-green);stop-opacity:0.1" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M0,150 Q50,130 100,120 T200,100 T300,80 T400,60" stroke="var(--success-green)" stroke-width="3" fill="url(#chartGradient)"/>
+                      <path d="M0,150 Q50,130 100,120 T200,100 T300,80 T400,60" stroke="var(--success-green)" stroke-width="3" fill="none"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="metrics-grid">
+                  <div class="metric">
+                    <div class="metric-label">Total Value</div>
+                    <div class="metric-value">$124,890</div>
+                  </div>
+                  <div class="metric">
+                    <div class="metric-label">Today's P&L</div>
+                    <div class="metric-value positive">+$2,345</div>
+                  </div>
+                  <div class="metric">
+                    <div class="metric-label">Open Positions</div>
+                    <div class="metric-value">23</div>
+                  </div>
+                  <div class="metric">
+                    <div class="metric-label">Win Rate</div>
+                    <div class="metric-value">78.5%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Comparison Section -->
+  <section class="features-comparison-section" id="features">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-heading">Free vs Pro Comparison</h2>
+        <p class="section-subtitle">See what's included in YAUSMA Pro and how it compares to our free tier</p>
+      </div>
+      
+      <div class="comparison-table-container">
+        <div class="table-responsive">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th class="feature-column">Features</th>
+                <th class="plan-column">
+                  <div class="plan-header">
+                    <div class="plan-name">Free</div>
+                    <div class="plan-price">$0</div>
+                  </div>
+                </th>
+                <th class="plan-column featured">
+                  <div class="plan-header">
+                    <div class="plan-badge">Most Popular</div>
+                    <div class="plan-name">Pro</div>
+                    <div class="plan-price">$29<span>/month</span></div>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-chart-line me-2"></i>
+                  Basic Charts & Analytics
+                </td>
+                <td class="plan-feature">
+                  <i class="fas fa-check text-success"></i>
+                </td>
+                <td class="plan-feature">
+                  <i class="fas fa-check text-success"></i>
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-clock me-2"></i>
+                  Market Data Delay
+                </td>
+                <td class="plan-feature">15 minutes</td>
+                <td class="plan-feature">
+                  <strong class="text-primary">Real-time</strong>
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-briefcase me-2"></i>
+                  Portfolio Tracking
+                </td>
+                <td class="plan-feature">Basic</td>
+                <td class="plan-feature">
+                  <strong class="text-primary">Advanced</strong>
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-chart-bar me-2"></i>
+                  Technical Indicators
+                </td>
+                <td class="plan-feature">5 indicators</td>
+                <td class="plan-feature">
+                  <strong class="text-primary">50+ indicators</strong>
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-bell me-2"></i>
+                  Price Alerts
+                </td>
+                <td class="plan-feature">5 alerts</td>
+                <td class="plan-feature">
+                  <strong class="text-primary">Unlimited</strong>
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-download me-2"></i>
+                  Data Export
+                </td>
+                <td class="plan-feature">
+                  <i class="fas fa-times text-danger"></i>
+                </td>
+                <td class="plan-feature">
+                  <i class="fas fa-check text-success"></i>
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-brain me-2"></i>
+                  AI-Powered Insights
+                </td>
+                <td class="plan-feature">
+                  <i class="fas fa-times text-danger"></i>
+                </td>
+                <td class="plan-feature">
+                  <i class="fas fa-check text-success"></i>
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-code me-2"></i>
+                  API Access
+                </td>
+                <td class="plan-feature">
+                  <i class="fas fa-times text-danger"></i>
+                </td>
+                <td class="plan-feature">
+                  <i class="fas fa-check text-success"></i>
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-name">
+                  <i class="fas fa-headset me-2"></i>
+                  Support Level
+                </td>
+                <td class="plan-feature">Community</td>
+                <td class="plan-feature">
+                  <strong class="text-primary">Priority</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing-section" id="pricing">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-heading">Choose Your Plan</h2>
+        <p class="section-subtitle">Start with a free trial, upgrade when you're ready</p>
+        
+        <div class="pricing-toggle">
+          <span class="toggle-label">Monthly</span>
+          <div class="toggle-switch">
+            <input type="checkbox" id="pricingToggle" class="toggle-input">
+            <label for="pricingToggle" class="toggle-label-switch"></label>
+          </div>
+          <span class="toggle-label">
+            Annual
+            <span class="discount-badge">Save 20%</span>
+          </span>
+        </div>
+      </div>
+      
+      <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="pricing-card">
+            <div class="pricing-header">
+              <h3 class="plan-name">Free</h3>
+              <div class="plan-description">Perfect for getting started</div>
+              <div class="plan-price">
+                <span class="price">$0</span>
+                <span class="period">forever</span>
+              </div>
+            </div>
+            
+            <div class="pricing-features">
+              <ul class="feature-list">
+                <li><i class="fas fa-check"></i>Basic market data (15-min delay)</li>
+                <li><i class="fas fa-check"></i>5 technical indicators</li>
+                <li><i class="fas fa-check"></i>Basic portfolio tracking</li>
+                <li><i class="fas fa-check"></i>5 price alerts</li>
+                <li><i class="fas fa-check"></i>Community support</li>
+              </ul>
+            </div>
+            
+            <div class="pricing-footer">
+              <a href="../auth.html?mode=signup" class="btn btn-coinbase-secondary w-100">
+                Get Started Free
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="pricing-card featured">
+            <div class="popular-badge">Most Popular</div>
+            <div class="pricing-header">
+              <h3 class="plan-name">Pro</h3>
+              <div class="plan-description">For serious traders & investors</div>
+              <div class="plan-price">
+                <span class="price monthly-price">$29</span>
+                <span class="price annual-price d-none">$23</span>
+                <span class="period">/month</span>
+              </div>
+              <div class="annual-savings d-none">Billed annually - Save $72/year</div>
+            </div>
+            
+            <div class="pricing-features">
+              <ul class="feature-list">
+                <li><i class="fas fa-check"></i>Real-time market data</li>
+                <li><i class="fas fa-check"></i>50+ technical indicators</li>
+                <li><i class="fas fa-check"></i>Advanced portfolio analytics</li>
+                <li><i class="fas fa-check"></i>Unlimited price alerts</li>
+                <li><i class="fas fa-check"></i>AI-powered insights</li>
+                <li><i class="fas fa-check"></i>Data export capabilities</li>
+                <li><i class="fas fa-check"></i>API access</li>
+                <li><i class="fas fa-check"></i>Priority support</li>
+              </ul>
+            </div>
+            
+            <div class="pricing-footer">
+              <a href="#" class="btn btn-coinbase-primary w-100" id="startTrialBtn">
+                Start 14-Day Free Trial
+              </a>
+              <div class="trial-note">No credit card required</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="pricing-card">
+            <div class="pricing-header">
+              <h3 class="plan-name">Enterprise</h3>
+              <div class="plan-description">Custom solutions for teams</div>
+              <div class="plan-price">
+                <span class="price">Custom</span>
+                <span class="period">pricing</span>
+              </div>
+            </div>
+            
+            <div class="pricing-features">
+              <ul class="feature-list">
+                <li><i class="fas fa-check"></i>Everything in Pro</li>
+                <li><i class="fas fa-check"></i>Multi-user management</li>
+                <li><i class="fas fa-check"></i>Advanced security features</li>
+                <li><i class="fas fa-check"></i>Custom integrations</li>
+                <li><i class="fas fa-check"></i>Dedicated account manager</li>
+                <li><i class="fas fa-check"></i>SLA guarantee</li>
+              </ul>
+            </div>
+            
+            <div class="pricing-footer">
+              <a href="#contact" class="btn btn-coinbase-secondary w-100">
+                Contact Sales
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Advanced Features Showcase -->
+  <section class="advanced-features-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-heading">Advanced Pro Features</h2>
+        <p class="section-subtitle">Professional tools designed for serious traders and investors</p>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-showcase">
+          <div class="feature-visual">
+            <div class="chart-demo">
+              <div class="chart-title">Advanced Technical Analysis</div>
+              <div class="indicators-panel">
+                <div class="indicator active">RSI</div>
+                <div class="indicator">MACD</div>
+                <div class="indicator">Bollinger Bands</div>
+                <div class="indicator">Fibonacci</div>
+              </div>
+              <div class="chart-canvas">
+                <canvas id="technicalChart" width="400" height="200"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="feature-content">
+            <h3 class="feature-title">
+              <i class="fas fa-chart-bar text-primary me-3"></i>
+              Professional Charting
+            </h3>
+            <p class="feature-description">
+              Access 50+ technical indicators, drawing tools, and advanced chart types. Analyze price action with institutional-grade tools including candlestick patterns, volume analysis, and trend identification.
+            </p>
+            <ul class="feature-benefits">
+              <li>50+ Technical Indicators</li>
+              <li>Multiple Chart Types</li>
+              <li>Drawing Tools & Annotations</li>
+              <li>Pattern Recognition</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="feature-showcase reverse">
+          <div class="feature-content">
+            <h3 class="feature-title">
+              <i class="fas fa-brain text-success me-3"></i>
+              AI-Powered Insights
+            </h3>
+            <p class="feature-description">
+              Our advanced AI analyzes market sentiment, news impact, and technical patterns to provide actionable insights. Get personalized recommendations based on your portfolio and risk profile.
+            </p>
+            <ul class="feature-benefits">
+              <li>Sentiment Analysis</li>
+              <li>News Impact Scoring</li>
+              <li>Pattern Recognition</li>
+              <li>Risk Assessment</li>
+            </ul>
+          </div>
+          <div class="feature-visual">
+            <div class="ai-insights-demo">
+              <div class="insight-card">
+                <div class="insight-header">
+                  <i class="fas fa-lightbulb text-warning"></i>
+                  <span>AI Insight</span>
+                </div>
+                <div class="insight-content">
+                  <div class="insight-title">AAPL shows bullish momentum</div>
+                  <div class="insight-description">Technical indicators suggest potential 8-12% upside in the next 30 days.</div>
+                  <div class="confidence-score">
+                    <span>Confidence: </span>
+                    <div class="score-bar">
+                      <div class="score-fill" style="width: 85%"></div>
+                    </div>
+                    <span>85%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="feature-showcase">
+          <div class="feature-visual">
+            <div class="portfolio-analytics-demo">
+              <div class="analytics-header">Portfolio Analytics</div>
+              <div class="metrics-dashboard">
+                <div class="metric-card">
+                  <div class="metric-title">Sharpe Ratio</div>
+                  <div class="metric-value">1.23</div>
+                  <div class="metric-change positive">+0.15</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-title">Max Drawdown</div>
+                  <div class="metric-value">-8.5%</div>
+                  <div class="metric-change positive">Improved</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-title">Alpha</div>
+                  <div class="metric-value">2.1%</div>
+                  <div class="metric-change positive">+0.3%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="feature-content">
+            <h3 class="feature-title">
+              <i class="fas fa-analytics text-info me-3"></i>
+              Advanced Portfolio Analytics
+            </h3>
+            <p class="feature-description">
+              Get institutional-level portfolio analysis with risk metrics, correlation analysis, and performance attribution. Understand your portfolio's risk-return profile and optimize your allocation.
+            </p>
+            <ul class="feature-benefits">
+              <li>Risk Metrics (VaR, Sharpe, Beta)</li>
+              <li>Correlation Analysis</li>
+              <li>Performance Attribution</li>
+              <li>Stress Testing</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-heading">What Pro Users Say</h2>
+        <p class="section-subtitle">Join thousands of professional traders who trust YAUSMA Pro</p>
+      </div>
+      
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <div class="quote-icon">
+              <i class="fas fa-quote-left"></i>
+            </div>
+            <p class="testimonial-text">
+              "YAUSMA Pro has transformed my trading strategy. The real-time data and AI insights have helped me make more informed decisions and improve my portfolio performance by 23% this year."
+            </p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="author-info">
+              <div class="author-name">Sarah Chen</div>
+              <div class="author-role">Portfolio Manager</div>
+              <div class="author-company">Investment Firm</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <div class="quote-icon">
+              <i class="fas fa-quote-left"></i>
+            </div>
+            <p class="testimonial-text">
+              "The advanced charting tools and technical indicators are exactly what I needed. As a day trader, having access to real-time data and professional-grade analysis tools is essential."
+            </p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="author-info">
+              <div class="author-name">Michael Rodriguez</div>
+              <div class="author-role">Day Trader</div>
+              <div class="author-company">Independent</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <div class="quote-icon">
+              <i class="fas fa-quote-left"></i>
+            </div>
+            <p class="testimonial-text">
+              "The portfolio analytics features are incredibly detailed. I can now track my risk metrics and optimize my allocation strategy with confidence. The API access is also a game-changer."
+            </p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="author-info">
+              <div class="author-name">David Kim</div>
+              <div class="author-role">Quantitative Analyst</div>
+              <div class="author-company">Hedge Fund</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-heading">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Everything you need to know about YAUSMA Pro</p>
+      </div>
+      
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                  What's included in the free trial?
+                </button>
+              </h3>
+              <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  Your 14-day free trial includes full access to all YAUSMA Pro features: real-time market data, advanced charting tools, AI insights, unlimited alerts, and priority support. No credit card required to start.
+                </div>
+              </div>
+            </div>
+            
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                  Can I cancel my subscription anytime?
+                </button>
+              </h3>
+              <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  Yes, you can cancel your YAUSMA Pro subscription at any time. If you cancel, you'll continue to have access to Pro features until the end of your current billing period, then your account will revert to the free plan.
+                </div>
+              </div>
+            </div>
+            
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                  Do you offer student discounts?
+                </button>
+              </h3>
+              <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  Yes! We offer a 50% discount for students with valid .edu email addresses. Contact our support team with your student ID to apply for the discount.
+                </div>
+              </div>
+            </div>
+            
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                  What data sources do you use?
+                </button>
+              </h3>
+              <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  We aggregate data from multiple tier-1 financial data providers including NYSE, NASDAQ, and major international exchanges. Our real-time data is typically delivered within milliseconds of market events.
+                </div>
+              </div>
+            </div>
+            
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                  Is my data secure?
+                </button>
+              </h3>
+              <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  Absolutely. We use bank-level encryption (AES-256) and follow SOC 2 compliance standards. Your personal and financial data is never shared with third parties, and we offer two-factor authentication for additional security.
+                </div>
+              </div>
+            </div>
+            
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
+                  Can I use the API for automated trading?
+                </button>
+              </h3>
+              <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                  Our API provides market data and portfolio information, but we don't execute trades directly. You can use our API to build automated strategies and connect to your broker's trading API for execution.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+          <div class="cta-content">
+            <h2 class="cta-title">Ready to Take Your Trading to the Next Level?</h2>
+            <p class="cta-description">
+              Join thousands of professional traders who rely on YAUSMA Pro for advanced analytics, real-time data, and AI-powered insights.
+            </p>
+            <div class="cta-actions">
+              <a href="#" class="btn btn-coinbase-primary btn-lg me-3" id="ctaTrialBtn">
+                <i class="fas fa-rocket me-2"></i>Start Free Trial
+              </a>
+              <a href="#contact" class="btn btn-coinbase-secondary btn-lg">
+                <i class="fas fa-phone me-2"></i>Talk to Sales
+              </a>
+            </div>
+            <div class="cta-features">
+              <div class="feature">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                14-day free trial
+              </div>
+              <div class="feature">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                No credit card required
+              </div>
+              <div class="feature">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                Cancel anytime
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section" id="contact">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="contact-info">
+            <h3 class="contact-title">Get in Touch</h3>
+            <p class="contact-description">
+              Have questions about YAUSMA Pro? Our team is here to help you choose the right plan and get started.
+            </p>
+            
+            <div class="contact-methods">
+              <div class="contact-method">
+                <div class="method-icon">
+                  <i class="fas fa-envelope"></i>
+                </div>
+                <div class="method-info">
+                  <div class="method-title">Email Support</div>
+                  <div class="method-detail">support@yausma.com</div>
+                </div>
+              </div>
+              
+              <div class="contact-method">
+                <div class="method-icon">
+                  <i class="fas fa-phone"></i>
+                </div>
+                <div class="method-info">
+                  <div class="method-title">Phone Support</div>
+                  <div class="method-detail">1-800-YAUSMA-1</div>
+                </div>
+              </div>
+              
+              <div class="contact-method">
+                <div class="method-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="method-info">
+                  <div class="method-title">Business Hours</div>
+                  <div class="method-detail">Mon-Fri 9AM-6PM EST</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-6">
+          <form class="contact-form">
+            <div class="mb-3">
+              <label for="contactName" class="form-label">Name</label>
+              <input type="text" class="form-control form-coinbase" id="contactName" required>
+            </div>
+            <div class="mb-3">
+              <label for="contactEmail" class="form-label">Email</label>
+              <input type="email" class="form-control form-coinbase" id="contactEmail" required>
+            </div>
+            <div class="mb-3">
+              <label for="contactCompany" class="form-label">Company</label>
+              <input type="text" class="form-control form-coinbase" id="contactCompany">
+            </div>
+            <div class="mb-3">
+              <label for="contactSubject" class="form-label">Subject</label>
+              <select class="form-control form-coinbase" id="contactSubject" required>
+                <option value="">Select a topic</option>
+                <option value="sales">Sales Inquiry</option>
+                <option value="support">Technical Support</option>
+                <option value="enterprise">Enterprise Solutions</option>
+                <option value="partnership">Partnership</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="contactMessage" class="form-label">Message</label>
+              <textarea class="form-control form-coinbase" id="contactMessage" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-coinbase-primary w-100">
+              <i class="fas fa-paper-plane me-2"></i>Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <div class="footer-brand">
+            <div class="logo-container mb-3">
+              <i class="fas fa-chart-line logo-icon"></i>
+              <span class="logo-text">YAUSMA</span>
+            </div>
+            <p class="footer-description">
+              Professional financial analytics platform trusted by thousands of traders and investors worldwide.
+            </p>
+            <div class="social-links">
+              <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+              <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+              <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-2 col-md-6 mb-4">
+          <h5 class="footer-heading">Product</h5>
+          <ul class="footer-links">
+            <li><a href="../index.html">Features</a></li>
+            <li><a href="pro.html">YAUSMA Pro</a></li>
+            <li><a href="#">API</a></li>
+            <li><a href="#">Mobile App</a></li>
+            <li><a href="#">Integrations</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-lg-2 col-md-6 mb-4">
+          <h5 class="footer-heading">Markets</h5>
+          <ul class="footer-links">
+            <li><a href="stocks.html">Stocks</a></li>
+            <li><a href="#">Crypto</a></li>
+            <li><a href="#">Forex</a></li>
+            <li><a href="#">Commodities</a></li>
+            <li><a href="#">Indices</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-lg-2 col-md-6 mb-4">
+          <h5 class="footer-heading">Resources</h5>
+          <ul class="footer-links">
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">Tutorials</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Webinars</a></li>
+            <li><a href="#">Help Center</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-lg-2 col-md-6 mb-4">
+          <h5 class="footer-heading">Company</h5>
+          <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Press</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <hr class="footer-divider">
+      
+      <div class="footer-bottom">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <p class="copyright-text">
+              &copy; 2024 YAUSMA. All rights reserved.
+            </p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <div class="footer-legal">
+              <a href="#">Terms of Service</a>
+              <a href="#">Privacy Policy</a>
+              <a href="#">Cookie Policy</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Custom JavaScript -->
+  <script src="../js/utils/global-theme-manager.js"></script>
+  <script src="../js/api/auth.js"></script>
+  <script src="../js/components/navbar.js"></script>
+  <script src="../js/pages/pro.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>
