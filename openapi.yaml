@@ -110,15 +110,15 @@ paths:
         '200':
           description: ''
           content:
-            application/json:
+            application/octet-stream:
               schema:
-                type: string
+                type: array
+                items:
+                  type: integer
+                  format: uint8
+                  minimum: 0.0
         '404':
-          description: Unauthorized access
-        '500':
-          description: Internal server error
-        '409':
-          description: Email already registered
+          description: ''
 components:
   schemas:
     NewsItem:

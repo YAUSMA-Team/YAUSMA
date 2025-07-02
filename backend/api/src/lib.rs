@@ -1,5 +1,12 @@
 use ::serde::{Deserialize, Serialize};
-use rocket::{Build, Responder, Rocket, State, get, http::Status, post, routes, serde::json::Json};
+use rocket::{
+    Build, Responder, Rocket, State,
+    fs::{FileServer, NamedFile},
+    get,
+    http::Status,
+    post, routes,
+    serde::json::Json,
+};
 use rocket_okapi::{
     okapi::{
         openapi3::{OpenApi, Response, Responses},
@@ -16,10 +23,11 @@ pub struct UserCredentials {
     pub email: String,
     pub password_hash: String,
 }
+
 #[openapi(tag = "Landing")]
 #[get("/")]
-pub async fn landing() -> Result<Json<String>, BackendError> {
-    Ok(Json("TODO".into()))
+async fn landing() -> Option<NamedFile> {
+    NamedFile::open("../web/index.html").await.ok()
 }
 
 #[openapi(tag = "User")]
@@ -194,6 +202,7 @@ pub fn get_spec() -> OpenApi {
 
 pub async fn launch() -> Rocket<Build> {
     rocket::build()
+        .mount("/", FileServer::from("../web"))
         .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
         .mount(
             "/",
