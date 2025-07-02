@@ -960,7 +960,7 @@ class NewsManager {
         const startDate = new Date(`${date} ${time}`);
         const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
         
-        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`;
+        // const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`;
         
         window.open(calendarUrl, '_blank');
         this.showToast('Calendar event created', 'success');
