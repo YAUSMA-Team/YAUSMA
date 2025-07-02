@@ -3,23 +3,6 @@ info:
   title: api
   version: 0.1.0
 paths:
-  /api/data/charts:
-    get:
-      tags:
-      - Data
-      description: Get prices
-      operationId: get_charts
-      responses:
-        default:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: integer
-                  format: uint32
-                  minimum: 0.0
   /api/data/news:
     get:
       tags:

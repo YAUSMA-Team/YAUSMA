@@ -73,13 +73,6 @@ pub async fn delete() -> &'static str {
 // pub async fn get_portfolio(token: Json<String>) -> &'static str {
 //     "Hello, world!"
 // }
-/// Get prices
-#[openapi(tag = "Data")]
-#[get("/api/data/charts")]
-pub async fn get_charts() -> (Status, Json<Vec<u32>>) {
-    (Status::Ok, Json(vec![1, 2, 3]))
-}
-
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
 pub struct MarketOverviewItem {
     pub name: String,
@@ -190,7 +183,6 @@ pub async fn get_news(ticker: Option<String>) -> Result<Json<Vec<NewsItem>>, Bac
 
 pub fn get_spec() -> OpenApi {
     openapi_get_spec![
-        get_charts,
         get_news,
         delete,
         signup,
@@ -206,7 +198,6 @@ pub async fn launch() -> Rocket<Build> {
         .mount(
             "/",
             routes![
-                get_charts,
                 get_news,
                 delete,
                 signup,
