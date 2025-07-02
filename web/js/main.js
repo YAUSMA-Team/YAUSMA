@@ -53,7 +53,7 @@ class YAUSMAApp {
 
     async init() {
         try {
-            console.log('=€ YAUSMA App initializing...');
+            console.log('=ï¿½ YAUSMA App initializing...');
             
             // Initialize core systems
             await this.initializeCore();
@@ -196,10 +196,32 @@ class YAUSMAApp {
             document.documentElement.setAttribute('data-theme', theme);
             document.body.setAttribute('data-theme', theme);
             
-            // Update theme stylesheet
+            // Update theme stylesheet using global theme manager path resolution
             const themeStylesheet = document.getElementById('theme-stylesheet');
             if (themeStylesheet) {
-                themeStylesheet.href = `css/themes/${theme}.css`;
+                const isInPages = window.location.pathname.includes('/pages/');
+                const basePath = isInPages ? '../css/themes/' : 'css/themes/';
+                const newHref = `${basePath}${theme}.css`;
+                
+                console.log(`ðŸŽ¨ Theme stylesheet updating: ${newHref}`);
+                
+                // Add load error handling
+                const onLoad = () => {
+                    console.log(`âœ… Theme stylesheet loaded successfully: ${newHref}`);
+                    themeStylesheet.removeEventListener('load', onLoad);
+                    themeStylesheet.removeEventListener('error', onError);
+                };
+                
+                const onError = () => {
+                    console.error(`âŒ Failed to load theme stylesheet: ${newHref}`);
+                    this.components.get('notifications')?.error(`Failed to load ${theme} theme. Please refresh the page.`);
+                    themeStylesheet.removeEventListener('load', onLoad);
+                    themeStylesheet.removeEventListener('error', onError);
+                };
+                
+                themeStylesheet.addEventListener('load', onLoad);
+                themeStylesheet.addEventListener('error', onError);
+                themeStylesheet.href = newHref;
             }
             
             // Store theme preference
@@ -530,7 +552,7 @@ class YAUSMAApp {
         // Record load time
         window.addEventListener('load', () => {
             this.performanceMetrics.loadTime = performance.now() - this.performanceMetrics.startTime;
-            console.log(`¡ App loaded in ${this.performanceMetrics.loadTime.toFixed(2)}ms`);
+            console.log(`ï¿½ App loaded in ${this.performanceMetrics.loadTime.toFixed(2)}ms`);
         });
         
         // Monitor performance
@@ -539,7 +561,7 @@ class YAUSMAApp {
                 const observer = new PerformanceObserver((list) => {
                     list.getEntries().forEach((entry) => {
                         if (entry.entryType === 'navigation') {
-                            console.log('=Ê Navigation timing:', entry);
+                            console.log('=ï¿½ Navigation timing:', entry);
                         }
                     });
                 });
@@ -735,7 +757,7 @@ class YAUSMAApp {
         };
         
         this.analytics.events.push(event);
-        console.log('=Ê Analytics event:', event);
+        console.log('=ï¿½ Analytics event:', event);
         
         // Send to analytics service (mock implementation)
         // this.sendAnalyticsEvent(event);
@@ -783,7 +805,7 @@ class YAUSMAApp {
         // Dispatch app ready event
         this.dispatchEvent('appReady');
         
-        console.log('<‰ YAUSMA App fully initialized!');
+        console.log('<ï¿½ YAUSMA App fully initialized!');
         
         // Track initialization complete
         this.trackEvent('app_initialized', {
@@ -1004,7 +1026,7 @@ class YAUSMAApp {
         document.body.innerHTML = `
             <div class="initialization-error">
                 <div class="container text-center">
-                    <h1>  Application Error</h1>
+                    <h1>ï¿½ Application Error</h1>
                     <p>YAUSMA failed to initialize properly. Please refresh the page to try again.</p>
                     <button onclick="window.location.reload()" class="btn btn-coinbase-primary">
                         Refresh Page
@@ -1075,7 +1097,7 @@ class YAUSMAApp {
         // Clean up components
         this.components.clear();
         
-        console.log('>ù YAUSMA App destroyed');
+        console.log('>ï¿½ YAUSMA App destroyed');
     }
 }
 
