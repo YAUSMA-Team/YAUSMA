@@ -57,10 +57,10 @@ jobs:
     needs: build-and-release
     runs-on: ubuntu-latest
     steps:
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Deploy to server
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -t 'pkill backend && pkill yausma-server && curl -L https://github.com/YAUSMA-Team/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s &'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: yausma.org
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: pkill backend && pkill yausma-server && curl -L https://github.com/YAUSMA-Team/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s &
