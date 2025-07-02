@@ -1,0 +1,407 @@
+/* YAUSMA Light Theme - Coinbase Inspired */
+
+[data-theme="light"] {
+  /* Primary Coinbase-inspired Brand Colors */
+  --primary-blue: #011082;        /* Coinbase dark navy - primary brand */
+  --interactive-blue: #344afb;    /* Coinbase bright blue - CTAs */
+  --secondary-blue: #1652f0;      /* Medium blue for gradients */
+  
+  /* Financial Data Colors */
+  --success-green: #00d395;       /* Coinbase green for gains */
+  --error-red: #f92364;           /* Coinbase red for losses */
+  --warning-yellow: #ffc947;      /* Coinbase yellow for alerts */
+  --info-blue: #0052ff;           /* Coinbase info blue */
+  
+  /* Neutral Palette */
+  --text-primary: #050f19;        /* Coinbase primary text */
+  --text-secondary: #5b616e;      /* Coinbase secondary text */
+  --text-tertiary: #8a919e;       /* Coinbase tertiary text */
+  --text-muted: #a8b0bd;          /* Even lighter text */
+  
+  /* Border Colors */
+  --border-light: #d8dce0;        /* Coinbase light borders */
+  --border-medium: #c5c9ce;       /* Medium borders */
+  --border-strong: #9ca0a6;       /* Strong borders */
+  
+  /* Background Colors */
+  --background-light: #ffffff;    /* Light background */
+  --background-secondary: #f7f8fa; /* Secondary light background */
+  --background-tertiary: #f0f2f5; /* Tertiary background */
+  --background-overlay: rgba(255, 255, 255, 0.95); /* Overlay background */
+  
+  /* Surface Colors */
+  --surface-primary: #ffffff;     /* Primary surface */
+  --surface-secondary: #f7f8fa;   /* Secondary surface */
+  --surface-raised: #ffffff;      /* Raised surface (cards) */
+  --surface-overlay: rgba(255, 255, 255, 0.98); /* Overlay surface */
+  
+  /* Navigation Colors */
+  --nav-background: rgba(255, 255, 255, 0.95);
+  --nav-border: rgba(216, 220, 224, 0.8);
+  --nav-text: var(--text-primary);
+  --nav-text-hover: var(--interactive-blue);
+  --nav-text-active: var(--interactive-blue);
+  
+  /* Button Colors */
+  --btn-primary-bg: linear-gradient(135deg, var(--primary-blue) 0%, var(--interactive-blue) 100%);
+  --btn-primary-text: #ffffff;
+  --btn-primary-shadow: rgba(52, 74, 251, 0.2);
+  --btn-primary-hover-shadow: rgba(52, 74, 251, 0.3);
+  
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: var(--interactive-blue);
+  --btn-secondary-text: var(--interactive-blue);
+  --btn-secondary-hover-bg: var(--interactive-blue);
+  --btn-secondary-hover-text: #ffffff;
+  
+  /* Form Colors */
+  --form-background: var(--background-light);
+  --form-border: var(--border-light);
+  --form-border-focus: var(--interactive-blue);
+  --form-text: var(--text-primary);
+  --form-placeholder: var(--text-tertiary);
+  --form-focus-shadow: rgba(52, 74, 251, 0.1);
+  
+  /* Card Colors */
+  --card-background: var(--background-light);
+  --card-border: var(--border-light);
+  --card-shadow: rgba(0, 0, 0, 0.04);
+  --card-hover-shadow: rgba(0, 0, 0, 0.12);
+  
+  /* Market Data Colors */
+  --market-positive: var(--success-green);
+  --market-negative: var(--error-red);
+  --market-neutral: var(--text-secondary);
+  --market-chart-positive: #00d395;
+  --market-chart-negative: #f92364;
+  --market-chart-grid: #e6e8ea;
+  
+  /* Status Colors */
+  --status-success: var(--success-green);
+  --status-error: var(--error-red);
+  --status-warning: var(--warning-yellow);
+  --status-info: var(--info-blue);
+  
+  --status-success-bg: rgba(0, 211, 149, 0.1);
+  --status-error-bg: rgba(249, 35, 100, 0.1);
+  --status-warning-bg: rgba(255, 201, 71, 0.1);
+  --status-info-bg: rgba(0, 82, 255, 0.1);
+  
+  /* Loading and Skeleton Colors */
+  --skeleton-base: var(--background-secondary);
+  --skeleton-highlight: var(--border-light);
+  --loading-overlay: rgba(255, 255, 255, 0.95);
+  --loading-spinner: var(--interactive-blue);
+  
+  /* Footer Colors */
+  --footer-background: var(--background-secondary);
+  --footer-border: var(--border-light);
+  --footer-text: var(--text-secondary);
+  --footer-text-hover: var(--interactive-blue);
+  --footer-heading: var(--text-primary);
+  
+  /* Dropdown Colors */
+  --dropdown-background: var(--background-light);
+  --dropdown-border: var(--border-light);
+  --dropdown-shadow: rgba(0, 0, 0, 0.1);
+  --dropdown-item-hover: var(--background-secondary);
+  
+  /* Table Colors */
+  --table-header-bg: var(--background-secondary);
+  --table-header-text: var(--text-primary);
+  --table-border: var(--border-light);
+  --table-row-hover: var(--background-secondary);
+  
+  /* Chart Colors */
+  --chart-primary: var(--interactive-blue);
+  --chart-secondary: var(--success-green);
+  --chart-tertiary: var(--warning-yellow);
+  --chart-grid: #f0f2f5;
+  --chart-text: var(--text-secondary);
+  --chart-axis: var(--border-medium);
+  
+  /* Input Focus Ring */
+  --focus-ring: 0 0 0 3px rgba(52, 74, 251, 0.1);
+  --focus-ring-error: 0 0 0 3px rgba(249, 35, 100, 0.1);
+  --focus-ring-success: 0 0 0 3px rgba(0, 211, 149, 0.1);
+  
+  /* Social Media Colors */
+  --social-twitter: #1da1f2;
+  --social-linkedin: #0077b5;
+  --social-github: #333333;
+  --social-discord: #7289da;
+  
+  /* Gradient Backgrounds */
+  --gradient-primary: linear-gradient(135deg, var(--primary-blue) 0%, var(--interactive-blue) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--success-green) 0%, var(--interactive-blue) 100%);
+  --gradient-hero: linear-gradient(135deg, 
+    rgba(1, 16, 130, 0.05) 0%, 
+    rgba(52, 74, 251, 0.05) 50%, 
+    rgba(0, 211, 149, 0.05) 100%
+  );
+  
+  /* Glass Morphism Effects */
+  --glass-background: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  
+  /* Hover and Active States */
+  --hover-background: var(--background-secondary);
+  --active-background: var(--background-tertiary);
+  --hover-transform: translateY(-1px);
+  --active-transform: translateY(0px);
+  
+  /* Animation Variables */
+  --animation-fast: 0.15s ease-in-out;
+  --animation-base: 0.2s ease-in-out;
+  --animation-slow: 0.3s ease-in-out;
+  
+  /* Scrollbar Colors */
+  --scrollbar-thumb: var(--border-medium);
+  --scrollbar-track: var(--background-secondary);
+  --scrollbar-thumb-hover: var(--border-strong);
+}
+
+/* Light Theme Specific Overrides */
+[data-theme="light"] .navbar-custom {
+  background: var(--nav-background);
+  border-bottom-color: var(--nav-border);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+[data-theme="light"] .hero-section {
+  background: var(--gradient-hero);
+}
+
+[data-theme="light"] .market-card {
+  background: var(--glass-background);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] .cta-section {
+  background: var(--gradient-primary);
+}
+
+[data-theme="light"] .cta-card {
+  background: var(--glass-background);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(10px);
+}
+
+/* Custom Scrollbar for Light Theme */
+[data-theme="light"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 4px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+  transition: background var(--animation-base);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Selection Colors */
+[data-theme="light"] ::selection {
+  background: rgba(52, 74, 251, 0.2);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] ::-moz-selection {
+  background: rgba(52, 74, 251, 0.2);
+  color: var(--text-primary);
+}
+
+/* Light Theme Bootstrap Overrides */
+[data-theme="light"] .nav-pills .nav-link.active {
+  background-color: var(--interactive-blue);
+  color: white;
+}
+
+[data-theme="light"] .nav-pills .nav-link {
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .nav-pills .nav-link:hover {
+  color: var(--interactive-blue);
+}
+
+[data-theme="light"] .dropdown-menu {
+  background-color: var(--dropdown-background);
+  border-color: var(--dropdown-border);
+  box-shadow: 0 0.5rem 1rem var(--dropdown-shadow);
+}
+
+[data-theme="light"] .dropdown-item {
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .dropdown-item:hover {
+  background-color: var(--dropdown-item-hover);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .dropdown-divider {
+  border-top-color: var(--border-light);
+}
+
+/* Table Styles for Light Theme */
+[data-theme="light"] .table {
+  color: var(--text-primary);
+  border-color: var(--table-border);
+}
+
+[data-theme="light"] .table th {
+  background-color: var(--table-header-bg);
+  color: var(--table-header-text);
+  border-color: var(--table-border);
+}
+
+[data-theme="light"] .table td {
+  border-color: var(--table-border);
+}
+
+[data-theme="light"] .table-hover tbody tr:hover {
+  background-color: var(--table-row-hover);
+}
+
+/* Form Controls for Light Theme */
+[data-theme="light"] .form-control {
+  background-color: var(--form-background);
+  border-color: var(--form-border);
+  color: var(--form-text);
+}
+
+[data-theme="light"] .form-control:focus {
+  border-color: var(--form-border-focus);
+  box-shadow: var(--focus-ring);
+  background-color: var(--form-background);
+  color: var(--form-text);
+}
+
+[data-theme="light"] .form-control::placeholder {
+  color: var(--form-placeholder);
+}
+
+/* Modal Styles for Light Theme */
+[data-theme="light"] .modal-content {
+  background-color: var(--surface-primary);
+  border-color: var(--border-light);
+}
+
+[data-theme="light"] .modal-header {
+  border-bottom-color: var(--border-light);
+}
+
+[data-theme="light"] .modal-footer {
+  border-top-color: var(--border-light);
+}
+
+/* Alert Styles for Light Theme */
+[data-theme="light"] .alert-success {
+  background-color: var(--status-success-bg);
+  border-color: var(--status-success);
+  color: var(--status-success);
+}
+
+[data-theme="light"] .alert-danger {
+  background-color: var(--status-error-bg);
+  border-color: var(--status-error);
+  color: var(--status-error);
+}
+
+[data-theme="light"] .alert-warning {
+  background-color: var(--status-warning-bg);
+  border-color: var(--status-warning);
+  color: var(--warning-yellow);
+}
+
+[data-theme="light"] .alert-info {
+  background-color: var(--status-info-bg);
+  border-color: var(--status-info);
+  color: var(--status-info);
+}
+
+/* Badge Styles for Light Theme */
+[data-theme="light"] .badge {
+  color: white;
+}
+
+[data-theme="light"] .badge.bg-success {
+  background-color: var(--status-success) !important;
+}
+
+[data-theme="light"] .badge.bg-danger {
+  background-color: var(--status-error) !important;
+}
+
+[data-theme="light"] .badge.bg-warning {
+  background-color: var(--status-warning) !important;
+}
+
+[data-theme="light"] .badge.bg-info {
+  background-color: var(--status-info) !important;
+}
+
+/* Tooltip Styles for Light Theme */
+[data-theme="light"] .tooltip-inner {
+  background-color: var(--text-primary);
+  color: var(--background-light);
+}
+
+[data-theme="light"] .tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--text-primary);
+}
+
+[data-theme="light"] .tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--text-primary);
+}
+
+[data-theme="light"] .tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: var(--text-primary);
+}
+
+[data-theme="light"] .tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: var(--text-primary);
+}
+
+/* Accessibility Improvements */
+[data-theme="light"] .visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  [data-theme="light"] {
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --border-light: #000000;
+    --border-medium: #333333;
+    --interactive-blue: #0000ee;
+    --success-green: #008000;
+    --error-red: #ff0000;
+  }
+}
