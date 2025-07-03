@@ -101,24 +101,6 @@ paths:
           description: Internal server error
         '409':
           description: Email already registered
-  /:
-    get:
-      tags:
-      - Landing
-      operationId: landing
-      responses:
-        '200':
-          description: ''
-          content:
-            application/octet-stream:
-              schema:
-                type: array
-                items:
-                  type: integer
-                  format: uint8
-                  minimum: 0.0
-        '404':
-          description: ''
 components:
   schemas:
     NewsItem:

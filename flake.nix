@@ -41,19 +41,19 @@
           parallel
           openapi-generator-cli
         ];
+        server = pkgs-unstable.rustPlatform.buildRustPackage {
+          pname = "yausma-server-unwrapped";
+          version = "0.1.1";
+          src = pkgs.lib.cleanSource ./backend;
+          cargoLock.lockFile = ./backend/Cargo.lock;
+          # buildInputs = [
+          #   # Example Run-time Additional Dependencies
+          #   pkgs.openapi-generator-cli
+          # ];
+          # 
+        };
       in {
-        packages."server-unwrapped" =
-          pkgs-unstable.rustPlatform.buildRustPackage {
-            pname = "yausma-server-unwrapped";
-            version = "0.1.1";
-            src = pkgs.lib.cleanSource ./backend;
-            cargoLock.lockFile = ./backend/Cargo.lock;
-            # buildInputs = [
-            #   # Example Run-time Additional Dependencies
-            #   pkgs.openapi-generator-cli
-            # ];
-            # 
-          };
+        packages."server-unwrapped" = server;
 
         packages."server" = pkgs.stdenv.mkDerivation {
           pname = "yausma-server"; # Required field
@@ -84,13 +84,33 @@
           };
         };
 
+        packages.docker = pkgs.dockerTools.buildLayeredImage {
+          name = "yausma-server-image";
+          tag = "latest";
+          contents = with pkgs; [ cacert ];
+          config = {
+            Env = [ "ROCKET_ADDRESS=0.0.0.0" ];
+            Cmd = "${server}/bin/backend";
+          };
+        };
+
         devShells.default = with pkgs;
           mkShell {
             ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
+            # KUBERNETES_ENDPOINT = "https://89.36.231.38:6443";
+            KUBECONFIG = "./.kube-config";
+
             buildInputs = [
               # Backend
               rust
               caddy
+              # python3
+              python311Packages.flask
+
+              # k8s
+              nixpacks
+              kubectl
+              kubernetes-helm
 
               # Mobile
               flutter

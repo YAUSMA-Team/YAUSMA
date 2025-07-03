@@ -28,23 +28,32 @@ jobs:
 
       # Build the bundle
       - name: Build bundle
-        run: nix bundle .#server
+        run: nix build .#docker
+        # run: nix bundle .#server
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: server-build
-          path: yausma-server-arx
+      - name: Login to GitHub Container Registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/master'
-        with:
-          tag_name: latest-master
-          prerelease: true
-          # files: result/bin/run-server-prod
-          files: yausma-server-arx
-          body: "Auto-generated release from master branch [Server]"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push to GitHub Packages
+        run: |
+          docker load < ./result
+          docker tag yausma-server-image ghcr.io/yausma-team/yausma:${{ github.sha }}
+          docker push ghcr.io/yausma-team/yausma:${{ github.sha }}
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: server-build
+      #     path: yausma-server-arx
+
+      # - uses: softprops/action-gh-release@v1
+      #   if: github.ref == 'refs/heads/master'
+      #   with:
+      #     tag_name: latest-master
+      #     prerelease: true
+      #     # files: result/bin/run-server-prod
+      #     files: yausma-server-arx
+      #     body: "Auto-generated release from master branch [Server]"
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # # Create release
       # - name: Create Release
       #   uses: softprops/action-gh-release@v1
@@ -54,13 +63,17 @@ jobs:
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   deploy-server:
+    
     needs: build-and-release
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: yausma.org
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: pkill backend && pkill yausma-server && curl -L https://github.com/YAUSMA-Team/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s &
+      # Setup Nix
+
+
+      # - name: Deploy to server
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: yausma.org
+      #     username: root
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     script: pkill backend && pkill yausma-server && curl -L https://github.com/YAUSMA-Team/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s &
