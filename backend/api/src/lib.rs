@@ -1,3 +1,8 @@
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
+
 use ::serde::{Deserialize, Serialize};
 use rocket::{
     Build, Responder, Rocket, State,
@@ -13,6 +18,7 @@ use rocket_okapi::{
     openapi, openapi_get_spec,
     response::OpenApiResponderInner,
 };
+use tokio::sync::RwLock;
 use yahoo_finance_api::YahooConnector;
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
@@ -74,7 +80,7 @@ pub async fn delete() -> &'static str {
 // pub async fn get_portfolio(token: Json<String>) -> &'static str {
 //     "Hello, world!"
 // }
-#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug, Clone)]
 pub struct MarketOverviewItem {
     pub name: String,
     pub short: String,
@@ -89,7 +95,7 @@ pub struct MarketOverviewItem {
     pub quotes: Vec<Quote>,
 }
 
-#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug, Clone)]
 pub struct Quote {
     close: f64,
     timestamp: i64,
@@ -98,6 +104,17 @@ pub struct Quote {
 #[openapi(tag = "Data")]
 #[get("/api/data/market-overview")]
 pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, BackendError> {
+    lazy_static::lazy_static! {
+        static ref CACHE: Arc<RwLock<Option<Vec<MarketOverviewItem>>>> = Arc::new(RwLock::new(None));
+        static ref CACHE_EXPIRATION_TIMER: Arc<RwLock<Instant>> = Arc::new(RwLock::new(Instant::now()));
+    }
+
+    if let Some(res) = &*CACHE.read().await {
+        //                                                                         ____ Expire every 10 minutes
+        if CACHE_EXPIRATION_TIMER.read().await.elapsed() < Duration::from_secs_f64(600.) {
+            return Ok(Json(res.clone()));
+        }
+    }
     // List of stock tickers
     let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
 
@@ -135,16 +152,14 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
             high: quote.high,
             low: quote.low,
             volume: quote.volume,
-            quotes: dbg!(
-                quotes
-                    .quotes()?
-                    .into_iter()
-                    .map(|q| Quote {
-                        close: q.close,
-                        timestamp: q.timestamp,
-                    })
-                    .collect()
-            ),
+            quotes: quotes
+                .quotes()?
+                .into_iter()
+                .map(|q| Quote {
+                    close: q.close,
+                    timestamp: q.timestamp,
+                })
+                .collect(),
             news_article: get_news(Some(ticker.to_owned()))
                 .await?
                 .0
@@ -152,6 +167,9 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
                 .map(|e| (*e).clone()),
         });
     }
+
+    *CACHE_EXPIRATION_TIMER.write().await = Instant::now();
+    CACHE.write().await.replace(res.clone());
 
     Ok(Json(res))
 }
@@ -168,25 +186,41 @@ pub struct NewsItem {
 #[openapi(tag = "Data")]
 #[get("/api/data/news?<ticker>")]
 pub async fn get_news(ticker: Option<String>) -> Result<Json<Vec<NewsItem>>, BackendError> {
+    lazy_static::lazy_static! {
+        static ref CACHE: Arc<RwLock<Option<Vec<NewsItem>>>> = Arc::new(RwLock::new(None));
+        static ref CACHE_EXPIRATION_TIMER: Arc<RwLock<Instant>> = Arc::new(RwLock::new(Instant::now()));
+    }
+    if let Some(res) = &*CACHE.read().await {
+        if ticker.is_none() //                                                         ____ Expire every 10 minutes
+            && CACHE_EXPIRATION_TIMER.read().await.elapsed() < Duration::from_secs_f64(600.)
+        {
+            return Ok(Json(res.clone()));
+        }
+    }
     // Create a YahooFinance client
     let provider = YahooConnector::new().unwrap();
 
     let searchres = provider
-        .search_ticker(&ticker.unwrap_or("*".to_owned()))
+        .search_ticker(&ticker.clone().unwrap_or("*".to_owned()))
         .await?;
-    Ok(Json(
-        searchres
-            .news
-            .into_iter()
-            .map(|yni| NewsItem {
-                id: yni.uuid,
-                title: yni.title,
-                publisher: yni.publisher,
-                source: yni.link,
-                date: yni.provider_publish_time.to_string(),
-            })
-            .collect(),
-    ))
+
+    let news: Vec<NewsItem> = searchres
+        .news
+        .into_iter()
+        .map(|yni| NewsItem {
+            id: yni.uuid,
+            title: yni.title,
+            publisher: yni.publisher,
+            source: yni.link,
+            date: yni.provider_publish_time.to_string(),
+        })
+        .collect();
+
+    if ticker.is_none() {
+        *CACHE_EXPIRATION_TIMER.write().await = Instant::now();
+        CACHE.write().await.replace(news.clone());
+    }
+    Ok(Json(news))
 }
 
 pub fn get_spec() -> OpenApi {
