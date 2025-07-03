@@ -1,14 +1,8 @@
 use ::serde::{Deserialize, Serialize};
 use rocket::{
-    Build,
-    Responder,
-    Rocket,
-    State,
-    fs::FileServer,
-    get,
-    post,
-    // response::content::{self, RawHtml},
-    routes,
+    Build, Responder, Rocket, State,
+    fs::{FileServer, NamedFile},
+    get, post, routes,
     serde::json::Json,
 };
 use rocket_okapi::{
@@ -19,9 +13,7 @@ use rocket_okapi::{
     openapi, openapi_get_spec,
     response::OpenApiResponderInner,
 };
-use rust_embed::Embed;
 use yahoo_finance_api::YahooConnector;
-// type DB = State<sled::Db>;
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
 pub struct UserCredentials {
@@ -29,38 +21,11 @@ pub struct UserCredentials {
     pub password_hash: String,
 }
 
-// #[derive(Embed)]
-// #[folder = "../../web/"]
-// struct Asset;
-
-// #[openapi(tag = "Landing")]
-// #[get("/")]
-// async fn landing() -> Option<content::RawHtml<String>> {
-//     static_files(PathBuf::from("index.html"))
-// }
-
-// #[get("/<file..>")]
-// fn static_files(file: std::path::PathBuf) -> Option<content::Raw<String>> {
-//     Asset::get(&file.to_string_lossy())
-//         .and_then(|f| String::from_utf8(f.data.to_owned().to_vec()).ok())
-//         .map(|c| RawHtml(c))
-// }
-
-// #[get("/<file..>")]
-// fn static_files<'a, 'o>(
-//     file: std::path::PathBuf,
-// ) -> Option<impl rocket::response::Responder<'a, 'o>> {
-//     // Asset::get(&file.to_string_lossy()).map(|f| match file.extension()?.to_str()? {
-//     //     "css" => content::RawCss(f.data).responder(),
-//     //     "html" => content::Html(f.data).responder(),
-//     //     "ico" => content::Custom("image/x-icon", f.data).responder(),
-//     //     "png" => content::Custom("image/png", f.data).responder(),
-//     //     "jpg" | "jpeg" => content::Custom("image/jpeg", f.data).responder(),
-//     //     "json" => content::Json(f.data).responder(),
-//     //     _ => content::Custom("application/octet-stream", f.data).responder(),
-//     // })
-//     todo!()
-// }
+#[openapi(tag = "Landing")]
+#[get("/")]
+async fn landing() -> Option<NamedFile> {
+    NamedFile::open("./static/index.html").await.ok()
+}
 
 #[openapi(tag = "User")]
 #[post("/api/user/login", data = "<creds>")]
@@ -234,7 +199,7 @@ pub fn get_spec() -> OpenApi {
 
 pub async fn launch() -> Rocket<Build> {
     rocket::build()
-        // .mount("/", FileServer::from("../web"))
+        .mount("/", FileServer::from("./static"))
         .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
         .mount(
             "/",
@@ -244,7 +209,7 @@ pub async fn launch() -> Rocket<Build> {
                 signup,
                 login,
                 get_market_overview,
-                // landing,
+                landing,
                 // static_files
             ],
         )

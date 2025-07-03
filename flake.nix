@@ -87,7 +87,13 @@
         packages.docker = pkgs.dockerTools.buildLayeredImage {
           name = "yausma-server-image";
           tag = "latest";
-          contents = with pkgs; [ cacert ];
+          contents = with pkgs; [
+            cacert
+            (pkgs.runCommand "copy-frontend" { } ''
+              mkdir -p $out/static
+              cp -r ${./web}/* $out/static/
+            '')
+          ];
           config = {
             Env = [ "ROCKET_ADDRESS=0.0.0.0" ];
             Cmd = "${server}/bin/backend";
