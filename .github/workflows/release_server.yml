@@ -19,6 +19,9 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -39,8 +42,8 @@ jobs:
       - name: Push to GitHub Packages
         run: |
           docker load < ./result
-          docker tag yausma-server-image ghcr.io/yausma-team/yausma:${{ github.sha }}
-          docker push ghcr.io/yausma-team/yausma:${{ github.sha }}
+          docker tag yausma-server-image ghcr.io/yausma-team/yausma/yausma-server:${{ github.sha }}
+          docker push ghcr.io/yausma-team/yausma/yausma-server:${{ github.sha }}
       # - uses: actions/upload-artifact@v4
       #   with:
       #     name: server-build
