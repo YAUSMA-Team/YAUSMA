@@ -1,4 +1,4 @@
-name: Release & Deploy Server
+name: Release Server Binary
 
 on:
   push:

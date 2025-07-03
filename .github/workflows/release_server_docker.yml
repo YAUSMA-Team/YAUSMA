@@ -1,4 +1,4 @@
-name: Release & Deploy Server
+name: Release Server Docker + Deploy
 
 on:
   push:
