@@ -19,6 +19,7 @@ rocket_okapi = "0.9.0"
 api = { path = "./api" }
 rocket_okapi = "0.9.0"
 serde_yaml = "0.9.34"
+fs_extra = "1.3"
 # rocket = { version = "0.5.1", features = ["secrets"] }
 # rocket_okapi = "0.9.0"
 # captcha = "1.0.0"

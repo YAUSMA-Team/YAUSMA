@@ -3,8 +3,10 @@ import 'package:openapi/api.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:fl_chart/fl_chart.dart';
 
-var client = ApiClient(basePath: "https://yausma.org");
+var client = ApiClient(basePath: "http://192.168.0.58:8000");
+// var client = ApiClient(basePath: "https://yausma.org");
 
 void main() => runApp(
       ChangeNotifierProvider(
@@ -311,7 +313,7 @@ class StockQuickView extends StatelessWidget {
                             children: [
                               Text('${stock.currentPrice}'),
                               Text(
-                                '${stock.change > 0 ? '+' : ''}${stock.change}%',
+                                '${stock.change > 0 ? '+' : ''}${stock.change.toStringAsFixed(2)}%',
                                 style: TextStyle(
                                   color: stock.change > 0
                                       ? Colors.green
@@ -370,7 +372,7 @@ class StocksOverviewPage extends StatelessWidget {
                         children: [
                           Text('${stock.currentPrice}'),
                           Text(
-                            '${stock.change > 0 ? '+' : ''}${stock.change}%',
+                            '${stock.change > 0 ? '+' : ''}${stock.change.toStringAsFixed(2)}%',
                             style: TextStyle(
                               color:
                                   stock.change > 0 ? Colors.green : Colors.red,
@@ -398,35 +400,6 @@ class NewsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final newsArticles = [
-      const NewsArticle(
-        id: '1',
-        title: 'Market Rally Continues',
-        summary: 'Stocks rise for third consecutive day...',
-        source: 'Financial Times',
-        content:
-            'Global markets continued their upward trend for the third consecutive day, with the S&P 500 gaining 1.2% and the NASDAQ up 1.8%. Analysts attribute the rally to positive earnings reports from major tech companies and easing inflation concerns. The Dow Jones Industrial Average also rose 0.8%, marking its best performance this month.',
-        date: '2023, 6, 15, 10, 30',
-        // imageUrl: 'https://example.com/news1.jpg',
-      ),
-      const NewsArticle(
-          id: '2',
-          title: 'Tech Stocks Lead Gains',
-          summary: 'Major tech companies report strong earnings...',
-          source: 'Wall Street Journal',
-          content:
-              'Technology stocks outperformed the broader market yesterday, with the tech-heavy NASDAQ index closing up 2.3%. Apple, Microsoft, and Alphabet all reported better-than-expected quarterly earnings, driving the sector higher. Analysts suggest this could signal a rotation back into growth stocks after months of underperformance.',
-          date: '2023, 6, 14, 15, 45'),
-      const NewsArticle(
-          id: '3',
-          title: 'Tech Stocks Lead Gains',
-          summary: 'Major tech companies report strong earnings...',
-          source: 'Wall Street Journal',
-          content:
-              'Technology stocks outperformed the broader market yesterday, with the tech-heavy NASDAQ index closing up 2.3%. Apple, Microsoft, and Alphabet all reported better-than-expected quarterly earnings, driving the sector higher. Analysts suggest this could signal a rotation back into growth stocks after months of underperformance.',
-          date: '2023, 6, 14, 15, 45'),
-    ];
-
     return FutureBuilder<List<NewsItem>>(
         future: DataApi(client)
             .getNews()
@@ -678,7 +651,7 @@ class ProVersionPage extends StatelessWidget {
           const Text('• We will give you nothing in return'),
           const Text('• Just use Ghostfolio'),
           const Text('• What are you even doing here?'),
-          const Text('• Help meeee!!!'),
+          const Text('• Help meeee!!!!'),
           const Text('• THEY KEEP ME HERE AGAINST MY WILL!!!'),
           const SizedBox(height: 24),
           ElevatedButton(
@@ -730,11 +703,11 @@ class StockDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '\$${stock.currentPrice}',
+              '${stock.currentPrice}',
               style: Theme.of(context).textTheme.displaySmall,
             ),
             Text(
-              '${stock.change > 0 ? '+' : ''}${stock.change}%',
+              '${stock.change > 0 ? '+' : ''}${stock.change.toStringAsFixed(2)}%',
               style: TextStyle(
                 color: stock.change > 0 ? Colors.green : Colors.red,
                 fontSize: 18,
@@ -742,18 +715,140 @@ class StockDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const Text(
-              'Price Chart',
+              'Price Chart of last Week',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
+            // Container(
+            //   height: 200,
+            //   decoration: BoxDecoration(
+            //     color: Colors.grey[200],
+            //     borderRadius: BorderRadius.circular(8.0),
+            //   ),
+            //   child: LineChart(
+            //     LineChartData(
+            //       gridData: FlGridData(show: true),
+            //       titlesData: FlTitlesData(show: true),
+            //       borderData: FlBorderData(show: true),
+            //       lineBarsData: [
+            //         LineChartBarData(
+            //           spots: [
+            //             FlSpot(0, 1), // x,y coordinates
+            //             FlSpot(1, 3),
+            //             FlSpot(2, 2),
+            //             FlSpot(3, 5),
+            //             FlSpot(4, 4),
+            //           ],
+            //           isCurved: true,
+            //           // colors: [Colors.blue],
+            //           dotData: FlDotData(show: true),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
             Container(
               height: 200,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8.0),
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade100, Colors.purple.shade100],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  )
+                ],
               ),
-              child: const Center(
-                child: Text('Interactive Chart Placeholder'),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: LineChart(
+                  LineChartData(
+                    minX: stock.quotes.first.timestamp.toDouble(),
+                    maxX: stock.quotes.last.timestamp.toDouble(),
+                    minY: 0,
+                    maxY: stock.quotes
+                            .reduce((a, b) => (a.close > b.close) ? a : b)
+                            .close *
+                        1.4,
+                    clipData: FlClipData.all(),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: true,
+                      getDrawingHorizontalLine: (value) => FlLine(
+                        color: Colors.white.withOpacity(0.3),
+                        strokeWidth: 1,
+                      ),
+                    ),
+                    titlesData: FlTitlesData(
+                      show: true,
+                      rightTitles: AxisTitles(),
+                      topTitles: AxisTitles(),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 22,
+                          getTitlesWidget: (value, meta) => Text(
+                            '${unixToDayDigit(value.toInt())}',
+                            style: TextStyle(
+                              color: Colors.blueGrey,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    borderData: FlBorderData(
+                      show: true,
+                      border: Border.all(color: Colors.white30, width: 1),
+                    ),
+                    lineBarsData: [
+                      LineChartBarData(
+                        // spots: [
+                        //   FlSpot(0, 3),
+                        //   FlSpot(1, 1),
+                        //   FlSpot(2, 4),
+                        //   FlSpot(3, 2),
+                        //   FlSpot(4, 5),
+                        //   FlSpot(5, 3),
+                        // ],
+                        spots: [
+                          ...stock.quotes.map((quote) =>
+                              FlSpot(quote.timestamp.toDouble(), quote.close))
+                        ],
+                        isCurved: true,
+                        color: Colors.purple,
+                        barWidth: 4,
+                        isStrokeCapRound: true,
+                        dotData: FlDotData(
+                          show: true,
+                          getDotPainter: (spot, percent, barData, index) =>
+                              FlDotCirclePainter(
+                            radius: 4,
+                            color: Colors.white,
+                            strokeWidth: 2,
+                            strokeColor: Colors.purple,
+                          ),
+                        ),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.purple.withOpacity(0.3),
+                              Colors.purple.withOpacity(0.1),
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -773,7 +868,7 @@ class StockDetailPage extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('\$${stock.high}'),
+                      child: Text('\$${stock.high.toStringAsFixed(1)}'),
                     ),
                   ],
                 ),
@@ -785,7 +880,7 @@ class StockDetailPage extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('\$${stock.low}'),
+                      child: Text('\$${stock.low.toStringAsFixed(1)}'),
                     ),
                   ],
                 ),
@@ -840,6 +935,11 @@ class StockDetailPage extends StatelessWidget {
       ),
     );
   }
+}
+
+int unixToDayDigit(int unixTimestamp) {
+  final date = DateTime.fromMillisecondsSinceEpoch(unixTimestamp * 1000);
+  return date.day; // Returns day of month (1-31)
 }
 
 class LoginPage extends StatefulWidget {

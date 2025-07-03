@@ -1,4 +1,5 @@
 use api::*;
+use fs_extra::dir::{CopyOptions, copy};
 use std::{
     fs::{self},
     process::Command,
@@ -21,7 +22,14 @@ fn main() {
         } else {
             eprintln!("Error:\n{}", String::from_utf8_lossy(&output.stderr));
         }
+        let options = CopyOptions::new()
+            .overwrite(true)
+            .skip_exist(false)
+            .copy_inside(true); // Recursive copy
+
+        copy("../web", "./static", &options).expect("Copy frontend to `static` to serve");
     }
+
     println!("cargo:rerun-if-changed=src/main.rs"); // Rebuild on changes
     println!("cargo:rerun-if-changed=src/build.rs"); // Rebuild on changes
 }

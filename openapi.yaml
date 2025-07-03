@@ -140,6 +140,7 @@ components:
       - high
       - low
       - name
+      - quotes
       - sector
       - short
       - symbol
@@ -172,3 +173,19 @@ components:
           allOf:
           - $ref: '#/components/schemas/NewsItem'
           nullable: true
+        quotes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quote'
+    Quote:
+      type: object
+      required:
+      - close
+      - timestamp
+      properties:
+        close:
+          type: number
+          format: double
+        timestamp:
+          type: integer
+          format: int64

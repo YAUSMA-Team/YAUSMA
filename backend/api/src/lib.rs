@@ -1,7 +1,12 @@
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
+
 use ::serde::{Deserialize, Serialize};
 use rocket::{
     Build, Responder, Rocket, State,
-    fs::FileServer,
+    fs::{FileServer, NamedFile},
     get, post, routes,
     serde::json::Json,
 };
@@ -13,6 +18,7 @@ use rocket_okapi::{
     openapi, openapi_get_spec,
     response::OpenApiResponderInner,
 };
+use tokio::sync::RwLock;
 use yahoo_finance_api::YahooConnector;
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
@@ -21,7 +27,11 @@ pub struct UserCredentials {
     pub password_hash: String,
 }
 
-
+#[openapi(tag = "Landing")]
+#[get("/")]
+async fn landing() -> Option<NamedFile> {
+    NamedFile::open("./static/index.html").await.ok()
+}
 
 #[openapi(tag = "User")]
 #[post("/api/user/login", data = "<creds>")]
@@ -33,14 +43,11 @@ pub async fn login(
 ) -> Result<(), BackendError> {
     let users_tree = db.open_tree("users")?;
 
-    dbg!(&creds);
     let Some(password) = users_tree.get(&creds.email)? else {
-        dbg!("Does not exist");
         return Err(BackendError::EmailExists("Username does not exist".into()));
     };
 
-    dbg!(&password);
-    if password != dbg!(creds.password_hash.as_bytes()) {
+    if password != creds.password_hash.as_bytes() {
         return Err(BackendError::EmailExists("Incorrect password".into()));
     }
 
@@ -53,7 +60,6 @@ pub async fn login(
 pub async fn signup(
     db: &State<sled::Db>,
     creds: Json<UserCredentials>,
-    // cookies: &CookieJar<'_>,
 ) -> Result<(), BackendError> {
     let users_tree = db.open_tree("users")?;
     if users_tree.contains_key(&creds.email)? {
@@ -74,7 +80,7 @@ pub async fn delete() -> &'static str {
 // pub async fn get_portfolio(token: Json<String>) -> &'static str {
 //     "Hello, world!"
 // }
-#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug, Clone)]
 pub struct MarketOverviewItem {
     pub name: String,
     pub short: String,
@@ -86,22 +92,40 @@ pub struct MarketOverviewItem {
     pub symbol: String,
     pub volume: u64,
     pub news_article: Option<NewsItem>,
+    pub quotes: Vec<Quote>,
+}
+
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug, Clone)]
+pub struct Quote {
+    close: f64,
+    timestamp: i64,
 }
 
 #[openapi(tag = "Data")]
 #[get("/api/data/market-overview")]
 pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, BackendError> {
+    lazy_static::lazy_static! {
+        static ref CACHE: Arc<RwLock<Option<Vec<MarketOverviewItem>>>> = Arc::new(RwLock::new(None));
+        static ref CACHE_EXPIRATION_TIMER: Arc<RwLock<Instant>> = Arc::new(RwLock::new(Instant::now()));
+    }
+
+    if let Some(res) = &*CACHE.read().await {
+        //                                                                         ____ Expire every 10 minutes
+        if CACHE_EXPIRATION_TIMER.read().await.elapsed() < Duration::from_secs_f64(600.) {
+            return Ok(Json(res.clone()));
+        }
+    }
     // List of stock tickers
     let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
 
     // Create a YahooFinance client
-    let provider = YahooConnector::new().unwrap();
+    let provider = YahooConnector::new()?;
 
     let mut res = vec![];
 
     for ticker in tickers {
         // Fetch quote asynchronously
-        let quotes = provider.get_latest_quotes(ticker, "1d").await?;
+        let quotes = provider.get_latest_quotes(ticker, "1wk").await?;
         let quote = quotes.last_quote()?;
         let metadata = quotes.metadata()?;
 
@@ -111,7 +135,7 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
         let percent_diff = ((close_price - open_price) / open_price) * 100.0;
 
         println!(
-            "Open: ${:.2}, Close: ${:.2}, % Diff: {:.2}%",
+            "Open: ${:.1}, Close: ${:.1}, % Diff: {:.1}%",
             open_price, close_price, percent_diff
         );
 
@@ -123,30 +147,31 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
                 .unwrap_or(metadata.exchange_name),
             sector: metadata.instrument_type,
             short: ticker.to_owned(),
-            current_price: format!("${close_price}"),
+            current_price: format!("${close_price:.1}"),
             change: percent_diff,
             high: quote.high,
             low: quote.low,
             volume: quote.volume,
+            quotes: quotes
+                .quotes()?
+                .into_iter()
+                .map(|q| Quote {
+                    close: q.close,
+                    timestamp: q.timestamp,
+                })
+                .collect(),
             news_article: get_news(Some(ticker.to_owned()))
                 .await?
                 .0
                 .first()
                 .map(|e| (*e).clone()),
         });
-
-        // Calculate % difference
-        // let percent_diff = ((current_price - prev_close) / prev_close) * 100.0;
-
-        // println!(
-        //     "Ticker: {}, Price: ${:.2}, % Diff: {:.2}%",
-        //     ticker, current_price, percent_diff
-        // );
     }
 
-    // todo!()
+    *CACHE_EXPIRATION_TIMER.write().await = Instant::now();
+    CACHE.write().await.replace(res.clone());
+
     Ok(Json(res))
-    // provider.get_latest_quotes(Status::Ok, Json(vec![1, 2, 3]))
 }
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug, Default, Clone)]
@@ -161,25 +186,41 @@ pub struct NewsItem {
 #[openapi(tag = "Data")]
 #[get("/api/data/news?<ticker>")]
 pub async fn get_news(ticker: Option<String>) -> Result<Json<Vec<NewsItem>>, BackendError> {
+    lazy_static::lazy_static! {
+        static ref CACHE: Arc<RwLock<Option<Vec<NewsItem>>>> = Arc::new(RwLock::new(None));
+        static ref CACHE_EXPIRATION_TIMER: Arc<RwLock<Instant>> = Arc::new(RwLock::new(Instant::now()));
+    }
+    if let Some(res) = &*CACHE.read().await {
+        if ticker.is_none() //                                                         ____ Expire every 10 minutes
+            && CACHE_EXPIRATION_TIMER.read().await.elapsed() < Duration::from_secs_f64(600.)
+        {
+            return Ok(Json(res.clone()));
+        }
+    }
     // Create a YahooFinance client
     let provider = YahooConnector::new().unwrap();
 
     let searchres = provider
-        .search_ticker(&ticker.unwrap_or("*".to_owned()))
+        .search_ticker(&ticker.clone().unwrap_or("*".to_owned()))
         .await?;
-    Ok(Json(
-        searchres
-            .news
-            .into_iter()
-            .map(|yni| NewsItem {
-                id: yni.uuid,
-                title: yni.title,
-                publisher: yni.publisher,
-                source: yni.link,
-                date: yni.provider_publish_time.to_string(),
-            })
-            .collect(),
-    ))
+
+    let news: Vec<NewsItem> = searchres
+        .news
+        .into_iter()
+        .map(|yni| NewsItem {
+            id: yni.uuid,
+            title: yni.title,
+            publisher: yni.publisher,
+            source: yni.link,
+            date: yni.provider_publish_time.to_string(),
+        })
+        .collect();
+
+    if ticker.is_none() {
+        *CACHE_EXPIRATION_TIMER.write().await = Instant::now();
+        CACHE.write().await.replace(news.clone());
+    }
+    Ok(Json(news))
 }
 
 pub fn get_spec() -> OpenApi {
@@ -195,7 +236,7 @@ pub fn get_spec() -> OpenApi {
 
 pub async fn launch() -> Rocket<Build> {
     rocket::build()
-        .mount("/", FileServer::from("../web"))
+        .mount("/", FileServer::from("./static"))
         .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
         .mount(
             "/",
@@ -205,6 +246,7 @@ pub async fn launch() -> Rocket<Build> {
                 signup,
                 login,
                 get_market_overview,
+                landing,
                 // static_files
             ],
         )
