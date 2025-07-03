@@ -50,11 +50,3 @@ jobs:
           body: "Auto-generated release from master branch [Server]"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Create release
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            result/bin/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
