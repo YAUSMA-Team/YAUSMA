@@ -678,7 +678,7 @@ class ProVersionPage extends StatelessWidget {
           const Text('• We will give you nothing in return'),
           const Text('• Just use Ghostfolio'),
           const Text('• What are you even doing here?'),
-          const Text('• Help meeee!!!'),
+          const Text('• Help meeee!!!!'),
           const Text('• THEY KEEP ME HERE AGAINST MY WILL!!!'),
           const SizedBox(height: 24),
           ElevatedButton(
