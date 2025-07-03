@@ -313,7 +313,7 @@ class StockQuickView extends StatelessWidget {
                             children: [
                               Text('${stock.currentPrice}'),
                               Text(
-                                '${stock.change > 0 ? '+' : ''}${stock.change}%',
+                                '${stock.change > 0 ? '+' : ''}${stock.change.toStringAsFixed(2)}%',
                                 style: TextStyle(
                                   color: stock.change > 0
                                       ? Colors.green
@@ -372,7 +372,7 @@ class StocksOverviewPage extends StatelessWidget {
                         children: [
                           Text('${stock.currentPrice}'),
                           Text(
-                            '${stock.change > 0 ? '+' : ''}${stock.change}%',
+                            '${stock.change > 0 ? '+' : ''}${stock.change.toStringAsFixed(2)}%',
                             style: TextStyle(
                               color:
                                   stock.change > 0 ? Colors.green : Colors.red,
@@ -703,11 +703,11 @@ class StockDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '\$${stock.currentPrice}',
+              '${stock.currentPrice}',
               style: Theme.of(context).textTheme.displaySmall,
             ),
             Text(
-              '${stock.change > 0 ? '+' : ''}${stock.change}%',
+              '${stock.change > 0 ? '+' : ''}${stock.change.toStringAsFixed(2)}%',
               style: TextStyle(
                 color: stock.change > 0 ? Colors.green : Colors.red,
                 fontSize: 18,
@@ -868,7 +868,7 @@ class StockDetailPage extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('\$${stock.high}'),
+                      child: Text('\$${stock.high.toStringAsFixed(1)}'),
                     ),
                   ],
                 ),
@@ -880,7 +880,7 @@ class StockDetailPage extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('\$${stock.low}'),
+                      child: Text('\$${stock.low.toStringAsFixed(1)}'),
                     ),
                   ],
                 ),
@@ -935,6 +935,11 @@ class StockDetailPage extends StatelessWidget {
       ),
     );
   }
+}
+
+int unixToDayDigit(int unixTimestamp) {
+  final date = DateTime.fromMillisecondsSinceEpoch(unixTimestamp * 1000);
+  return date.day; // Returns day of month (1-31)
 }
 
 class LoginPage extends StatefulWidget {
