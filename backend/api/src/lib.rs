@@ -37,14 +37,11 @@ pub async fn login(
 ) -> Result<(), BackendError> {
     let users_tree = db.open_tree("users")?;
 
-    dbg!(&creds);
     let Some(password) = users_tree.get(&creds.email)? else {
-        dbg!("Does not exist");
         return Err(BackendError::EmailExists("Username does not exist".into()));
     };
 
-    dbg!(&password);
-    if password != dbg!(creds.password_hash.as_bytes()) {
+    if password != creds.password_hash.as_bytes() {
         return Err(BackendError::EmailExists("Incorrect password".into()));
     }
 
@@ -57,7 +54,6 @@ pub async fn login(
 pub async fn signup(
     db: &State<sled::Db>,
     creds: Json<UserCredentials>,
-    // cookies: &CookieJar<'_>,
 ) -> Result<(), BackendError> {
     let users_tree = db.open_tree("users")?;
     if users_tree.contains_key(&creds.email)? {
@@ -90,6 +86,13 @@ pub struct MarketOverviewItem {
     pub symbol: String,
     pub volume: u64,
     pub news_article: Option<NewsItem>,
+    pub quotes: Vec<Quote>,
+}
+
+#[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
+pub struct Quote {
+    close: f64,
+    timestamp: i64,
 }
 
 #[openapi(tag = "Data")]
@@ -99,13 +102,13 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
     let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
 
     // Create a YahooFinance client
-    let provider = YahooConnector::new().unwrap();
+    let provider = YahooConnector::new()?;
 
     let mut res = vec![];
 
     for ticker in tickers {
         // Fetch quote asynchronously
-        let quotes = provider.get_latest_quotes(ticker, "1d").await?;
+        let quotes = provider.get_latest_quotes(ticker, "1wk").await?;
         let quote = quotes.last_quote()?;
         let metadata = quotes.metadata()?;
 
@@ -115,7 +118,7 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
         let percent_diff = ((close_price - open_price) / open_price) * 100.0;
 
         println!(
-            "Open: ${:.2}, Close: ${:.2}, % Diff: {:.2}%",
+            "Open: ${:.1}, Close: ${:.1}, % Diff: {:.1}%",
             open_price, close_price, percent_diff
         );
 
@@ -127,30 +130,30 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
                 .unwrap_or(metadata.exchange_name),
             sector: metadata.instrument_type,
             short: ticker.to_owned(),
-            current_price: format!("${close_price}"),
+            current_price: format!("${close_price:.1}"),
             change: percent_diff,
             high: quote.high,
             low: quote.low,
             volume: quote.volume,
+            quotes: dbg!(
+                quotes
+                    .quotes()?
+                    .into_iter()
+                    .map(|q| Quote {
+                        close: q.close,
+                        timestamp: q.timestamp,
+                    })
+                    .collect()
+            ),
             news_article: get_news(Some(ticker.to_owned()))
                 .await?
                 .0
                 .first()
                 .map(|e| (*e).clone()),
         });
-
-        // Calculate % difference
-        // let percent_diff = ((current_price - prev_close) / prev_close) * 100.0;
-
-        // println!(
-        //     "Ticker: {}, Price: ${:.2}, % Diff: {:.2}%",
-        //     ticker, current_price, percent_diff
-        // );
     }
 
-    // todo!()
     Ok(Json(res))
-    // provider.get_latest_quotes(Status::Ok, Json(vec![1, 2, 3]))
 }
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug, Default, Clone)]
