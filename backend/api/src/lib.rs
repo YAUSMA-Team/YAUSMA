@@ -1,5 +1,10 @@
 use ::serde::{Deserialize, Serialize};
-use rocket::{Build, Responder, Rocket, State, get, http::Status, post, routes, serde::json::Json};
+use rocket::{
+    Build, Responder, Rocket, State,
+    fs::FileServer,
+    get, post, routes,
+    serde::json::Json,
+};
 use rocket_okapi::{
     okapi::{
         openapi3::{OpenApi, Response, Responses},
@@ -9,18 +14,14 @@ use rocket_okapi::{
     response::OpenApiResponderInner,
 };
 use yahoo_finance_api::YahooConnector;
-// type DB = State<sled::Db>;
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
 pub struct UserCredentials {
     pub email: String,
     pub password_hash: String,
 }
-#[openapi(tag = "Landing")]
-#[get("/")]
-pub async fn landing() -> Result<Json<String>, BackendError> {
-    Ok(Json("TODO".into()))
-}
+
+
 
 #[openapi(tag = "User")]
 #[post("/api/user/login", data = "<creds>")]
@@ -188,12 +189,13 @@ pub fn get_spec() -> OpenApi {
         signup,
         login,
         get_market_overview,
-        landing
+        // landing,
     ]
 }
 
 pub async fn launch() -> Rocket<Build> {
     rocket::build()
+        .mount("/", FileServer::from("../web"))
         .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
         .mount(
             "/",
@@ -203,7 +205,7 @@ pub async fn launch() -> Rocket<Build> {
                 signup,
                 login,
                 get_market_overview,
-                landing
+                // static_files
             ],
         )
 }

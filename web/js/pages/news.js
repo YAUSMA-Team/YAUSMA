@@ -185,28 +185,73 @@ function createArticleElement(article) {
     var articleEl = document.createElement('article');
     articleEl.className = 'news-card';
     
+    // Handle different data formats - direct news article or from stock data
+    var newsData;
+    var stockInfo = null;
+    
+    if (article.news_article) {
+        // This is from stock data structure
+        newsData = article.news_article;
+        stockInfo = {
+            symbol: article.symbol,
+            name: article.name,
+            current_price: article.current_price,
+            change: article.change,
+            sector: article.sector
+        };
+    } else {
+        // This is direct news data
+        newsData = article;
+    }
+    
     // Format the date for display
-    var formattedDate = formatNewsDate(article.date);
+    var formattedDate = formatNewsDate(newsData.date);
+    
+    // Create stock info section if available
+    var stockInfoHtml = '';
+    if (stockInfo) {
+        var changeClass = stockInfo.change >= 0 ? 'positive' : 'negative';
+        var changeIcon = stockInfo.change >= 0 ? 'bi-arrow-up' : 'bi-arrow-down';
+        var changeSign = stockInfo.change >= 0 ? '+' : '';
+        var sectorClass = stockInfo.sector.toLowerCase();
+        
+        stockInfoHtml = `
+            <div class="stock-context">
+                <div class="stock-info-header">
+                    <span class="stock-symbol">${escapeHtml(stockInfo.symbol)}</span>
+                    <span class="sector-badge ${sectorClass}">${stockInfo.sector}</span>
+                </div>
+                <div class="stock-price-info">
+                    <span class="stock-price">${escapeHtml(stockInfo.current_price)}</span>
+                    <span class="price-change ${changeClass}">
+                        <i class="bi ${changeIcon}"></i>
+                        ${changeSign}${stockInfo.change.toFixed(2)}%
+                    </span>
+                </div>
+            </div>
+        `;
+    }
     
     articleEl.innerHTML = `
         <div class="news-card-header">
             <div class="news-meta">
-                <span class="news-publisher">${escapeHtml(article.publisher)}</span>
+                <span class="news-publisher">${escapeHtml(newsData.publisher)}</span>
                 <span class="news-date">${formattedDate}</span>
             </div>
         </div>
+        ${stockInfoHtml}
         <div class="news-card-body">
             <h4 class="news-title">
                 <a href="#" class="news-link">
-                    ${escapeHtml(article.title)}
+                    ${escapeHtml(newsData.title)}
                 </a>
             </h4>
             <p class="news-summary">
-                ${escapeHtml(article.summary)}
+                ${escapeHtml(newsData.summary || generateSummary(newsData.title))}
             </p>
         </div>
         <div class="news-card-footer">
-            <a href="${escapeHtml(article.source)}" class="news-source" target="_blank">
+            <a href="${escapeHtml(newsData.source)}" class="news-source" target="_blank">
                 <i class="bi bi-box-arrow-up-right"></i>
                 Read Full Article
             </a>
@@ -215,6 +260,14 @@ function createArticleElement(article) {
     
     colDiv.appendChild(articleEl);
     return colDiv;
+}
+
+// Generate a summary from title if summary is not available
+function generateSummary(title) {
+    if (!title) return 'Click to read the full article for more details.';
+    return title.length > 100 ? 
+        title.substring(0, 100) + '... Click to read more.' :
+        title + ' Click to read the full article for more details.';
 }
 
 // Handle search errors
@@ -334,40 +387,156 @@ function updateResultsCount(count) {
     }
 }
 
+// Mock news data similar to stock API structure
+var mockNewsData = [
+    {
+        "name": "MongoDB, Inc.",
+        "short": "MDB",
+        "sector": "EQUITY",
+        "current_price": "$211.34",
+        "change": 2.80,
+        "symbol": "MDB",
+        "news_article": {
+            "id": "e6552044-356a-3af2-81ef-985ae8837abc",
+            "title": "What Makes Atlas the Core Driver of MongoDB's Revenue Growth?",
+            "publisher": "Zacks",
+            "source": "https://finance.yahoo.com/news/makes-atlas-core-driver-mongodbs-171600546.html",
+            "date": "1751562960"
+        }
+    },
+    {
+        "name": "GitLab Inc.",
+        "short": "GTLB",
+        "sector": "EQUITY",
+        "current_price": "$46.37",
+        "change": 1.91,
+        "symbol": "GTLB",
+        "news_article": {
+            "id": "d6dfa439-1002-3df1-aa78-28abb318546a",
+            "title": "GitLab Maintains Buy Rating Despite Lowered Price Target, Shows Strong Seat Expansion",
+            "publisher": "Insider Monkey",
+            "source": "https://finance.yahoo.com/news/gitlab-maintains-buy-rating-despite-072056917.html",
+            "date": "1751440856"
+        }
+    },
+    {
+        "name": "Apple Inc.",
+        "short": "AAPL",
+        "sector": "EQUITY",
+        "current_price": "$175.43",
+        "change": 1.66,
+        "symbol": "AAPL",
+        "news_article": {
+            "id": "apple-news-1",
+            "title": "Apple's Q3 Earnings Beat Expectations with Strong iPhone Sales",
+            "publisher": "MarketWatch",
+            "source": "https://www.marketwatch.com/story/apple-earnings-q3-2025",
+            "date": "1751550000"
+        }
+    },
+    {
+        "name": "Tesla, Inc.",
+        "short": "TSLA",
+        "sector": "EQUITY",
+        "current_price": "$248.50",
+        "change": 2.33,
+        "symbol": "TSLA",
+        "news_article": {
+            "id": "tsla-news-1",
+            "title": "Tesla Deliveries Exceed Expectations Despite Production Challenges",
+            "publisher": "Bloomberg",
+            "source": "https://www.bloomberg.com/news/tesla-deliveries-q2-2025",
+            "date": "1751546000"
+        }
+    },
+    {
+        "name": "Bitcoin USD",
+        "short": "BTC-USD",
+        "sector": "CRYPTOCURRENCY",
+        "current_price": "$67,452.30",
+        "change": 3.25,
+        "symbol": "BTC-USD",
+        "news_article": {
+            "id": "btc-news-1",
+            "title": "Bitcoin Reaches New Monthly High as Institutional Adoption Grows",
+            "publisher": "CoinDesk",
+            "source": "https://www.coindesk.com/bitcoin-institutional-adoption-2025",
+            "date": "1751544000"
+        }
+    },
+    {
+        "name": "Ethereum USD",
+        "short": "ETH-USD",
+        "sector": "CRYPTOCURRENCY",
+        "current_price": "$3,421.67",
+        "change": -0.85,
+        "symbol": "ETH-USD",
+        "news_article": {
+            "id": "eth-news-1",
+            "title": "Ethereum's Latest Upgrade Shows Promise for Scalability Solutions",
+            "publisher": "CoinTelegraph",
+            "source": "https://cointelegraph.com/ethereum-upgrade-scalability-2025",
+            "date": "1751542000"
+        }
+    },
+    // Add some standalone news articles (without stock context)
+    {
+        "id": "market-news-1",
+        "title": "Federal Reserve Signals Potential Interest Rate Changes in Q4 2025",
+        "publisher": "Reuters",
+        "source": "https://www.reuters.com/fed-interest-rates-q4-2025",
+        "date": "1751540000"
+    },
+    {
+        "id": "market-news-2",
+        "title": "Global Market Outlook: Tech Stocks Continue to Lead Recovery",
+        "publisher": "Financial Times",
+        "source": "https://www.ft.com/global-market-outlook-tech-2025",
+        "date": "1751538000"
+    }
+];
+
 // Load news articles on page initialization
 async function loadNewsArticles() {
     try {
         console.log('=== LOADING INITIAL NEWS ARTICLES ===');
-        console.log('NewsAPI client available:', !!window.newsApiClient);
-        console.log('NewsAPI client config:', window.newsApiClient ? window.newsApiClient.getConfig() : 'N/A');
         
         // Show loading state
         showLoadingState();
         
-        // Fetch initial articles without filters
-        console.log('Calling fetchAllNews...');
-        const articles = await newsApiClient.fetchAllNews();
-        
-        console.log('Received articles:', articles);
-        console.log('Articles count:', articles.length);
-        
-        // Update state
-        NewsPage.articles = articles;
-        
-        // Update UI
-        console.log('Updating news grid...');
-        updateNewsGrid(articles);
-        updateResultsCount(articles.length);
-        
-        if (articles.length === 0) {
-            console.log('No articles found, showing empty state');
-            showEmptyState();
-        } else {
-            console.log('Articles found, hiding empty state');
-            hideEmptyState();
-        }
-        
-        console.log(`=== LOADED ${articles.length} NEWS ARTICLES SUCCESSFULLY ===`);
+        // Simulate API delay and then use mock data
+        setTimeout(function() {
+            try {
+                var articles = mockNewsData;
+                
+                console.log('Received articles:', articles);
+                console.log('Articles count:', articles.length);
+                
+                // Update state
+                NewsPage.articles = articles;
+                
+                // Update UI
+                console.log('Updating news grid...');
+                updateNewsGrid(articles);
+                updateResultsCount(articles.length);
+                
+                if (articles.length === 0) {
+                    console.log('No articles found, showing empty state');
+                    showEmptyState();
+                } else {
+                    console.log('Articles found, hiding empty state');
+                    hideEmptyState();
+                }
+                
+                console.log(`=== LOADED ${articles.length} NEWS ARTICLES SUCCESSFULLY ===`);
+                
+            } catch (error) {
+                console.error('Error processing mock news data:', error);
+                handleSearchError(error);
+            } finally {
+                hideLoadingState();
+            }
+        }, 600);
         
     } catch (error) {
         console.error('=== ERROR LOADING INITIAL NEWS ARTICLES ===');
@@ -377,7 +546,6 @@ async function loadNewsArticles() {
         console.error('Error stack:', error.stack);
         console.error('=== END ERROR LOADING INITIAL NEWS ARTICLES ===');
         handleSearchError(error);
-    } finally {
         hideLoadingState();
     }
 }

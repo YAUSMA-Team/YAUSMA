@@ -357,6 +357,84 @@
 }
 
 
+/* Stock Context Section */
+.stock-context {
+    margin-bottom: var(--space-md);
+    padding: var(--space-md);
+    background: var(--background-secondary, #f7f8fa);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light, #e0e0e0);
+}
+
+.stock-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.stock-context .stock-symbol {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary, #050f19);
+    font-family: var(--font-family-mono, monospace);
+}
+
+.stock-context .sector-badge {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid transparent;
+}
+
+.stock-context .sector-badge.equity {
+    background: rgba(52, 74, 251, 0.1);
+    color: var(--interactive-blue);
+    border-color: rgba(52, 74, 251, 0.2);
+}
+
+.stock-context .sector-badge.cryptocurrency {
+    background: rgba(255, 201, 71, 0.1);
+    color: var(--warning-yellow);
+    border-color: rgba(255, 201, 71, 0.2);
+}
+
+.stock-price-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stock-context .stock-price {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary, #050f19);
+    font-family: var(--font-family-mono, monospace);
+}
+
+.stock-context .price-change {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.stock-context .price-change.positive {
+    color: var(--success-green);
+}
+
+.stock-context .price-change.negative {
+    color: var(--error-red);
+}
+
+.stock-context .price-change i {
+    font-size: var(--font-size-xs);
+}
+
 /* News Card Body */
 .news-card-body {
     flex: 1;

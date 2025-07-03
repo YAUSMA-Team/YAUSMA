@@ -5,7 +5,7 @@
 
 // API Configuration - Easily configurable for different environments
 const NEWS_API_CONFIG = {
-    BASE_URL: 'https://yausma.org/api/data/news',
+    BASE_URL: 'http://localhost:8000/api/data/news',
     TIMEOUT: 30000, // 30 seconds
     SUPPORTED_TICKERS: ["XMR-USD", "MDB", "GTLB", "CFLT", "GOOG"],
     RETRY_ATTEMPTS: 3,
