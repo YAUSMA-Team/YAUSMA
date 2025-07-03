@@ -1,0 +1,13 @@
+[config]
+default_encoding = "utf-8"  # Force UTF-8 for all files
+exclude_files = ["web/js/components/navbar.js"]
+
+[phases.setup]
+nixPkgs = ["stdenv.cc", "bash"]  # Add your flake's runtime deps here
+
+[phases.build]
+commands = [
+  "nix bundle .#server",
+  "cp /yausma-server-arx /app/"
+]
+
