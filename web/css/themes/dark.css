@@ -1,601 +1,424 @@
-/* YAUSMA Dark Theme - Coinbase Inspired */
+/* YAUSMA Dark Theme - Unified Styles */
 
-[data-theme="dark"] {
-  /* Primary Coinbase-inspired Brand Colors (adjusted for dark theme) */
-  --primary-blue: #344afb;        /* Brighter blue for dark theme */
-  --interactive-blue: #5470ff;    /* Coinbase bright blue adjusted */
-  --secondary-blue: #4259f1;      /* Medium blue for gradients */
-  
-  /* Financial Data Colors */
-  --success-green: #00d395;       /* Coinbase green for gains */
-  --error-red: #f92364;           /* Coinbase red for losses */
-  --warning-yellow: #ffc947;      /* Coinbase yellow for alerts */
-  --info-blue: #4285f4;           /* Info blue adjusted for dark */
-  
-  /* Dark Theme Text Colors */
-  --text-primary: #ffffff;        /* Dark theme primary text */
-  --text-secondary: #9ca0a6;      /* Dark theme secondary text */
-  --text-tertiary: #6c7080;       /* Dark theme tertiary text */
-  --text-muted: #545862;          /* Even darker muted text */
-  
-  /* Dark Theme Border Colors */
-  --border-light: #2d3139;        /* Dark theme borders */
-  --border-medium: #3a3f47;       /* Medium borders */
-  --border-strong: #4a5058;       /* Strong borders */
-  
-  /* Dark Theme Background Colors */
-  --background-light: #0c0e16;    /* Coinbase dark primary */
-  --background-secondary: #1a1d29; /* Coinbase dark secondary */
-  --background-tertiary: #242833;  /* Tertiary dark background */
-  --background-overlay: rgba(12, 14, 22, 0.95); /* Overlay background */
-  
-  /* Dark Theme Surface Colors */
-  --surface-primary: #0c0e16;     /* Primary dark surface */
-  --surface-secondary: #1a1d29;   /* Secondary dark surface */
-  --surface-raised: #242833;      /* Raised surface (cards) */
-  --surface-overlay: rgba(36, 40, 51, 0.98); /* Overlay surface */
-  
-  /* Navigation Colors */
-  --nav-background: rgba(12, 14, 22, 0.95);
-  --nav-border: rgba(45, 49, 57, 0.8);
-  --nav-text: var(--text-primary);
-  --nav-text-hover: var(--interactive-blue);
-  --nav-text-active: var(--interactive-blue);
-  
-  /* Button Colors */
-  --btn-primary-bg: linear-gradient(135deg, var(--primary-blue) 0%, var(--interactive-blue) 100%);
-  --btn-primary-text: #ffffff;
-  --btn-primary-shadow: rgba(52, 112, 255, 0.3);
-  --btn-primary-hover-shadow: rgba(52, 112, 255, 0.4);
-  
-  --btn-secondary-bg: transparent;
-  --btn-secondary-border: var(--interactive-blue);
-  --btn-secondary-text: var(--interactive-blue);
-  --btn-secondary-hover-bg: var(--interactive-blue);
-  --btn-secondary-hover-text: #ffffff;
-  
-  /* Form Colors */
-  --form-background: var(--surface-secondary);
-  --form-border: var(--border-light);
-  --form-border-focus: var(--interactive-blue);
-  --form-text: var(--text-primary);
-  --form-placeholder: var(--text-tertiary);
-  --form-focus-shadow: rgba(84, 112, 255, 0.2);
-  
-  /* Card Colors */
-  --card-background: var(--surface-raised);
-  --card-border: var(--border-light);
-  --card-shadow: rgba(0, 0, 0, 0.3);
-  --card-hover-shadow: rgba(0, 0, 0, 0.5);
-  
-  /* Market Data Colors */
-  --market-positive: var(--success-green);
-  --market-negative: var(--error-red);
-  --market-neutral: var(--text-secondary);
-  --market-chart-positive: #00d395;
-  --market-chart-negative: #f92364;
-  --market-chart-grid: #2d3139;
+:root[data-theme="dark"] {
+  /* Primary Brand Colors */
+  --primary-blue: #011082;
+  --interactive-blue: #344afb;
+  --secondary-blue: #1652f0;
   
   /* Status Colors */
-  --status-success: var(--success-green);
-  --status-error: var(--error-red);
-  --status-warning: var(--warning-yellow);
-  --status-info: var(--info-blue);
+  --success-green: #00d395;
+  --error-red: #f92364;
+  --warning-yellow: #ffc947;
   
-  --status-success-bg: rgba(0, 211, 149, 0.15);
-  --status-error-bg: rgba(249, 35, 100, 0.15);
-  --status-warning-bg: rgba(255, 201, 71, 0.15);
-  --status-info-bg: rgba(66, 133, 244, 0.15);
+  /* Dark Text Colors - Enhanced Contrast */
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
   
-  /* Loading and Skeleton Colors */
-  --skeleton-base: var(--background-secondary);
-  --skeleton-highlight: var(--border-light);
-  --loading-overlay: rgba(12, 14, 22, 0.95);
-  --loading-spinner: var(--interactive-blue);
+  /* Dark Background Colors */
+  --background-light: #0c0e16;
+  --background-secondary: #1a1d29;
+  --surface-primary: #1a1d29;
   
-  /* Footer Colors */
-  --footer-background: var(--background-secondary);
-  --footer-border: var(--border-light);
-  --footer-text: var(--text-secondary);
-  --footer-text-hover: var(--interactive-blue);
-  --footer-heading: var(--text-primary);
+  /* Dark Border Colors */
+  --border-light: #2d3139;
+  --border-focus: #344afb;
   
-  /* Dropdown Colors */
-  --dropdown-background: var(--surface-raised);
-  --dropdown-border: var(--border-light);
-  --dropdown-shadow: rgba(0, 0, 0, 0.4);
-  --dropdown-item-hover: var(--background-secondary);
+  /* Navigation Dark */
+  --navbar-bg: rgba(12, 14, 22, 0.95);
+  --navbar-border: #2d3139;
   
-  /* Table Colors */
-  --table-header-bg: var(--background-secondary);
-  --table-header-text: var(--text-primary);
-  --table-border: var(--border-light);
-  --table-row-hover: var(--background-secondary);
+  /* Cards Dark */
+  --card-bg: #1a1d29;
+  --card-border: #2d3139;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
   
-  /* Chart Colors */
-  --chart-primary: var(--interactive-blue);
-  --chart-secondary: var(--success-green);
-  --chart-tertiary: var(--warning-yellow);
-  --chart-grid: #242833;
-  --chart-text: var(--text-secondary);
-  --chart-axis: var(--border-medium);
+  /* Forms Dark */
+  --input-bg: #1a1d29;
+  --input-border: #2d3139;
+  --input-border-focus: #344afb;
+  --input-placeholder: #9ca3af;
   
-  /* Input Focus Ring */
-  --focus-ring: 0 0 0 3px rgba(84, 112, 255, 0.2);
-  --focus-ring-error: 0 0 0 3px rgba(249, 35, 100, 0.2);
-  --focus-ring-success: 0 0 0 3px rgba(0, 211, 149, 0.2);
+  /* Buttons Dark */
+  --btn-primary-bg: linear-gradient(135deg, #011082 0%, #344afb 100%);
+  --btn-primary-hover: linear-gradient(135deg, #010b6b 0%, #2d3fd8 100%);
+  --btn-secondary-border: #344afb;
+  --btn-secondary-color: #344afb;
   
-  /* Social Media Colors (adjusted for dark theme) */
-  --social-twitter: #1da1f2;
-  --social-linkedin: #0077b5;
-  --social-github: #f0f0f0;
-  --social-discord: #7289da;
+  /* Market Data Dark */
+  --market-positive: #10b981;
+  --market-negative: #f87171;
+  --market-neutral: #d1d5db;
   
-  /* Gradient Backgrounds */
-  --gradient-primary: linear-gradient(135deg, var(--primary-blue) 0%, var(--interactive-blue) 100%);
-  --gradient-secondary: linear-gradient(135deg, var(--success-green) 0%, var(--interactive-blue) 100%);
-  --gradient-hero: linear-gradient(135deg, 
-    rgba(52, 74, 251, 0.1) 0%, 
-    rgba(84, 112, 255, 0.1) 50%, 
-    rgba(0, 211, 149, 0.1) 100%
-  );
-  
-  /* Glass Morphism Effects */
-  --glass-background: rgba(36, 40, 51, 0.95);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  
-  /* Hover and Active States */
-  --hover-background: var(--background-secondary);
-  --active-background: var(--background-tertiary);
-  --hover-transform: translateY(-1px);
-  --active-transform: translateY(0px);
-  
-  /* Animation Variables */
-  --animation-fast: 0.15s ease-in-out;
-  --animation-base: 0.2s ease-in-out;
-  --animation-slow: 0.3s ease-in-out;
-  
-  /* Scrollbar Colors */
-  --scrollbar-thumb: var(--border-strong);
-  --scrollbar-track: var(--background-secondary);
-  --scrollbar-thumb-hover: var(--text-tertiary);
+  /* Footer Dark */
+  --footer-bg: #1a1d29;
+  --footer-border: #2d3139;
+  --footer-text: #d1d5db;
 }
 
-/* Dark Theme Specific Overrides */
-[data-theme="dark"] body {
+/* Body Background Dark */
+body[data-theme="dark"] {
   background-color: var(--background-light);
   color: var(--text-primary);
 }
 
-[data-theme="dark"] .navbar-custom {
-  background: var(--nav-background);
-  border-bottom-color: var(--nav-border);
-  backdrop-filter: blur(10px);
+/* Navigation Dark Theme */
+[data-theme="dark"] .navbar {
+  background: var(--navbar-bg);
+  border-bottom-color: var(--navbar-border);
 }
 
-[data-theme="dark"] .navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+[data-theme="dark"] .navbar.scrolled {
+  background: rgba(12, 14, 22, 0.98) !important;
 }
 
-[data-theme="dark"] .hero-section {
-  background: var(--gradient-hero);
-}
-
-[data-theme="dark"] .market-card {
-  background: var(--glass-background);
-  border-color: var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(10px);
-}
-
-[data-theme="dark"] .cta-section {
-  background: var(--gradient-primary);
-}
-
-[data-theme="dark"] .cta-card {
-  background: var(--glass-background);
-  border-color: var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(10px);
-}
-
-[data-theme="dark"] .features-section {
-  background: var(--background-light);
-}
-
-[data-theme="dark"] .market-overview-section {
-  background: var(--background-secondary);
-}
-
-[data-theme="dark"] .footer-section {
-  background: var(--background-secondary);
-  border-top-color: var(--border-light);
-}
-
-/* Custom Scrollbar for Dark Theme */
-[data-theme="dark"] ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-  border-radius: 4px;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 4px;
-  transition: background var(--animation-base);
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
-}
-
-/* Selection Colors */
-[data-theme="dark"] ::selection {
-  background: rgba(84, 112, 255, 0.3);
+[data-theme="dark"] .navbar-brand {
   color: var(--text-primary);
 }
 
-[data-theme="dark"] ::-moz-selection {
-  background: rgba(84, 112, 255, 0.3);
+[data-theme="dark"] .navbar-brand:hover {
   color: var(--text-primary);
 }
 
-/* Dark Theme Bootstrap Overrides */
-[data-theme="dark"] .nav-pills {
-  background: var(--surface-secondary);
-}
-
-[data-theme="dark"] .nav-pills .nav-link.active {
-  background-color: var(--interactive-blue);
-  color: white;
-}
-
-[data-theme="dark"] .nav-pills .nav-link {
+[data-theme="dark"] .nav-link {
   color: var(--text-secondary);
 }
 
-[data-theme="dark"] .nav-pills .nav-link:hover {
+[data-theme="dark"] .nav-link:hover,
+[data-theme="dark"] .nav-link.active {
   color: var(--interactive-blue);
-  background: rgba(84, 112, 255, 0.1);
+  background: rgba(52, 74, 251, 0.15);
 }
 
-[data-theme="dark"] .dropdown-menu {
-  background-color: var(--dropdown-background);
-  border-color: var(--dropdown-border);
-  box-shadow: 0 0.5rem 1rem var(--dropdown-shadow);
+[data-theme="dark"] .btn-theme-toggle {
+  border-color: var(--border-light);
+  color: var(--text-secondary);
 }
 
-[data-theme="dark"] .dropdown-item {
+[data-theme="dark"] .btn-theme-toggle:hover {
+  border-color: var(--interactive-blue);
+  color: var(--interactive-blue);
+  background: rgba(52, 74, 251, 0.15);
+}
+
+/* Cards Dark Theme */
+[data-theme="dark"] .card,
+[data-theme="dark"] .stock-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .news-card,
+[data-theme="dark"] .chart-section,
+[data-theme="dark"] .metrics-section,
+[data-theme="dark"] .company-info-section,
+[data-theme="dark"] .key-stats-section,
+[data-theme="dark"] .news-section,
+[data-theme="dark"] .card-basic {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .stock-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--interactive-blue);
+}
+
+/* Forms Dark Theme */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background: var(--input-bg);
+  border-color: var(--input-border);
   color: var(--text-primary);
 }
 
-[data-theme="dark"] .dropdown-item:hover {
-  background-color: var(--dropdown-item-hover);
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  border-color: var(--input-border-focus);
+  background: var(--input-bg);
   color: var(--text-primary);
-}
-
-[data-theme="dark"] .dropdown-divider {
-  border-top-color: var(--border-light);
-}
-
-/* Table Styles for Dark Theme */
-[data-theme="dark"] .table {
-  color: var(--text-primary);
-  border-color: var(--table-border);
-}
-
-[data-theme="dark"] .table th {
-  background-color: var(--table-header-bg);
-  color: var(--table-header-text);
-  border-color: var(--table-border);
-}
-
-[data-theme="dark"] .table td {
-  border-color: var(--table-border);
-}
-
-[data-theme="dark"] .table-hover tbody tr:hover {
-  background-color: var(--table-row-hover);
-}
-
-/* Form Controls for Dark Theme */
-[data-theme="dark"] .form-control {
-  background-color: var(--form-background);
-  border-color: var(--form-border);
-  color: var(--form-text);
-}
-
-[data-theme="dark"] .form-control:focus {
-  border-color: var(--form-border-focus);
-  box-shadow: var(--focus-ring);
-  background-color: var(--form-background);
-  color: var(--form-text);
 }
 
 [data-theme="dark"] .form-control::placeholder {
-  color: var(--form-placeholder);
+  color: var(--input-placeholder);
 }
 
-/* Modal Styles for Dark Theme */
-[data-theme="dark"] .modal-content {
-  background-color: var(--surface-primary);
-  border-color: var(--border-light);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .modal-header {
-  border-bottom-color: var(--border-light);
-}
-
-[data-theme="dark"] .modal-footer {
-  border-top-color: var(--border-light);
-}
-
-[data-theme="dark"] .modal-title {
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .btn-close {
-  filter: invert(1) grayscale(100%) brightness(200%);
-}
-
-/* Alert Styles for Dark Theme */
-[data-theme="dark"] .alert-success {
-  background-color: var(--status-success-bg);
-  border-color: var(--status-success);
-  color: var(--status-success);
-}
-
-[data-theme="dark"] .alert-danger {
-  background-color: var(--status-error-bg);
-  border-color: var(--status-error);
-  color: var(--status-error);
-}
-
-[data-theme="dark"] .alert-warning {
-  background-color: var(--status-warning-bg);
-  border-color: var(--status-warning);
-  color: var(--warning-yellow);
-}
-
-[data-theme="dark"] .alert-info {
-  background-color: var(--status-info-bg);
-  border-color: var(--status-info);
-  color: var(--status-info);
-}
-
-/* Badge Styles for Dark Theme */
-[data-theme="dark"] .badge {
+/* Buttons Dark Theme */
+[data-theme="dark"] .btn-primary {
+  background: var(--btn-primary-bg);
+  border: none;
   color: white;
 }
 
-[data-theme="dark"] .badge.bg-success {
-  background-color: var(--status-success) !important;
+[data-theme="dark"] .btn-primary:hover {
+  background: var(--btn-primary-hover);
+  color: white;
 }
 
-[data-theme="dark"] .badge.bg-danger {
-  background-color: var(--status-error) !important;
+[data-theme="dark"] .btn-secondary {
+  border-color: var(--btn-secondary-border);
+  color: var(--btn-secondary-color);
+  background: transparent;
 }
 
-[data-theme="dark"] .badge.bg-warning {
-  background-color: var(--status-warning) !important;
+[data-theme="dark"] .btn-secondary:hover {
+  background: var(--interactive-blue);
+  color: white;
 }
 
-[data-theme="dark"] .badge.bg-info {
-  background-color: var(--status-info) !important;
-}
-
-/* Tooltip Styles for Dark Theme */
-[data-theme="dark"] .tooltip-inner {
-  background-color: var(--surface-raised);
-  color: var(--text-primary);
-  border: 1px solid var(--border-light);
-}
-
-[data-theme="dark"] .tooltip.bs-tooltip-top .tooltip-arrow::before {
-  border-top-color: var(--surface-raised);
-}
-
-[data-theme="dark"] .tooltip.bs-tooltip-bottom .tooltip-arrow::before {
-  border-bottom-color: var(--surface-raised);
-}
-
-[data-theme="dark"] .tooltip.bs-tooltip-start .tooltip-arrow::before {
-  border-left-color: var(--surface-raised);
-}
-
-[data-theme="dark"] .tooltip.bs-tooltip-end .tooltip-arrow::before {
-  border-right-color: var(--surface-raised);
-}
-
-/* Offcanvas Styles for Dark Theme */
-[data-theme="dark"] .offcanvas {
-  background-color: var(--surface-primary);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .offcanvas-header {
-  border-bottom-color: var(--border-light);
-}
-
-[data-theme="dark"] .offcanvas-title {
-  color: var(--text-primary);
-}
-
-/* Accordion Styles for Dark Theme */
-[data-theme="dark"] .accordion-item {
-  background-color: var(--surface-secondary);
+[data-theme="dark"] .btn-outline-secondary {
   border-color: var(--border-light);
+  color: var(--text-secondary);
 }
 
-[data-theme="dark"] .accordion-button {
-  background-color: var(--surface-secondary);
-  color: var(--text-primary);
-  border-color: var(--border-light);
-}
-
-[data-theme="dark"] .accordion-button:not(.collapsed) {
-  background-color: var(--surface-raised);
+[data-theme="dark"] .btn-outline-secondary:hover {
+  background: var(--background-secondary);
+  border-color: var(--interactive-blue);
   color: var(--interactive-blue);
 }
 
-[data-theme="dark"] .accordion-body {
-  background-color: var(--surface-primary);
+/* Text Colors Dark Theme */
+[data-theme="dark"] .text-primary,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .stock-symbol,
+[data-theme="dark"] .current-price,
+[data-theme="dark"] .market-price,
+[data-theme="dark"] .metric-value,
+[data-theme="dark"] .detail-value,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .news-title,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .suggestion-symbol,
+[data-theme="dark"] .suggestion-price,
+[data-theme="dark"] .index-value {
   color: var(--text-primary);
 }
 
-/* Card Styles for Dark Theme */
-[data-theme="dark"] .card {
-  background-color: var(--card-background);
+[data-theme="dark"] .text-secondary,
+[data-theme="dark"] p,
+[data-theme="dark"] .stock-name,
+[data-theme="dark"] .stock-company-name,
+[data-theme="dark"] .stock-sector,
+[data-theme="dark"] .metric-label,
+[data-theme="dark"] .detail-label,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .metadata-label,
+[data-theme="dark"] .news-summary,
+[data-theme="dark"] .status-text,
+[data-theme="dark"] .suggestion-name,
+[data-theme="dark"] .empty-state h3 {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .text-tertiary,
+[data-theme="dark"] .news-time,
+[data-theme="dark"] .empty-state p {
+  color: var(--text-tertiary);
+}
+
+/* Stock Market Data Dark Theme */
+[data-theme="dark"] .market-change.positive,
+[data-theme="dark"] .price-change.positive,
+[data-theme="dark"] .stat-change.positive,
+[data-theme="dark"] .stock-change.positive,
+[data-theme="dark"] .index-change.positive,
+[data-theme="dark"] .suggestion-change.positive {
+  color: var(--market-positive);
+}
+
+[data-theme="dark"] .market-change.negative,
+[data-theme="dark"] .price-change.negative,
+[data-theme="dark"] .stat-change.negative,
+[data-theme="dark"] .stock-change.negative,
+[data-theme="dark"] .index-change.negative,
+[data-theme="dark"] .suggestion-change.negative {
+  color: var(--market-negative);
+}
+
+/* Sections Dark Theme */
+[data-theme="dark"] .featured-stocks-section,
+[data-theme="dark"] .search-filters,
+[data-theme="dark"] .stock-content-section {
+  background: var(--background-light);
+}
+
+[data-theme="dark"] .features-section,
+[data-theme="dark"] .market-content,
+[data-theme="dark"] .stock-header-section {
+  background: var(--background-secondary);
+}
+
+/* Footer Dark Theme */
+[data-theme="dark"] .footer {
+  background: var(--footer-bg);
+  border-top-color: var(--footer-border);
+}
+
+[data-theme="dark"] .footer-links a {
+  color: var(--footer-text);
+}
+
+[data-theme="dark"] .footer-links a:hover {
+  color: var(--interactive-blue);
+}
+
+/* Dropdown Dark Theme */
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .search-suggestions {
+  background: var(--surface-primary);
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .dropdown-item,
+[data-theme="dark"] .suggestion-item {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .suggestion-item:hover {
+  background: var(--background-secondary);
+  color: var(--interactive-blue);
+}
+
+/* Modal Dark Theme */
+[data-theme="dark"] .modal-content {
+  background: var(--surface-primary);
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-body,
+[data-theme="dark"] .modal-footer {
+  border-color: var(--border-light);
+}
+
+/* Alert Dark Theme */
+[data-theme="dark"] .alert-success {
+  background: rgba(0, 211, 149, 0.15);
+  border-color: var(--success-green);
+  color: var(--success-green);
+}
+
+[data-theme="dark"] .alert-danger {
+  background: rgba(249, 35, 100, 0.15);
+  border-color: var(--error-red);
+  color: var(--error-red);
+}
+
+[data-theme="dark"] .alert-info {
+  background: rgba(52, 74, 251, 0.15);
+  border-color: var(--interactive-blue);
+  color: var(--interactive-blue);
+}
+
+[data-theme="dark"] .alert-warning {
+  background: rgba(255, 201, 71, 0.15);
+  border-color: var(--warning-yellow);
+  color: #e6b800;
+}
+
+/* Navigation Pills Dark Theme */
+[data-theme="dark"] .market-tabs .nav-pills {
+  background: var(--border-light);
+}
+
+[data-theme="dark"] .market-tabs .nav-link {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .market-tabs .nav-link:hover:not(.active) {
+  background: rgba(52, 74, 251, 0.2);
+  color: var(--interactive-blue);
+}
+
+/* Loading States Dark Theme */
+[data-theme="dark"] .loading::after {
+  background: linear-gradient(90deg, transparent, var(--interactive-blue), transparent);
+}
+
+[data-theme="dark"] .stock-card.loading .stock-symbol,
+[data-theme="dark"] .stock-card.loading .stock-name,
+[data-theme="dark"] .stock-card.loading .stock-price,
+[data-theme="dark"] .stock-card.loading .metadata-value {
+  background: var(--border-light);
+  color: transparent;
+}
+
+/* Metric Items Dark Theme */
+[data-theme="dark"] .metric-item {
+  background: var(--card-bg);
   border-color: var(--card-border);
-  color: var(--text-primary);
 }
 
-[data-theme="dark"] .card-header {
-  background-color: var(--surface-secondary);
-  border-bottom-color: var(--border-light);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .card-footer {
-  background-color: var(--surface-secondary);
-  border-top-color: var(--border-light);
-}
-
-/* List Group Styles for Dark Theme */
-[data-theme="dark"] .list-group-item {
-  background-color: var(--surface-secondary);
-  border-color: var(--border-light);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .list-group-item:hover {
-  background-color: var(--surface-raised);
-}
-
-[data-theme="dark"] .list-group-item.active {
-  background-color: var(--interactive-blue);
+[data-theme="dark"] .metric-item:hover {
   border-color: var(--interactive-blue);
 }
 
-/* Progress Bar Styles for Dark Theme */
-[data-theme="dark"] .progress {
-  background-color: var(--background-secondary);
+/* Border Colors Dark Theme */
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-light {
+  border-color: var(--border-light) !important;
 }
 
-[data-theme="dark"] .progress-bar {
-  background-color: var(--interactive-blue);
-}
-
-/* Spinner Styles for Dark Theme */
-[data-theme="dark"] .spinner-border {
-  color: var(--interactive-blue);
-}
-
-[data-theme="dark"] .spinner-grow {
-  color: var(--interactive-blue);
-}
-
-/* Breadcrumb Styles for Dark Theme */
-[data-theme="dark"] .breadcrumb {
-  background-color: var(--surface-secondary);
-}
-
-[data-theme="dark"] .breadcrumb-item {
+/* Watchlist Button Dark Theme */
+[data-theme="dark"] .btn-watchlist {
   color: var(--text-secondary);
 }
 
-[data-theme="dark"] .breadcrumb-item.active {
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .breadcrumb-item + .breadcrumb-item::before {
-  color: var(--text-tertiary);
-}
-
-/* Pagination Styles for Dark Theme */
-[data-theme="dark"] .page-link {
-  background-color: var(--surface-secondary);
-  border-color: var(--border-light);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .page-link:hover {
-  background-color: var(--surface-raised);
-  border-color: var(--border-medium);
+[data-theme="dark"] .btn-watchlist:hover {
   color: var(--interactive-blue);
+  background: rgba(52, 74, 251, 0.15);
 }
 
-[data-theme="dark"] .page-item.active .page-link {
-  background-color: var(--interactive-blue);
-  border-color: var(--interactive-blue);
+[data-theme="dark"] .btn-watchlist.active {
+  color: var(--warning-yellow);
 }
 
-[data-theme="dark"] .page-item.disabled .page-link {
-  background-color: var(--surface-secondary);
-  border-color: var(--border-light);
-  color: var(--text-tertiary);
+/* Chart Container Dark Theme */
+[data-theme="dark"] .chart-container canvas {
+  filter: brightness(0.9);
 }
 
-/* Tab Styles for Dark Theme */
-[data-theme="dark"] .nav-tabs {
-  border-bottom-color: var(--border-light);
+/* Hero Section - Keep Light Theme Colors */
+/* Force hero section elements to maintain original light theme styling */
+[data-theme="dark"] .hero-section .stat-label {
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
-[data-theme="dark"] .nav-tabs .nav-link {
-  color: var(--text-secondary);
-  border-color: transparent;
+[data-theme="dark"] .hero-section .stat-symbol {
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
-[data-theme="dark"] .nav-tabs .nav-link:hover {
-  border-color: var(--border-light);
-  color: var(--interactive-blue);
+[data-theme="dark"] .hero-section .stat-value {
+  color: white !important;
 }
 
-[data-theme="dark"] .nav-tabs .nav-link.active {
-  color: var(--text-primary);
-  background-color: var(--surface-primary);
-  border-color: var(--border-light) var(--border-light) var(--surface-primary);
+[data-theme="dark"] .hero-section .stat-change.positive {
+  color: #00d395 !important;
 }
 
-[data-theme="dark"] .tab-content {
-  background-color: var(--surface-primary);
+[data-theme="dark"] .hero-section .stat-change.negative {
+  color: #f92364 !important;
 }
 
-/* Dark Theme Specific Animations */
-[data-theme="dark"] .skeleton-loading {
-  background: linear-gradient(90deg, var(--background-secondary) 25%, var(--border-light) 50%, var(--background-secondary) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
+[data-theme="dark"] .hero-section .hero-title {
+  color: white !important;
 }
 
-/* High Contrast Mode Support for Dark Theme */
-@media (prefers-contrast: high) {
-  [data-theme="dark"] {
-    --text-primary: #ffffff;
-    --text-secondary: #cccccc;
-    --border-light: #ffffff;
-    --border-medium: #cccccc;
-    --interactive-blue: #66ccff;
-    --success-green: #00ff00;
-    --error-red: #ff6666;
-    --background-light: #000000;
-    --background-secondary: #1a1a1a;
-  }
+[data-theme="dark"] .hero-section .hero-subtitle {
+  color: rgba(255, 255, 255, 0.95) !important;
 }
 
-/* Reduce Motion for Dark Theme */
-@media (prefers-reduced-motion: reduce) {
-  [data-theme="dark"] *,
-  [data-theme="dark"] *::before,
-  [data-theme="dark"] *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+[data-theme="dark"] .hero-section .highlight-text {
+  background: linear-gradient(45deg, #ffffff, #f0f8ff, #ffffff) !important;
+  background-size: 200% 200% !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
