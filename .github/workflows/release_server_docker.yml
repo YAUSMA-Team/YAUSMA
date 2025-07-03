@@ -1,0 +1,53 @@
+name: Release & Deploy Server
+
+on:
+  push:
+    paths: ['flake.nix', 'backend/**', '.github/workflows/release_server_docker.yml']
+    branches: ['master']
+  workflow_dispatch:
+
+# Automatically cancels any existing runs in the same group
+# Applies to jobs in the same workflow only
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  packages: write
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Nix
+      - uses: cachix/install-nix-action@v20
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      # Build the bundle
+      - name: Build bundle
+        run: nix build .#docker
+        # run: nix bundle .#server
+
+      - name: Login to GitHub Container Registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push to GitHub Packages
+        run: |
+          docker load < ./result
+          docker tag yausma-server-image ghcr.io/yausma-team/yausma/yausma-server:${{ github.sha }}
+          docker tag yausma-server-image ghcr.io/yausma-team/yausma/yausma-server:latest
+
+          docker push ghcr.io/yausma-team/yausma/yausma-server:${{ github.sha }}
+          docker push ghcr.io/yausma-team/yausma/yausma-server:latest 
+
+      - name: Trigger Deployment Webhook
+        run: |
+          curl ${{ secrets.DEPLOY_WEBHOOK_URL}}

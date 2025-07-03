@@ -33,52 +33,28 @@ jobs:
 
       # Build the bundle
       - name: Build bundle
-        run: nix build .#docker
-        # run: nix bundle .#server
+        run: nix bundle .#server
 
-      - name: Login to GitHub Container Registry
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: server-build
+          path: yausma-server-arx
 
-      - name: Push to GitHub Packages
-        run: |
-          docker load < ./result
-          docker tag yausma-server-image ghcr.io/yausma-team/yausma/yausma-server:${{ github.sha }}
-          docker push ghcr.io/yausma-team/yausma/yausma-server:${{ github.sha }}
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: server-build
-      #     path: yausma-server-arx
-
-      # - uses: softprops/action-gh-release@v1
-      #   if: github.ref == 'refs/heads/master'
-      #   with:
-      #     tag_name: latest-master
-      #     prerelease: true
-      #     # files: result/bin/run-server-prod
-      #     files: yausma-server-arx
-      #     body: "Auto-generated release from master branch [Server]"
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # # Create release
-      # - name: Create Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: |
-      #       result/bin/*
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  # deploy-server:
-    
-  #   needs: build-and-release
-  #   runs-on: ubuntu-latest
-  #   steps:
-      # Setup Nix
-
-
-      # - name: Deploy to server
-      #   uses: appleboy/ssh-action@v1
-      #   with:
-      #     host: yausma.org
-      #     username: root
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     script: pkill backend && pkill yausma-server && curl -L https://github.com/YAUSMA-Team/YAUSMA/releases/download/latest-master/yausma-server-arx | sh -s &
+      - uses: softprops/action-gh-release@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          tag_name: latest-master
+          prerelease: true
+          # files: result/bin/run-server-prod
+          files: yausma-server-arx
+          body: "Auto-generated release from master branch [Server]"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Create release
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            result/bin/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
