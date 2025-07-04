@@ -366,19 +366,6 @@ body[data-theme="light"] {
   border-color: var(--border-light) !important;
 }
 
-/* Watchlist Button Light Theme */
-[data-theme="light"] .btn-watchlist {
-  color: var(--text-secondary);
-}
-
-[data-theme="light"] .btn-watchlist:hover {
-  color: var(--interactive-blue);
-  background: rgba(52, 74, 251, 0.1);
-}
-
-[data-theme="light"] .btn-watchlist.active {
-  color: var(--warning-yellow);
-}
 
 /* Chart Container Light Theme */
 [data-theme="light"] .chart-container canvas {

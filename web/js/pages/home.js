@@ -5,7 +5,6 @@
 
 // Home page state
 var HomePage = {
-    watchlist: [],
     featuredStocks: [],
     isLoading: false
 };
@@ -93,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize the page
 function initPage() {
-    loadWatchlist();
     loadFeaturedStocks();
     startPriceUpdates();
     animateStats();
@@ -167,73 +165,7 @@ function goToStock(symbol) {
     window.location.href = 'pages/stock-detail.html?symbol=' + symbol;
 }
 
-// Toggle watchlist for a stock
-function toggleWatchlist(symbol) {
-    var index = HomePage.watchlist.indexOf(symbol);
-    
-    if (index > -1) {
-        // Remove from watchlist
-        HomePage.watchlist.splice(index, 1);
-        console.log('Removed', symbol, 'from watchlist');
-    } else {
-        // Add to watchlist
-        HomePage.watchlist.push(symbol);
-        console.log('Added', symbol, 'to watchlist');
-    }
-    
-    // Update UI
-    updateWatchlistUI(symbol);
-    
-    // Save to localStorage
-    saveWatchlist();
-}
 
-// Update watchlist UI
-function updateWatchlistUI(symbol) {
-    var watchlistButtons = document.querySelectorAll(`[onclick*="${symbol}"]`);
-    var isInWatchlist = HomePage.watchlist.indexOf(symbol) > -1;
-    
-    watchlistButtons.forEach(function(button) {
-        var icon = button.querySelector('i');
-        if (icon) {
-            if (isInWatchlist) {
-                icon.className = 'bi bi-bookmark-fill';
-                button.classList.add('active');
-            } else {
-                icon.className = 'bi bi-bookmark';
-                button.classList.remove('active');
-            }
-        }
-    });
-}
-
-// Load watchlist from localStorage
-function loadWatchlist() {
-    try {
-        var saved = localStorage.getItem('yausma-watchlist');
-        if (saved) {
-            HomePage.watchlist = JSON.parse(saved);
-        }
-        
-        // Update UI for all saved symbols
-        HomePage.watchlist.forEach(function(symbol) {
-            updateWatchlistUI(symbol);
-        });
-        
-    } catch (error) {
-        console.error('Error loading watchlist:', error);
-        HomePage.watchlist = [];
-    }
-}
-
-// Save watchlist to localStorage
-function saveWatchlist() {
-    try {
-        localStorage.setItem('yausma-watchlist', JSON.stringify(HomePage.watchlist));
-    } catch (error) {
-        console.error('Error saving watchlist:', error);
-    }
-}
 
 
 
@@ -539,7 +471,6 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         toggleTheme: toggleTheme,
         goToStock: goToStock,
-        toggleWatchlist: toggleWatchlist,
         updatePrices: updatePrices,
         animateStats: animateStats,
         createHeroChart: createHeroChart

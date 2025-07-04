@@ -37,10 +37,7 @@
             
             <!-- Navigation Menu -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html">Home</a>
-                    </li>
+                <ul class="navbar-nav me-auto" id="mainNavigation">
                     <li class="nav-item">
                         <a class="nav-link active" href="stocks.html">Stocks</a>
                     </li>
@@ -322,12 +319,35 @@
 
     <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Superagent for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/superagent@8.0.0/dist/superagent.min.js"></script>
+    
+    <!-- OpenAPI Generated Client - Load in dependency order -->
+    <script src="../js/api/src/ApiClient.js"></script>
+    <script src="../js/api/src/model/NewsItem.js"></script>
+    <script src="../js/api/src/model/MarketOverviewItem.js"></script>
+    <script src="../js/api/src/api/DataApi.js"></script>
+    
+    <!-- Cookie Manager (must load before main.js) -->
+    <script src="../js/utils/cookie-manager.js"></script>
+    <!-- Auth Manager (must load before main.js) -->
+    <script src="../js/utils/auth-manager.js"></script>
     <!-- Main JavaScript -->
     <script src="../js/main.js"></script>
     <!-- Global Theme Manager -->
     <script src="../js/utils/global-theme-manager.js"></script>
-    <!-- Stocks API Client -->
-    <script src="../js/api/stocks.js"></script>
+    
+    <!-- Page Protection -->
+    <script>
+        // Protect this page - require authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.authManager.protectPage()) {
+                return; // Will redirect to auth page if not logged in
+            }
+        });
+    </script>
+    
     <!-- Stocks Page JavaScript -->
     <script src="../js/pages/stocks.js"></script>
 </body>
