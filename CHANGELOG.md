@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.5] - 2025-07-04
+
+### Bug Fixes
+
+- Ci
+
 ## [1.4.4] - 2025-07-04
 
 ### Bug Fixes
