@@ -48,7 +48,7 @@ jobs:
           path: yausma.apk
 
       - uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/master'
+        # if: github.ref == 'refs/heads/master'
         with:
           tag_name: ${{ github.ref_name }}
           # tag_name: latest-master

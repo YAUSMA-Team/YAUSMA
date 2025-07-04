@@ -48,7 +48,7 @@ jobs:
           path: yausma-server-arx
 
       - uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/master'
+        # if: github.ref == 'refs/heads/master'
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
