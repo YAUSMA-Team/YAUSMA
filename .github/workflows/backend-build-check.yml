@@ -1,0 +1,33 @@
+name: Backend Build Check
+
+on:
+  push:
+    branches: ['**']  # Triggers on all branches
+    paths:            # Only run when backend files change
+      - 'backend/**'
+      - 'flake.nix'   # Include other relevant files
+      - '.github/workflows/backend-build-check.yml'
+
+concurrency:
+  group: backend-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for version checks
+
+      - name: Setup Nix
+        uses: cachix/install-nix-action@v20
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Build backend
+        run: |
+          echo "Building backend for branch: ${{ github.ref_name }}"
+          cd backend && nix develop .#backend --command RUSTFLAGS="-D warnings" cargo check
