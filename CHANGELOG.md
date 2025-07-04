@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2025-07-04
+
+### Bug Fixes
+
+- There is a bug in ci, need to push empty
+
 ## [1.4.0] - 2025-07-04
+
+### Bug Fixes
+
+- Fix release
 
 ### Features
 
