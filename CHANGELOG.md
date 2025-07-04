@@ -2,11 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.5] - 2025-07-04
+
+### Bug Fixes
+
+- Use latest git-cliff in flake.nix
+
 ## [1.5.4] - 2025-07-04
 
 ### Bug Fixes
 
 - Display changelog in releases
+- Make backend iteration faster
 
 ### Performance
 
