@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.6] - 2025-07-04
+
+### Miscellaneous Tasks
+
+- Include version in apk name in releases
+
 ## [1.5.5] - 2025-07-04
 
 ### Bug Fixes
