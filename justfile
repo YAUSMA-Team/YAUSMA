@@ -5,9 +5,9 @@ parallel:
   echo task 3 start; sleep 3; echo task 3 done
   echo task 4 start; sleep 3; echo task 4 done
 
-cliff:
+release:
   git cliff --bump -o CHANGELOG.md
   git cliff --bumped-version > version.txt
   git add .
-  git commit -c "Release $(cat version.txt)"
+  git commit -m "Release $(cat version.txt)"
   git tag -a "$(cat version.txt)" -m "Release $(cat version.txt)" 
