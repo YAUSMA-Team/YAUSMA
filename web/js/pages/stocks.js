@@ -11,171 +11,6 @@ var StocksPage = {
     filteredStocks: []
 };
 
-// Mock data matching the API structure provided by user
-var mockStocksData = [
-    {
-        "name": "Monero USD",
-        "short": "XMR-USD",
-        "sector": "CRYPTOCURRENCY",
-        "current_price": "$316.41",
-        "change": -1.58,
-        "high": 336.57,
-        "low": 316.03,
-        "symbol": "XMR-USD",
-        "volume": 126227824,
-        "news_article": {
-            "id": "f532845e-5229-4b9c-beea-6df5837f8b6f",
-            "title": "Best high-yield savings interest rates today, July 3, 2025 (top account pays 4.3% APY)",
-            "publisher": "Yahoo Personal Finance",
-            "source": "https://finance.yahoo.com/personal-finance/banking/article/best-high-yield-savings-interest-rates-today-thursday-july-3-2025-200632473.html",
-            "date": "1751573192"
-        }
-    },
-    {
-        "name": "MongoDB, Inc.",
-        "short": "MDB",
-        "sector": "EQUITY",
-        "current_price": "$211.34",
-        "change": 2.80,
-        "high": 213.79,
-        "low": 205.41,
-        "symbol": "MDB",
-        "volume": 1516513,
-        "news_article": {
-            "id": "e6552044-356a-3af2-81ef-985ae8837abc",
-            "title": "What Makes Atlas the Core Driver of MongoDB's Revenue Growth?",
-            "publisher": "Zacks",
-            "source": "https://finance.yahoo.com/news/makes-atlas-core-driver-mongodbs-171600546.html",
-            "date": "1751562960"
-        }
-    },
-    {
-        "name": "GitLab Inc.",
-        "short": "GTLB",
-        "sector": "EQUITY",
-        "current_price": "$46.37",
-        "change": 1.91,
-        "high": 46.73,
-        "low": 45.39,
-        "symbol": "GTLB",
-        "volume": 2197903,
-        "news_article": {
-            "id": "d6dfa439-1002-3df1-aa78-28abb318546a",
-            "title": "GitLab Maintains Buy Rating Despite Lowered Price Target, Shows Strong Seat Expansion",
-            "publisher": "Insider Monkey",
-            "source": "https://finance.yahoo.com/news/gitlab-maintains-buy-rating-despite-072056917.html",
-            "date": "1751440856"
-        }
-    },
-    {
-        "name": "Confluent, Inc.",
-        "short": "CFLT",
-        "sector": "EQUITY",
-        "current_price": "$26.30",
-        "change": 2.53,
-        "high": 26.70,
-        "low": 25.63,
-        "symbol": "CFLT",
-        "volume": 4695980,
-        "news_article": {
-            "id": "3d6e945d-6e4d-361b-924d-0e69d903fa1c",
-            "title": "The 5 Most Interesting Analyst Questions From Confluent's Q1 Earnings Call",
-            "publisher": "StockStory",
-            "source": "https://finance.yahoo.com/news/5-most-interesting-analyst-questions-122842359.html",
-            "date": "1750854522"
-        }
-    },
-    {
-        "name": "Apple Inc.",
-        "short": "AAPL",
-        "sector": "EQUITY",
-        "current_price": "$175.43",
-        "change": 1.66,
-        "high": 178.21,
-        "low": 173.52,
-        "symbol": "AAPL",
-        "volume": 89542103,
-        "news_article": {
-            "id": "apple-news-1",
-            "title": "Apple's Q3 Earnings Beat Expectations with Strong iPhone Sales",
-            "publisher": "MarketWatch",
-            "source": "https://www.marketwatch.com/story/apple-earnings-q3-2025",
-            "date": "1751550000"
-        }
-    },
-    {
-        "name": "Microsoft Corporation",
-        "short": "MSFT",
-        "sector": "EQUITY",
-        "current_price": "$387.92",
-        "change": 1.19,
-        "high": 392.45,
-        "low": 384.15,
-        "symbol": "MSFT",
-        "volume": 25847302,
-        "news_article": {
-            "id": "msft-news-1",
-            "title": "Microsoft Azure Growth Accelerates as AI Demand Surges",
-            "publisher": "Reuters",
-            "source": "https://www.reuters.com/technology/microsoft-azure-ai-growth-2025",
-            "date": "1751548000"
-        }
-    },
-    {
-        "name": "Tesla, Inc.",
-        "short": "TSLA",
-        "sector": "EQUITY",
-        "current_price": "$248.50",
-        "change": 2.33,
-        "high": 255.78,
-        "low": 243.12,
-        "symbol": "TSLA",
-        "volume": 156732891,
-        "news_article": {
-            "id": "tsla-news-1",
-            "title": "Tesla Deliveries Exceed Expectations Despite Production Challenges",
-            "publisher": "Bloomberg",
-            "source": "https://www.bloomberg.com/news/tesla-deliveries-q2-2025",
-            "date": "1751546000"
-        }
-    },
-    {
-        "name": "Bitcoin USD",
-        "short": "BTC-USD",
-        "sector": "CRYPTOCURRENCY",
-        "current_price": "$67,452.30",
-        "change": 3.25,
-        "high": 68901.45,
-        "low": 65234.12,
-        "symbol": "BTC-USD",
-        "volume": 892341567,
-        "news_article": {
-            "id": "btc-news-1",
-            "title": "Bitcoin Reaches New Monthly High as Institutional Adoption Grows",
-            "publisher": "CoinDesk",
-            "source": "https://www.coindesk.com/bitcoin-institutional-adoption-2025",
-            "date": "1751544000"
-        }
-    },
-    {
-        "name": "Ethereum USD",
-        "short": "ETH-USD",
-        "sector": "CRYPTOCURRENCY",
-        "current_price": "$3,421.67",
-        "change": -0.85,
-        "high": 3498.23,
-        "low": 3398.45,
-        "symbol": "ETH-USD",
-        "volume": 234567891,
-        "news_article": {
-            "id": "eth-news-1",
-            "title": "Ethereum's Latest Upgrade Shows Promise for Scalability Solutions",
-            "publisher": "CoinTelegraph",
-            "source": "https://cointelegraph.com/ethereum-upgrade-scalability-2025",
-            "date": "1751542000"
-        }
-    }
-];
 
 // Initialize stocks page when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -346,18 +181,30 @@ function performSearch() {
 async function loadStocksData() {
     try {
         console.log('=== LOADING STOCKS DATA ===');
-        console.log('StocksAPI client available:', !!window.stocksApiClient);
-        console.log('StocksAPI client config:', window.stocksApiClient ? window.stocksApiClient.getConfig() : 'N/A');
+        console.log('DataApi client available:', !!window.dataApi);
         
         showLoadingState();
         
-        // Check if API client is available
-        if (!window.stocksApiClient) {
-            throw new Error('Stocks API client not available. Please ensure the API client script is loaded.');
-        }
+        let stocks;
         
-        console.log('Calling fetchMarketOverview...');
-        const stocks = await stocksApiClient.fetchMarketOverview();
+        // Check if API client is available
+        if (window.dataApi) {
+            // Use real API to fetch market overview
+            stocks = await new Promise((resolve, reject) => {
+                window.dataApi.getMarketOverview((error, data, response) => {
+                    if (error) {
+                        console.error('API error loading stocks:', error);
+                        reject(error);
+                    } else {
+                        resolve(data || []);
+                    }
+                });
+            });
+            
+        } else {
+            console.log('API client not available');
+            stocks = [];
+        }
         
         console.log('Received stocks:', stocks);
         console.log('Stocks count:', stocks.length);
@@ -392,7 +239,7 @@ async function loadStocksData() {
         console.error('Error stack:', error.stack);
         console.error('=== END ERROR LOADING STOCKS DATA ===');
         
-        // Handle error by showing empty state with error message
+        // Show error state
         handleStockLoadError(error);
     } finally {
         hideLoadingState();
@@ -439,25 +286,10 @@ function retryLoadStocks() {
     loadStocksData();
 }
 
-// Load mock data as fallback
+// Load mock data as fallback - no longer available
 function loadMockData() {
-    try {
-        console.log('Loading mock data as fallback...');
-        StocksPage.stocks = mockStocksData;
-        StocksPage.filteredStocks = mockStocksData;
-        
-        updateStocksGrid(StocksPage.stocks);
-        updateResultsCount(StocksPage.stocks.length);
-        hideEmptyState();
-        
-        // Re-initialize animations for new cards
-        setTimeout(initThemeAnimations, 100);
-        
-        console.log('Mock data loaded successfully');
-        
-    } catch (error) {
-        console.error('Error loading mock data:', error);
-    }
+    console.log('Mock data no longer available. Please ensure API is running.');
+    showEmptyState();
 }
 
 // Update stocks grid
@@ -559,11 +391,9 @@ function createStockElement(stock) {
 
 // Handle stock card click
 function handleStockClick(stock) {
-    // In a real app, this would navigate to stock detail page
-    console.log('Clicked on stock:', stock.symbol);
-    
-    // For now, show a simple alert
-    alert(`Stock: ${stock.name} (${stock.symbol})\nPrice: ${stock.current_price}\nChange: ${stock.change.toFixed(2)}%`);
+    // Navigate to stock detail page
+    console.log('Navigating to stock detail for:', stock.symbol);
+    window.location.href = `stock-detail.html?symbol=${encodeURIComponent(stock.symbol)}`;
 }
 
 // Format volume number

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - YAUSMA | Your Investment Portfolio</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Main CSS -->
+    <link href="../css/main.css" rel="stylesheet">
+    <!-- Theme CSS Files -->
+    <link href="../css/themes/light.css" rel="stylesheet">
+    <link href="../css/themes/dark.css" rel="stylesheet">
+    <!-- Portfolio Page CSS -->
+    <link href="../css/pages/portfolio.css" rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand" href="../index.html">
+                <i class="logo-icon bi bi-graph-up"></i>
+                <span>YAUSMA</span>
+            </a>
+            
+            <!-- Mobile Menu Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Menu -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="stocks.html">Stocks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="news.html">News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="portfolio.html">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pro.html">Pro</a>
+                    </li>
+                </ul>
+                
+                <!-- Right Side Actions -->
+                <div class="navbar-actions">
+                    <!-- Theme Toggle -->
+                    <button class="btn-theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                        <i class="theme-icon-light bi bi-sun"></i>
+                        <i class="theme-icon-dark bi bi-moon"></i>
+                    </button>
+                    
+                    <!-- Auth Buttons -->
+                    <a href="auth.html" class="btn btn-outline-secondary">Sign In</a>
+                    <a href="auth.html" class="btn btn-primary">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="portfolio-hero-section">
+        <!-- Animated Background -->
+        <div class="hero-background">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+                <div class="shape shape-5"></div>
+            </div>
+            <div class="animated-particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="row align-items-center justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            <span class="title-line highlight-text">PORTFOLIO</span>
+                        </h1>
+                        <p class="hero-subtitle">
+                            Track your investments and monitor portfolio performance in real-time
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Overview Section -->
+    <section class="portfolio-overview-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="portfolio-summary">
+                        <div class="row">
+                            <!-- Total Portfolio Value -->
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="summary-card portfolio-value-card">
+                                    <div class="card-icon">
+                                        <i class="bi bi-wallet2"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <h3 class="card-title">Total Portfolio Value</h3>
+                                        <div class="portfolio-value" id="totalValue">$157,832.45</div>
+                                        <div class="value-change positive" id="totalChange">
+                                            <i class="bi bi-arrow-up"></i>
+                                            <span>+$2,847.32 (+1.84%)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Daily P&L -->
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="summary-card daily-pnl-card">
+                                    <div class="card-icon">
+                                        <i class="bi bi-graph-up"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <h3 class="card-title">Today's P&L</h3>
+                                        <div class="daily-pnl positive" id="dailyPnL">+$1,243.76</div>
+                                        <div class="pnl-percentage positive">
+                                            <i class="bi bi-arrow-up"></i>
+                                            <span>+0.79%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Asset Allocation -->
+                            <div class="col-lg-4 col-md-12 mb-4">
+                                <div class="summary-card allocation-card">
+                                    <div class="card-icon">
+                                        <i class="bi bi-pie-chart"></i>
+                                    </div>
+                                    <div class="card-content">
+                                        <h3 class="card-title">Asset Allocation</h3>
+                                        <div class="allocation-breakdown">
+                                            <div class="allocation-item">
+                                                <span class="allocation-label">Stocks</span>
+                                                <span class="allocation-value">78.5%</span>
+                                            </div>
+                                            <div class="allocation-item">
+                                                <span class="allocation-label">ETFs</span>
+                                                <span class="allocation-value">15.2%</span>
+                                            </div>
+                                            <div class="allocation-item">
+                                                <span class="allocation-label">Cash</span>
+                                                <span class="allocation-value">6.3%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Performance Chart Section -->
+    <section class="portfolio-chart-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="chart-container-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Portfolio Performance</h3>
+                            <div class="chart-controls">
+                                <div class="time-range-selector">
+                                    <button class="time-btn" data-period="1D">1D</button>
+                                    <button class="time-btn" data-period="1W">1W</button>
+                                    <button class="time-btn active" data-period="1M">1M</button>
+                                    <button class="time-btn" data-period="3M">3M</button>
+                                    <button class="time-btn" data-period="1Y">1Y</button>
+                                    <button class="time-btn" data-period="ALL">ALL</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="portfolioChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Holdings Table Section -->
+    <section class="holdings-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="holdings-card">
+                        <div class="holdings-header">
+                            <h3 class="holdings-title">Your Holdings</h3>
+                            <div class="holdings-actions">
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-funnel"></i> Filter
+                                </button>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus"></i> Add Position
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="holdings-table-wrapper">
+                            <table class="holdings-table" id="holdingsTable">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-sort="symbol">
+                                            Symbol <i class="bi bi-arrow-up-down sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="name">
+                                            Company <i class="bi bi-arrow-up-down sort-icon"></i>
+                                        </th>
+                                        <th class="sortable text-right" data-sort="shares">
+                                            Shares <i class="bi bi-arrow-up-down sort-icon"></i>
+                                        </th>
+                                        <th class="sortable text-right" data-sort="price">
+                                            Price <i class="bi bi-arrow-up-down sort-icon"></i>
+                                        </th>
+                                        <th class="sortable text-right" data-sort="value">
+                                            Market Value <i class="bi bi-arrow-up-down sort-icon"></i>
+                                        </th>
+                                        <th class="sortable text-right" data-sort="change">
+                                            Today's Change <i class="bi bi-arrow-up-down sort-icon"></i>
+                                        </th>
+                                        <th class="sortable text-right" data-sort="pnl">
+                                            Total P&L <i class="bi bi-arrow-up-down sort-icon"></i>
+                                        </th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="holdingsTableBody">
+                                    <!-- Holdings data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Loading State -->
+                        <div class="loading-state d-none" id="holdingsLoading">
+                            <div class="loading-spinner">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </div>
+                            <p>Loading your holdings...</p>
+                        </div>
+                        
+                        <!-- Empty State -->
+                        <div class="empty-state d-none" id="holdingsEmpty">
+                            <div class="empty-state-icon">
+                                <i class="bi bi-briefcase"></i>
+                            </div>
+                            <h4>No holdings yet</h4>
+                            <p>Start building your portfolio by purchasing your first stock.</p>
+                            <button class="btn btn-primary">Browse Stocks</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Activity Section -->
+    <section class="activity-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h3 class="activity-title">Recent Activity</h3>
+                            <a href="#" class="view-all-link">View All</a>
+                        </div>
+                        
+                        <div class="activity-list" id="activityList">
+                            <!-- Activity items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions Sidebar -->
+                <div class="col-lg-4">
+                    <div class="quick-actions-card">
+                        <div class="actions-header">
+                            <h3 class="actions-title">Quick Actions</h3>
+                        </div>
+                        
+                        <div class="actions-list">
+                            <button class="action-btn buy-btn">
+                                <i class="bi bi-plus-circle"></i>
+                                <span>Buy Stocks</span>
+                            </button>
+                            
+                            <button class="action-btn sell-btn">
+                                <i class="bi bi-dash-circle"></i>
+                                <span>Sell Holdings</span>
+                            </button>
+                            
+                            <button class="action-btn watchlist-btn">
+                                <i class="bi bi-eye"></i>
+                                <span>Manage Watchlist</span>
+                            </button>
+                            
+                            <button class="action-btn alert-btn">
+                                <i class="bi bi-bell"></i>
+                                <span>Set Price Alerts</span>
+                            </button>
+                            
+                            <button class="action-btn export-btn">
+                                <i class="bi bi-download"></i>
+                                <span>Export Data</span>
+                            </button>
+                        </div>
+                        
+                        <div class="cash-balance">
+                            <div class="balance-label">Available Cash</div>
+                            <div class="balance-amount">$12,847.23</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>YAUSMA</h5>
+                    <p>Your trusted partner for stock market analysis and investment decisions.</p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>Products</h6>
+                    <ul class="footer-links">
+                        <li><a href="stocks.html">Stock Analysis</a></li>
+                        <li><a href="portfolio.html">Portfolio</a></li>
+                        <li><a href="news.html">Market News</a></li>
+                        <li><a href="pro.html">Pro Features</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>Company</h6>
+                    <ul class="footer-links">
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>Legal</h6>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Disclaimer</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 YAUSMA. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Superagent for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/superagent@8.0.0/dist/js/superagent.min.js"></script>
+    
+    <!-- OpenAPI Generated Client - Load in dependency order -->
+    <script src="../js/api/src/ApiClient.js"></script>
+    <script src="../js/api/src/model/PortfolioItem.js"></script>
+    <script src="../js/api/src/model/MarketOverviewItem.js"></script>
+    <script src="../js/api/src/api/DataApi.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="../js/main.js"></script>
+    <!-- Global Theme Manager -->
+    <script src="../js/utils/global-theme-manager.js"></script>
+    <!-- Portfolio Page JavaScript -->
+    <script src="../js/pages/portfolio.js"></script>
+</body>
+</html>

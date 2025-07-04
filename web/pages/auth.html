@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - YAUSMA | Your Advanced Stock Market Analysis</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Main CSS -->
+    <link href="../css/main.css" rel="stylesheet">
+    <!-- Theme CSS Files -->
+    <link href="../css/themes/light.css" rel="stylesheet">
+    <link href="../css/themes/dark.css" rel="stylesheet">
+    <!-- Auth Page CSS -->
+    <link href="../css/pages/auth.css" rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand" href="../index.html">
+                <i class="logo-icon bi bi-graph-up"></i>
+                <span>YAUSMA</span>
+            </a>
+            
+            <!-- Mobile Menu Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Menu -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="stocks.html">Stocks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="news.html">News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="portfolio.html">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pro.html">Pro</a>
+                    </li>
+                </ul>
+                
+                <!-- Right Side Actions -->
+                <div class="navbar-actions">
+                    <!-- Theme Toggle -->
+                    <button class="btn-theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                        <i class="theme-icon-light bi bi-sun"></i>
+                        <i class="theme-icon-dark bi bi-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Hero Section -->
+    <section class="auth-hero-section">
+        <div class="auth-background">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-100">
+                <div class="col-lg-5 col-md-8">
+                    <div class="auth-card">
+                        <div class="auth-card-header">
+                            <div class="auth-logo">
+                                <i class="bi bi-graph-up"></i>
+                                <span>YAUSMA</span>
+                            </div>
+                            <h1 class="auth-title">Welcome Back</h1>
+                            <p class="auth-subtitle">Sign in to access your account</p>
+                        </div>
+
+                        <!-- Auth Tabs -->
+                        <div class="auth-tabs">
+                            <button class="auth-tab active" data-tab="signin" id="signinTab">
+                                Sign In
+                            </button>
+                            <button class="auth-tab" data-tab="signup" id="signupTab">
+                                Sign Up
+                            </button>
+                        </div>
+
+                        <!-- Sign In Form -->
+                        <div class="auth-form-container" id="signinForm">
+                            <form class="auth-form" id="signinFormElement">
+                                <div class="form-group">
+                                    <label for="signinEmail" class="form-label">Email address</label>
+                                    <div class="input-container">
+                                        <i class="bi bi-envelope input-icon"></i>
+                                        <input type="email" class="form-control auth-input" id="signinEmail" 
+                                               placeholder="Enter your email" required>
+                                    </div>
+                                    <div class="form-error" id="signinEmailError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="signinPassword" class="form-label">Password</label>
+                                    <div class="input-container">
+                                        <i class="bi bi-lock input-icon"></i>
+                                        <input type="password" class="form-control auth-input" id="signinPassword" 
+                                               placeholder="Enter your password" required>
+                                        <button type="button" class="password-toggle" id="signinPasswordToggle">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-error" id="signinPasswordError"></div>
+                                </div>
+
+
+                                <button type="submit" class="btn btn-primary auth-submit-btn" id="signinSubmitBtn">
+                                    <span class="btn-text">Sign In</span>
+                                    <span class="btn-spinner d-none">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </span>
+                                </button>
+
+                                <div class="auth-error" id="signinFormError"></div>
+                                <div class="auth-success" id="signinFormSuccess"></div>
+                            </form>
+                        </div>
+
+                        <!-- Sign Up Form -->
+                        <div class="auth-form-container d-none" id="signupForm">
+                            <form class="auth-form" id="signupFormElement">
+                                <div class="form-group">
+                                    <label for="signupEmail" class="form-label">Email address</label>
+                                    <div class="input-container">
+                                        <i class="bi bi-envelope input-icon"></i>
+                                        <input type="email" class="form-control auth-input" id="signupEmail" 
+                                               placeholder="Enter your email" required>
+                                    </div>
+                                    <div class="form-error" id="signupEmailError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="signupPassword" class="form-label">Password</label>
+                                    <div class="input-container">
+                                        <i class="bi bi-lock input-icon"></i>
+                                        <input type="password" class="form-control auth-input" id="signupPassword" 
+                                               placeholder="Create a password" required>
+                                        <button type="button" class="password-toggle" id="signupPasswordToggle">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-error" id="signupPasswordError"></div>
+                                    <div class="password-strength" id="passwordStrength">
+                                        <div class="strength-meter">
+                                            <div class="strength-bar" id="strengthBar"></div>
+                                        </div>
+                                        <div class="strength-text" id="strengthText">Choose a strong password</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirmPassword" class="form-label">Confirm password</label>
+                                    <div class="input-container">
+                                        <i class="bi bi-lock input-icon"></i>
+                                        <input type="password" class="form-control auth-input" id="confirmPassword" 
+                                               placeholder="Confirm your password" required>
+                                        <button type="button" class="password-toggle" id="confirmPasswordToggle">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-error" id="confirmPasswordError"></div>
+                                </div>
+
+
+                                <button type="submit" class="btn btn-primary auth-submit-btn" id="signupSubmitBtn">
+                                    <span class="btn-text">Create Account</span>
+                                    <span class="btn-spinner d-none">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </span>
+                                </button>
+
+                                <div class="auth-error" id="signupFormError"></div>
+                                <div class="auth-success" id="signupFormSuccess"></div>
+                            </form>
+                        </div>
+
+                        <!-- Auth Footer -->
+                        <div class="auth-footer">
+                            <div class="auth-switch" id="authSwitch">
+                                <span id="switchText">Don't have an account?</span>
+                                <button type="button" class="switch-btn" id="switchBtn">Sign up</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Superagent for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/superagent@8.0.0/dist/superagent.min.js"></script>
+    
+    <!-- OpenAPI Generated Client - Load in dependency order -->
+    <script src="../js/api/src/ApiClient.js"></script>
+    <script src="../js/api/src/model/UserCredentials.js"></script>
+    <script src="../js/api/src/api/UserApi.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="../js/main.js"></script>
+    <!-- Global Theme Manager -->
+    <script src="../js/utils/global-theme-manager.js"></script>
+    <!-- Auth Page JavaScript -->
+    <script src="../js/pages/auth.js"></script>
+</body>
+</html>

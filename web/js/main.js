@@ -7,7 +7,10 @@
 var YAUSMA = {
     version: '1.0.0',
     initialized: false,
-    debug: false
+    debug: false,
+    apiClient: null,
+    dataApi: null,
+    userApi: null
 };
 
 // Initialize application when DOM is ready
@@ -27,6 +30,7 @@ function initializeApp() {
         initErrorHandling();
         initNavigationHandlers();
         initUtilities();
+        initApiClients();
         
         // Mark as initialized
         YAUSMA.initialized = true;
@@ -319,6 +323,51 @@ window.formatPercentage = formatPercentage;
 window.debounce = debounce;
 window.Storage = Storage;
 window.toggleTheme = toggleTheme;
+
+// Initialize API clients
+function initApiClients() {
+    try {
+        // Check if OpenAPI client is available
+        if (typeof ApiClient !== 'undefined') {
+            // Configure API client with backend URL
+            YAUSMA.apiClient = new ApiClient('http://localhost:8000');
+            
+            // Create API instances if available
+            if (typeof DataApi !== 'undefined') {
+                YAUSMA.dataApi = new DataApi(YAUSMA.apiClient);
+                window.dataApi = YAUSMA.dataApi;
+            }
+            
+            if (typeof UserApi !== 'undefined') {
+                YAUSMA.userApi = new UserApi(YAUSMA.apiClient);
+                window.userApi = YAUSMA.userApi;
+            }
+            
+            // Make API client globally available
+            window.apiClient = YAUSMA.apiClient;
+            
+            if (YAUSMA.debug) {
+                console.log('API clients initialized successfully');
+            }
+            
+        } else {
+            console.warn('OpenAPI client not available. Using fallback mode.');
+            
+            // Create fallback clients that will trigger empty state
+            window.dataApi = null;
+            window.userApi = null;
+            window.apiClient = null;
+        }
+        
+    } catch (error) {
+        console.error('Failed to initialize API clients:', error);
+        
+        // Ensure fallback clients are set
+        window.dataApi = null;
+        window.userApi = null;
+        window.apiClient = null;
+    }
+}
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
