@@ -51,11 +51,13 @@ jobs:
         # if: github.ref == 'refs/heads/master'
         # 
         with:
-          tag_name: ${{ github.ref_name }}
+          # tag_name: ${{ github.ref_name }}
+          tag_name: v$(cat version.txt)  # Explicitly set from your version file
+          target_commitish: ${{ github.sha }}  # Anchor to current commit
           # tag_name: latest-master
           # prerelease: true
           files: yausma.apk
-          # body: "Auto-generated release from master branch"
-          body_file: CHANGELOG.md
+          body: "Auto-generated release from master branch"
+          # body_file: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
