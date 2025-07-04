@@ -109,18 +109,14 @@
               # Backend
               rust
               caddy
-              # python3
-              python311Packages.flask
-
-              # k8s
-              nixpacks
-              kubectl
-              kubernetes-helm
 
               # Mobile
               flutter
               androidSdk # The customized SDK that we've made above
               jdk17
+
+              # Misc
+              git-cliff
             ] ++ commonBuildInputs;
           };
 
