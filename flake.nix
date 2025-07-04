@@ -123,8 +123,24 @@
           };
 
         devShells.release = with pkgs-unstable;
-          mkShell { buildInputs = [ just nushell git-cliff ]; };
+          mkShell { buildInputs = [ git just nushell git-cliff ]; };
 
-        devShells.default = sh.backend // sh.release // sh.mobile;
+        devShells.default = with pkgs;
+          mkShell {
+            RUST_LOG = "debug";
+            ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
+
+            buildInputs = [
+              flutter
+              androidSdk # The customized SDK that we've made above
+              jdk17
+              # Backend
+              rust
+              git
+              just
+              nushell
+              git-cliff
+            ] ++ commonBuildInputs;
+          };
       });
 }

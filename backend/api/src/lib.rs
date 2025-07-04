@@ -31,7 +31,11 @@ pub struct UserCredentials {
 #[openapi(tag = "Landing")]
 #[get("/")]
 async fn landing() -> Option<NamedFile> {
-    NamedFile::open("./static/index.html").await.ok()
+    if cfg!(debug_assertions) {
+        NamedFile::open("../index.html").await.ok()
+    } else {
+        NamedFile::open("./static/index.html").await.ok()
+    }
 }
 
 #[openapi(tag = "User")]
@@ -255,7 +259,14 @@ pub async fn launch() -> Rocket<Build> {
         .with(EnvFilter::from_default_env())
         .init();
     rocket::build()
-        .mount("/", FileServer::from("./static"))
+        .mount(
+            "/",
+            FileServer::from(if cfg!(debug_assertions) {
+                "../web"
+            } else {
+                "./static"
+            }),
+        )
         .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
         .mount(
             "/",
