@@ -35,7 +35,7 @@ jobs:
       # - run: cd mobile && nix develop . --command flutter pub get
       - run: cd mobile && nix develop .#mobile --command just gen-client
       - run: cd mobile && nix develop .#mobile --command flutter build apk --release
-      - run: mv mobile/build/app/outputs/flutter-apk/app-release.apk ./yausma.apk
+      - run: mv mobile/build/app/outputs/flutter-apk/app-release.apk ./yausma-${{ github.ref_name }}.apk
 
       # Generate changelog
       - name: Generate changelog
@@ -51,7 +51,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           tag_name: ${{ github.ref_name }}
-          files: yausma.apk
+          files: yausma-${{ github.ref_name }}.apk
           body_path: ./CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
