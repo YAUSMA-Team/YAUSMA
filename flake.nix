@@ -95,7 +95,7 @@
             '')
           ];
           config = {
-            Env = [ "ROCKET_ADDRESS=0.0.0.0" ];
+            Env = [ "ROCKET_ADDRESS=0.0.0.0" "RUST_LOG=debug" ];
             Cmd = "${server}/bin/backend";
           };
         };
@@ -103,8 +103,7 @@
         devShells.default = with pkgs;
           mkShell {
             ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
-            # KUBERNETES_ENDPOINT = "https://89.36.231.38:6443";
-            KUBECONFIG = "./.kube-config";
+            RUST_LOG = "debug";
 
             buildInputs = [
               # Backend

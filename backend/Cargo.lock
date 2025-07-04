@@ -43,6 +43,8 @@ dependencies = [
  "sled",
  "thiserror 2.0.12",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
  "yahoo_finance_api",
 ]
 

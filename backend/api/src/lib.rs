@@ -19,6 +19,7 @@ use rocket_okapi::{
     response::OpenApiResponderInner,
 };
 use tokio::sync::RwLock;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use yahoo_finance_api::YahooConnector;
 
 #[derive(Serialize, Deserialize, schemars::JsonSchema, Debug)]
@@ -44,10 +45,12 @@ pub async fn login(
     let users_tree = db.open_tree("users")?;
 
     let Some(password) = users_tree.get(&creds.email)? else {
+        tracing::info!("User with email {} does not exist", creds.email);
         return Err(BackendError::EmailExists("Username does not exist".into()));
     };
 
     if password != creds.password_hash.as_bytes() {
+        tracing::info!("Incorrect password for email {}", creds.email);
         return Err(BackendError::EmailExists("Incorrect password".into()));
     }
 
@@ -63,6 +66,7 @@ pub async fn signup(
 ) -> Result<(), BackendError> {
     let users_tree = db.open_tree("users")?;
     if users_tree.contains_key(&creds.email)? {
+        tracing::info!("User with email {} already exists", creds.email);
         return Err(BackendError::EmailExists("Email already exists".into()));
     }
     users_tree.insert(creds.email.clone(), creds.password_hash.as_bytes())?;
@@ -110,11 +114,15 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
     }
 
     if let Some(res) = &*CACHE.read().await {
+        tracing::trace!("Cache exists");
         //                                                                         ____ Expire every 10 minutes
         if CACHE_EXPIRATION_TIMER.read().await.elapsed() < Duration::from_secs_f64(600.) {
+            tracing::info!("Using cached values");
             return Ok(Json(res.clone()));
         }
+        tracing::info!("Cache is expired");
     }
+    tracing::info!("Fetching data");
     // List of stock tickers
     let tickers = vec!["XMR-USD", "MDB", "GTLB", "CFLT"];
 
@@ -134,9 +142,11 @@ pub async fn get_market_overview() -> Result<Json<Vec<MarketOverviewItem>>, Back
 
         let percent_diff = ((close_price - open_price) / open_price) * 100.0;
 
-        println!(
+        tracing::trace!(
             "Open: ${:.1}, Close: ${:.1}, % Diff: {:.1}%",
-            open_price, close_price, percent_diff
+            open_price,
+            close_price,
+            percent_diff
         );
 
         res.push(MarketOverviewItem {
@@ -191,12 +201,16 @@ pub async fn get_news(ticker: Option<String>) -> Result<Json<Vec<NewsItem>>, Bac
         static ref CACHE_EXPIRATION_TIMER: Arc<RwLock<Instant>> = Arc::new(RwLock::new(Instant::now()));
     }
     if let Some(res) = &*CACHE.read().await {
+        tracing::trace!("Cache exists");
         if ticker.is_none() //                                                         ____ Expire every 10 minutes
             && CACHE_EXPIRATION_TIMER.read().await.elapsed() < Duration::from_secs_f64(600.)
         {
+            tracing::info!("Using cached values");
             return Ok(Json(res.clone()));
         }
+        tracing::info!("Cache has expired");
     }
+    tracing::info!("Fetching data");
     // Create a YahooFinance client
     let provider = YahooConnector::new().unwrap();
 
@@ -233,8 +247,13 @@ pub fn get_spec() -> OpenApi {
         // landing,
     ]
 }
+use tracing_subscriber::filter::EnvFilter;
 
 pub async fn launch() -> Rocket<Build> {
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(EnvFilter::from_default_env())
+        .init();
     rocket::build()
         .mount("/", FileServer::from("./static"))
         .manage(sled::open("/tmp/YAUSMA_DB").expect("open"))
