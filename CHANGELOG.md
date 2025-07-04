@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.4] - 2025-07-04
+
+### Bug Fixes
+
+- Display changelog in releases
+
+### Performance
+
+- Optimize ci and flake.nix
+
 ## [1.5.3] - 2025-07-04
 
 ### Bug Fixes
