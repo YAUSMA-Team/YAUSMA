@@ -40,7 +40,7 @@ jobs:
       # Generate changelog
       - name: Generate changelog
         run: |
-          nix develop .#release --command git cliff --tag ${{ github.ref_name }} -o CHANGELOG.md
+          nix develop .#release --command git cliff --latest -o CHANGELOG.md
 
       - uses: actions/upload-artifact@v4
         with:
@@ -54,6 +54,6 @@ jobs:
           # name: Release ${{ github.ref_name }}
           # files: result/bin/run-server-prod
           files: yausma-server-arx
-          body_file: ./CHANGELOG.md
+          body_path: ./CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

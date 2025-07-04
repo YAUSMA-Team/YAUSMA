@@ -123,7 +123,7 @@
           };
 
         devShells.release = with pkgs-unstable;
-          mkShell { buildInputs = [ git just nushell git-cliff ]; };
+          mkShell { buildInputs = [ just nushell git-cliff ]; };
 
         devShells.default = sh.backend // sh.release // sh.mobile;
       });
