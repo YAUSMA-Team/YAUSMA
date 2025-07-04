@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2025-07-04
+
+### Features
+
+- Release for backend
+
 ## [1.3.0] - 2025-07-04
 
 ### Bug Fixes
@@ -18,6 +24,7 @@ All notable changes to this project will be documented in this file.
 ### Performance
 
 - Optimize perf for release please
+- Optimize release please even more
 
 ## [1.2.0] - 2025-07-04
 
