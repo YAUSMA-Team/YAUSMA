@@ -3,7 +3,9 @@ name: Release Server Binary
 on:
   push:
     paths: ['flake.nix', 'backend/**', '.github/workflows/release_server.yml', 'web/**']
-    branches: ['master']
+    # branches: ['master']
+    tags:
+      - 'v*'  # Trigger on version tags (e.g., v1.0.0)
   workflow_dispatch:
 
 # Automatically cancels any existing runs in the same group
@@ -35,6 +37,13 @@ jobs:
       - name: Build bundle
         run: nix bundle .#server
 
+      # Generate changelog
+      - name: Generate changelog
+        run: |
+          nix develop .#release --command 
+          git cliff --tag ${{ github.ref_name }} -o CHANGELOG.md
+          cat CHANGELOG.md
+
       - uses: actions/upload-artifact@v4
         with:
           name: server-build
@@ -43,10 +52,10 @@ jobs:
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/master'
         with:
-          tag_name: latest-master
-          prerelease: true
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           # files: result/bin/run-server-prod
           files: yausma-server-arx
-          body: "Auto-generated release from master branch [Server]"
+          body_file: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
