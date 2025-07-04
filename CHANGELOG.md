@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2025-07-04
+
+### Bug Fixes
+
+- Use personal token for release please
+- More ci fixes
+
+### Features
+
+- Add release please badge
+
 ## [1.4.6] - 2025-07-04
 
 ### Bug Fixes
