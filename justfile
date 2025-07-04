@@ -4,5 +4,5 @@ release:
   cd mobile && ./build.nu
   cd backend && ./build.nu
   git add .
-  git commit -m "Release $(cat version.txt)"
+  # git commit -m "Release $(cat version.txt)"
   git tag -a "$(cat version.txt)" -m "Release $(cat version.txt)" 
