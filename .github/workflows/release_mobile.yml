@@ -31,7 +31,6 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
-
       # No need for Nix installation - it's preinstalled on NixOS runners
       # - run: cd mobile && nix develop . --command flutter pub get
       - run: cd mobile && nix develop . --command just gen-client
@@ -49,16 +48,10 @@ jobs:
           path: yausma.apk
 
       - uses: softprops/action-gh-release@v1
-        # if: github.ref == 'refs/heads/master'
-        # 
+        if: github.ref_type == 'tag'
         with:
-          # tag_name: ${{ github.ref_name }}
-          tag_name: v$(cat version.txt)  # Explicitly set from your version file
-          target_commitish: ${{ github.sha }}  # Anchor to current commit
-          # tag_name: latest-master
-          # prerelease: true
+          tag_name: ${{ github.ref_name }}
           files: yausma.apk
-          body: "Auto-generated release from master branch"
-          # body_file: CHANGELOG.md
+          body_file: ./CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -48,12 +48,12 @@ jobs:
           path: yausma-server-arx
 
       - uses: softprops/action-gh-release@v1
-        # if: github.ref == 'refs/heads/master'
+        if: github.ref_type == 'tag'
         with:
           tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          # name: Release ${{ github.ref_name }}
           # files: result/bin/run-server-prod
           files: yausma-server-arx
-          body_file: CHANGELOG.md
+          body_file: ./CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
