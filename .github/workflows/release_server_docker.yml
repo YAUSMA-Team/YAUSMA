@@ -2,7 +2,7 @@ name: Release Server Docker + Deploy
 
 on:
   push:
-    paths: ['flake.nix', 'backend/**', '.github/workflows/release_server_docker.yml']
+    paths: ['flake.nix', 'backend/**', '.github/workflows/release_server_docker.yml', "web/**"]
     branches: ['master']
   workflow_dispatch:
 
