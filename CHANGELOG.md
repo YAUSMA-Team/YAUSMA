@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2025-07-04
+
+### Features
+
+- Sync backend and mobile versions with version.txt
+
 ## [1.1.1] - 2025-07-04
 
 ### Bug Fixes
