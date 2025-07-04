@@ -139,7 +139,7 @@
               git
               just
               nushell
-              git-cliff
+              pkgs-unstable.git-cliff
             ] ++ commonBuildInputs;
           };
       });
