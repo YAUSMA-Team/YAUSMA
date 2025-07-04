@@ -38,8 +38,10 @@
         commonBuildInputs = with pkgs; [
           # Chore
           just
+          nushell
           parallel
           openapi-generator-cli
+          pkgs-unstable.git-cliff
         ];
         server = pkgs-unstable.rustPlatform.buildRustPackage {
           pname = "yausma-server-unwrapped";
@@ -115,8 +117,6 @@
               androidSdk # The customized SDK that we've made above
               jdk17
 
-              # Misc
-              pkgs-unstable.git-cliff
             ] ++ commonBuildInputs;
           };
 
