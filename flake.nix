@@ -116,6 +116,7 @@
         devShells.backend = with pkgs;
           mkShell {
             RUST_LOG = "debug";
+            RUSTFLAGS = "-D warnings";
             buildInputs = [
               # Backend
               rust

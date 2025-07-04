@@ -30,4 +30,4 @@ jobs:
       - name: Build backend
         run: |
           echo "Building backend for branch: ${{ github.ref_name }}"
-          cd backend && nix develop .#backend --command RUSTFLAGS="-D warnings" cargo check
+          cd backend && nix develop .#backend --command cargo check
