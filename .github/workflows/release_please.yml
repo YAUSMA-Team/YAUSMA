@@ -2,8 +2,8 @@ name: Release Please
 
 on:
   workflow_dispatch:  # Allows manual triggering
-  push:
-    branches: [ master ] 
+  # push:
+  #   branches: [ master ] 
 
 jobs:
   release:
