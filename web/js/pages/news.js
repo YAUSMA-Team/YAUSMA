@@ -132,6 +132,7 @@ function initThemeAnimations() {
 
 // Perform search with search term only
 async function performSearch() {
+    const debugPrefix = '[YAUSMA-NEWS-SEARCH-DEBUG]';
     if (NewsPage.isLoading) return;
     
     NewsPage.isLoading = true;
@@ -140,7 +141,9 @@ async function performSearch() {
     showLoadingState();
     
     try {
-        console.log('Performing search with term:', NewsPage.searchTerm);
+        console.log(`${debugPrefix} === PERFORMING SEARCH ===`);
+        console.log(`${debugPrefix} Search term:`, NewsPage.searchTerm);
+        console.log(`${debugPrefix} window.dataApi available:`, !!window.dataApi);
         
         let articles;
         
@@ -148,13 +151,23 @@ async function performSearch() {
         if (window.dataApi) {
             // Use real API to fetch news
             const searchParams = NewsPage.searchTerm ? { ticker: NewsPage.searchTerm } : {};
+            console.log(`${debugPrefix} Search params:`, searchParams);
             
             articles = await new Promise((resolve, reject) => {
+                console.log(`${debugPrefix} Creating Promise for search getNews call`);
+                
                 window.dataApi.getNews(searchParams, (error, data, response) => {
+                    console.log(`${debugPrefix} Search getNews callback invoked`);
+                    console.log(`${debugPrefix} Search callback error:`, error);
+                    console.log(`${debugPrefix} Search callback data:`, data);
+                    console.log(`${debugPrefix} Search callback data type:`, typeof data);
+                    console.log(`${debugPrefix} Search callback response status:`, response?.status);
+                    
                     if (error) {
-                        console.error('API error searching news:', error);
+                        console.error(`${debugPrefix} API error searching news:`, error);
                         reject(error);
                     } else {
+                        console.log(`${debugPrefix} Search API success, resolving with:`, data || []);
                         resolve(data || []);
                     }
                 });
@@ -162,9 +175,12 @@ async function performSearch() {
             
         } else {
             // API client not available
-            console.log('API client not available');
+            console.log(`${debugPrefix} API client not available`);
             articles = [];
         }
+        
+        console.log(`${debugPrefix} Search final articles:`, articles);
+        console.log(`${debugPrefix} Search final articles count:`, articles.length);
         
         // Update articles in state
         NewsPage.articles = articles;
@@ -177,13 +193,17 @@ async function performSearch() {
         
         // Show empty state if no results
         if (articles.length === 0) {
+            console.log(`${debugPrefix} No search results, showing empty state`);
             showEmptyState();
         } else {
+            console.log(`${debugPrefix} Search results found, hiding empty state`);
             hideEmptyState();
         }
         
+        console.log(`${debugPrefix} === SEARCH COMPLETED SUCCESSFULLY ===`);
+        
     } catch (error) {
-        console.error('Error performing search:', error);
+        console.error(`${debugPrefix} Error performing search:`, error);
         handleSearchError(error);
         
     } finally {
@@ -406,8 +426,16 @@ function updateResultsCount(count) {
 
 // Load news articles on page initialization
 async function loadNewsArticles() {
+    const debugPrefix = '[YAUSMA-NEWS-DEBUG]';
     try {
-        console.log('=== LOADING INITIAL NEWS ARTICLES ===');
+        console.log(`${debugPrefix} === LOADING INITIAL NEWS ARTICLES ===`);
+        console.log(`${debugPrefix} window.dataApi available:`, !!window.dataApi);
+        console.log(`${debugPrefix} typeof window.dataApi:`, typeof window.dataApi);
+        
+        if (window.dataApi) {
+            console.log(`${debugPrefix} dataApi.apiClient available:`, !!window.dataApi.apiClient);
+            console.log(`${debugPrefix} dataApi.apiClient.basePath:`, window.dataApi.apiClient?.basePath);
+        }
         
         // Show loading state
         showLoadingState();
@@ -416,51 +444,83 @@ async function loadNewsArticles() {
         
         // Check if API client is available
         if (window.dataApi) {
+            console.log(`${debugPrefix} Using real API to fetch all news`);
+            
             // Use real API to fetch all news
             articles = await new Promise((resolve, reject) => {
+                console.log(`${debugPrefix} Creating Promise for getNews call`);
+                console.log(`${debugPrefix} Calling window.dataApi.getNews with empty params`);
+                
                 window.dataApi.getNews({}, (error, data, response) => {
+                    console.log(`${debugPrefix} getNews Promise callback invoked`);
+                    console.log(`${debugPrefix} getNews Promise callback error:`, error);
+                    console.log(`${debugPrefix} getNews Promise callback error type:`, error?.constructor?.name);
+                    console.log(`${debugPrefix} getNews Promise callback data:`, data);
+                    console.log(`${debugPrefix} getNews Promise callback data type:`, typeof data);
+                    console.log(`${debugPrefix} getNews Promise callback data isArray:`, Array.isArray(data));
+                    console.log(`${debugPrefix} getNews Promise callback response:`, response);
+                    console.log(`${debugPrefix} getNews Promise callback response status:`, response?.status);
+                    console.log(`${debugPrefix} getNews Promise callback response body:`, response?.body);
+                    console.log(`${debugPrefix} getNews Promise callback response text:`, response?.text);
+                    
                     if (error) {
-                        console.error('API error loading news:', error);
+                        console.error(`${debugPrefix} API error loading news:`, error);
+                        console.error(`${debugPrefix} API error details:`, {
+                            name: error.name,
+                            message: error.message,
+                            stack: error.stack,
+                            response: error.response
+                        });
                         reject(error);
                     } else {
+                        console.log(`${debugPrefix} API success, resolving with data:`, data);
+                        console.log(`${debugPrefix} Data fallback check: data || [] =`, data || []);
                         resolve(data || []);
                     }
                 });
             });
             
         } else {
-            console.log('API client not available');
+            console.log(`${debugPrefix} API client not available`);
             articles = [];
         }
         
-        console.log('Received articles:', articles);
-        console.log('Articles count:', articles.length);
+        console.log(`${debugPrefix} Final received articles:`, articles);
+        console.log(`${debugPrefix} Final articles type:`, typeof articles);
+        console.log(`${debugPrefix} Final articles isArray:`, Array.isArray(articles));
+        console.log(`${debugPrefix} Final articles count:`, articles.length);
+        
+        if (Array.isArray(articles) && articles.length > 0) {
+            console.log(`${debugPrefix} First article structure:`, articles[0]);
+            console.log(`${debugPrefix} First article keys:`, Object.keys(articles[0] || {}));
+        }
         
         // Update state
         NewsPage.articles = articles;
+        console.log(`${debugPrefix} Updated NewsPage.articles:`, NewsPage.articles);
         
         // Update UI
-        console.log('Updating news grid...');
+        console.log(`${debugPrefix} Updating news grid...`);
         updateNewsGrid(articles);
         updateResultsCount(articles.length);
         
         if (articles.length === 0) {
-            console.log('No articles found, showing empty state');
+            console.log(`${debugPrefix} No articles found, showing empty state`);
             showEmptyState();
         } else {
-            console.log('Articles found, hiding empty state');
+            console.log(`${debugPrefix} Articles found, hiding empty state`);
             hideEmptyState();
         }
         
-        console.log(`=== LOADED ${articles.length} NEWS ARTICLES SUCCESSFULLY ===`);
+        console.log(`${debugPrefix} === LOADED ${articles.length} NEWS ARTICLES SUCCESSFULLY ===`);
         
     } catch (error) {
-        console.error('=== ERROR LOADING INITIAL NEWS ARTICLES ===');
-        console.error('Error:', error);
-        console.error('Error type:', error.constructor.name);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-        console.error('=== END ERROR LOADING INITIAL NEWS ARTICLES ===');
+        console.error(`${debugPrefix} === ERROR LOADING INITIAL NEWS ARTICLES ===`);
+        console.error(`${debugPrefix} Error:`, error);
+        console.error(`${debugPrefix} Error type:`, error.constructor.name);
+        console.error(`${debugPrefix} Error message:`, error.message);
+        console.error(`${debugPrefix} Error stack:`, error.stack);
+        console.error(`${debugPrefix} === END ERROR LOADING INITIAL NEWS ARTICLES ===`);
         
         // Show error state
         handleSearchError(error);
@@ -709,6 +769,7 @@ function updateNewsGrid(articles) {
         throw error;
     }
 }
+
 
 // Theme integration
 document.addEventListener('themeChanged', function(e) {

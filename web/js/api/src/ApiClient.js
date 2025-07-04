@@ -487,19 +487,66 @@ class ApiClient {
         }
 
         request.end((error, response) => {
+            // Enhanced logging for debugging
+            const requestUrl = url;
+            const debugPrefix = '[YAUSMA-API-DEBUG]';
+            
+            console.log(`${debugPrefix} Request completed for ${httpMethod} ${requestUrl}`);
+            console.log(`${debugPrefix} Query params:`, this.normalizeParams(queryParams));
+            
+            if (error) {
+                console.error(`${debugPrefix} Request error:`, error);
+                console.error(`${debugPrefix} Error type:`, error.constructor.name);
+                console.error(`${debugPrefix} Error message:`, error.message);
+                if (error.response) {
+                    console.error(`${debugPrefix} Error response status:`, error.response.status);
+                    console.error(`${debugPrefix} Error response text:`, error.response.text);
+                }
+            } else {
+                console.log(`${debugPrefix} Response status:`, response.status);
+                console.log(`${debugPrefix} Response headers:`, response.headers);
+                console.log(`${debugPrefix} Response body type:`, typeof response.body);
+                console.log(`${debugPrefix} Response body:`, response.body);
+                console.log(`${debugPrefix} Response text length:`, response.text ? response.text.length : 'N/A');
+                console.log(`${debugPrefix} Response text preview:`, response.text ? response.text.substring(0, 200) : 'N/A');
+                
+                if (Array.isArray(response.body)) {
+                    console.log(`${debugPrefix} Response body is array with length:`, response.body.length);
+                } else if (response.body && typeof response.body === 'object') {
+                    console.log(`${debugPrefix} Response body object keys:`, Object.keys(response.body));
+                }
+            }
+            
             if (callback) {
                 var data = null;
                 if (!error) {
                     try {
+                        console.log(`${debugPrefix} Starting deserialization for returnType:`, returnType);
                         data = this.deserialize(response, returnType);
+                        console.log(`${debugPrefix} Deserialization completed. Result type:`, typeof data);
+                        console.log(`${debugPrefix} Deserialized data:`, data);
+                        
+                        if (Array.isArray(data)) {
+                            console.log(`${debugPrefix} Deserialized data is array with length:`, data.length);
+                            if (data.length > 0) {
+                                console.log(`${debugPrefix} First array item:`, data[0]);
+                            }
+                        }
+                        
                         if (this.enableCookies && typeof window === 'undefined'){
                             this.agent._saveCookies(response);
                         }
                     } catch (err) {
+                        console.error(`${debugPrefix} Deserialization error:`, err);
+                        console.error(`${debugPrefix} Deserialization error type:`, err.constructor.name);
+                        console.error(`${debugPrefix} Deserialization error message:`, err.message);
+                        console.error(`${debugPrefix} Deserialization error stack:`, err.stack);
                         error = err;
                     }
                 }
 
+                console.log(`${debugPrefix} Calling callback with error:`, error ? error.message : 'null');
+                console.log(`${debugPrefix} Calling callback with data:`, data);
                 callback(error, data, response);
             }
         });

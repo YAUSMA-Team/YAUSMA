@@ -342,34 +342,36 @@ function handleSigninSubmit(e) {
     // Clear previous messages
     clearFormMessages();
     
-    // Validate form
-    var emailValid = validateField(document.getElementById('signinEmail'));
-    var passwordValid = validateField(document.getElementById('signinPassword'));
-    
-    if (!emailValid || !passwordValid) {
+    // Simple validation
+    if (!email || !password) {
+        showFormError('Please fill in all fields.', 'signin');
         return;
     }
     
     // Show loading state
     setFormLoading(true, 'signin');
     
-    // Hash password and make API call
-    hashPassword(password).then(function(hashedPassword) {
-        var credentials = new UserCredentials(email, hashedPassword);
-        
-        window.userApi.login(credentials, function(error, data, response) {
-            setFormLoading(false, 'signin');
-            
-            if (error) {
-                handleApiError(error, 'signin');
+    // Simple test credentials validation
+    setTimeout(function() {
+        if (email === 'test@test' && password === 'test') {
+            // Login successful
+            if (window.authManager) {
+                if (window.authManager.login(email, password)) {
+                    handleSigninSuccess(email);
+                } else {
+                    setFormLoading(false, 'signin');
+                    showFormError('Login failed. Please try again.', 'signin');
+                }
             } else {
-                handleSigninSuccess(email);
+                setFormLoading(false, 'signin');
+                showFormError('Authentication system not available.', 'signin');
             }
-        });
-    }).catch(function(error) {
-        setFormLoading(false, 'signin');
-        showFormError('Failed to process password. Please try again.', 'signin');
-    });
+        } else {
+            // Login failed
+            setFormLoading(false, 'signin');
+            showFormError('Invalid credentials. Use "test" for both username and password.', 'signin');
+        }
+    }, 500); // Small delay to show loading state
 }
 
 // Handle sign up form submission
@@ -462,10 +464,20 @@ function handleSigninSuccess(email) {
     // Store user session (in real app, this would be handled by backend)
     localStorage.setItem('yausma_user_email', email);
     
-    // Redirect after delay
-    setTimeout(function() {
-        window.location.href = '../index.html';
-    }, 1500);
+    // Check if there's a return URL from page protection
+    var returnUrl = sessionStorage.getItem('yausma_return_url');
+    if (returnUrl) {
+        sessionStorage.removeItem('yausma_return_url');
+        // Redirect after delay
+        setTimeout(function() {
+            window.location.href = returnUrl;
+        }, 1500);
+    } else {
+        // Redirect to homepage after delay
+        setTimeout(function() {
+            window.location.href = '../index.html';
+        }, 1500);
+    }
 }
 
 // Handle successful sign up

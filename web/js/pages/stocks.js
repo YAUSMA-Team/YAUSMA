@@ -528,6 +528,7 @@ function debounce(func, wait) {
     };
 }
 
+
 // Export functions for global use
 window.StocksPage = StocksPage;
 window.clearSearch = clearSearch;

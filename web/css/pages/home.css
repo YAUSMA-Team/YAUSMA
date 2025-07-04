@@ -652,24 +652,6 @@
     margin-bottom: 0;
 }
 
-.btn-watchlist {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1.125rem;
-    padding: 0.5rem;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-}
-
-.btn-watchlist:hover {
-    color: var(--interactive-blue);
-    background: rgba(52, 74, 251, 0.1);
-}
-
-.btn-watchlist.active {
-    color: var(--warning-yellow);
-}
 
 .stock-price-info {
     margin-top: 1rem;

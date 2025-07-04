@@ -25,6 +25,9 @@ class GlobalThemeManager {
         // Setup keyboard shortcuts
         this.setupKeyboardShortcuts();
         
+        // Setup cookie event listeners
+        this.setupCookieEventListeners();
+        
         console.log('<� Global Theme Manager initialized');
     }
 
@@ -36,29 +39,52 @@ class GlobalThemeManager {
     }
 
     loadSavedTheme() {
-        // Wait for CONFIG and storage to be available
-        if (typeof CONFIG === 'undefined' || typeof storage === 'undefined') {
-            console.warn('CONFIG or storage not available, using default theme');
-            this.applyTheme('light', false);
-            return;
-        }
-        
-        const savedTheme = storage.get(CONFIG.STORAGE_KEYS.THEME);
-        const userPrefs = storage.getUserPreferences();
+        console.log('🎨 Global Theme Manager loading saved theme...');
         
         let themeToApply;
+        let themeSource = 'default';
         
-        if (userPrefs.autoTheme && this.systemThemeQuery) {
-            // Use system theme if auto-theme is enabled
-            themeToApply = this.systemThemeQuery.matches ? 'dark' : 'light';
-        } else if (savedTheme && CONFIG.THEME.AVAILABLE && CONFIG.THEME.AVAILABLE.includes(savedTheme)) {
-            // Use saved theme
-            themeToApply = savedTheme;
-        } else {
-            // Use default theme
-            themeToApply = CONFIG.THEME.DEFAULT || 'light';
+        // First priority: Check cookies for theme preference
+        if (window.cookieManager) {
+            const cookieTheme = window.cookieManager.getTheme(null);
+            if (cookieTheme && ['light', 'dark'].includes(cookieTheme)) {
+                themeToApply = cookieTheme;
+                themeSource = 'cookie';
+                console.log(`🍪 Global Theme Manager found theme in cookie: ${cookieTheme}`);
+            }
         }
         
+        // Second priority: Check localStorage for migration
+        if (!themeToApply && typeof Storage !== 'undefined') {
+            const localTheme = Storage.get('theme', null, false); // Don't prefer cookie here to avoid recursion
+            if (localTheme && ['light', 'dark'].includes(localTheme)) {
+                themeToApply = localTheme;
+                themeSource = 'localStorage';
+                console.log(`💾 Global Theme Manager found theme in localStorage: ${localTheme}`);
+                
+                // Migrate to cookie if cookie manager is available
+                if (window.cookieManager) {
+                    console.log(`🔄 Global Theme Manager migrating theme to cookie: ${localTheme}`);
+                    window.cookieManager.setTheme(localTheme);
+                }
+            }
+        }
+        
+        // Third priority: Check system preference
+        if (!themeToApply && this.systemThemeQuery) {
+            themeToApply = this.systemThemeQuery.matches ? 'dark' : 'light';
+            themeSource = 'system';
+            console.log(`⚙️ Global Theme Manager using system theme: ${themeToApply}`);
+        }
+        
+        // Final fallback: Use default theme
+        if (!themeToApply) {
+            themeToApply = 'light';
+            themeSource = 'default';
+            console.log(`🔄 Global Theme Manager using default theme: ${themeToApply}`);
+        }
+        
+        console.log(`🎨 Global Theme Manager applying theme: ${themeToApply} (source: ${themeSource})`);
         this.applyTheme(themeToApply, false);
     }
 
@@ -129,10 +155,8 @@ class GlobalThemeManager {
             // Update theme toggle button
             this.updateThemeToggleButton(theme);
             
-            // Store theme preference if storage is available
-            if (typeof storage !== 'undefined' && typeof CONFIG !== 'undefined') {
-                storage.set(CONFIG.STORAGE_KEYS.THEME, theme);
-            }
+            // Store theme preference - prioritize cookies
+            this.saveThemePreference(theme);
             
             // Update current theme
             const previousTheme = this.currentTheme;
@@ -488,6 +512,106 @@ class GlobalThemeManager {
         };
     }
 
+    /**
+     * Save theme preference using cookies with localStorage fallback
+     * @param {string} theme - Theme to save
+     */
+    saveThemePreference(theme) {
+        console.log(`💾 Global Theme Manager saving theme preference: ${theme}`);
+        
+        // Primary: Save to cookie if available
+        if (window.cookieManager) {
+            const success = window.cookieManager.setTheme(theme);
+            if (success) {
+                console.log(`🍪 Global Theme Manager saved theme to cookie: ${theme}`);
+                return;
+            }
+        }
+        
+        // Fallback: Save to localStorage via Storage utility
+        if (typeof Storage !== 'undefined') {
+            const success = Storage.set('theme', theme);
+            if (success) {
+                console.log(`💾 Global Theme Manager saved theme to localStorage: ${theme}`);
+                return;
+            }
+        }
+        
+        console.warn('⚠️ Global Theme Manager failed to save theme preference');
+    }
+    
+    /**
+     * Setup cookie event listeners for cross-tab synchronization
+     */
+    setupCookieEventListeners() {
+        // Listen for cookie change events from CookieManager
+        window.addEventListener('cookiechange', (event) => {
+            console.log('🍪 Global Theme Manager received cookie change event:', event.detail);
+            
+            // Handle theme cookie changes from other tabs
+            if (event.detail.name === 'yausma_theme' && event.detail.action === 'sync') {
+                const newTheme = event.detail.value;
+                if (newTheme && newTheme !== this.currentTheme && ['light', 'dark'].includes(newTheme)) {
+                    console.log(`🔄 Global Theme Manager syncing theme from other tab: ${newTheme}`);
+                    this.applyTheme(newTheme, true);
+                }
+            }
+        });
+        
+        // Listen for storage events (localStorage fallback synchronization)
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'theme' && event.newValue !== event.oldValue) {
+                try {
+                    const newTheme = JSON.parse(event.newValue);
+                    if (newTheme && newTheme !== this.currentTheme && ['light', 'dark'].includes(newTheme)) {
+                        console.log(`🔄 Global Theme Manager syncing theme from localStorage: ${newTheme}`);
+                        this.applyTheme(newTheme, true);
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Global Theme Manager failed to parse theme from storage event:', e);
+                }
+            }
+        });
+    }
+    
+    /**
+     * Get theme preference with cookie priority
+     * @returns {string} Current theme preference
+     */
+    getThemePreference() {
+        // First check cookies
+        if (window.cookieManager) {
+            const cookieTheme = window.cookieManager.getTheme(null);
+            if (cookieTheme) {
+                return cookieTheme;
+            }
+        }
+        
+        // Fallback to localStorage
+        if (typeof Storage !== 'undefined') {
+            return Storage.get('theme', 'light');
+        }
+        
+        return 'light';
+    }
+    
+    /**
+     * Clear theme preference from all storage
+     */
+    clearThemePreference() {
+        console.log('🗑️ Global Theme Manager clearing theme preference');
+        
+        // Clear from cookies
+        if (window.cookieManager) {
+            window.cookieManager.deleteTheme();
+        }
+        
+        // Clear from localStorage
+        if (typeof Storage !== 'undefined') {
+            Storage.remove('theme');
+        }
+    }
+    
     /**
      * Destroy theme manager
      */

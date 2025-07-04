@@ -48,6 +48,10 @@ export default class DataApi {
      * data is of type: {@link Array.<module:model/MarketOverviewItem>}
      */
     getMarketOverview(callback) {
+      const debugPrefix = '[YAUSMA-DATAAPI-DEBUG]';
+      
+      console.log(`${debugPrefix} getMarketOverview called`);
+      
       let postBody = null;
 
       let pathParams = {
@@ -59,14 +63,36 @@ export default class DataApi {
       let formParams = {
       };
 
+      console.log(`${debugPrefix} getMarketOverview queryParams:`, queryParams);
+      console.log(`${debugPrefix} getMarketOverview returnType:`, [MarketOverviewItem]);
+
       let authNames = [];
       let contentTypes = [];
       let accepts = ['application/json'];
       let returnType = [MarketOverviewItem];
+      
+      // Wrap the callback to add logging
+      const wrappedCallback = (error, data, response) => {
+        console.log(`${debugPrefix} getMarketOverview callback invoked`);
+        console.log(`${debugPrefix} getMarketOverview callback error:`, error);
+        console.log(`${debugPrefix} getMarketOverview callback data:`, data);
+        console.log(`${debugPrefix} getMarketOverview callback data type:`, typeof data);
+        if (Array.isArray(data)) {
+          console.log(`${debugPrefix} getMarketOverview callback data length:`, data.length);
+        }
+        console.log(`${debugPrefix} getMarketOverview callback response status:`, response?.status);
+        
+        // Call the original callback
+        if (callback) {
+          callback(error, data, response);
+        }
+      };
+      
+      console.log(`${debugPrefix} getMarketOverview calling apiClient.callApi...`);
       return this.apiClient.callApi(
         '/api/data/market-overview', 'GET',
         pathParams, queryParams, headerParams, formParams, postBody,
-        authNames, contentTypes, accepts, returnType, null, callback
+        authNames, contentTypes, accepts, returnType, null, wrappedCallback
       );
     }
 
@@ -86,6 +112,11 @@ export default class DataApi {
      */
     getNews(opts, callback) {
       opts = opts || {};
+      const debugPrefix = '[YAUSMA-DATAAPI-DEBUG]';
+      
+      console.log(`${debugPrefix} getNews called with opts:`, opts);
+      console.log(`${debugPrefix} getNews ticker parameter:`, opts['ticker']);
+      
       let postBody = null;
 
       let pathParams = {
@@ -98,14 +129,41 @@ export default class DataApi {
       let formParams = {
       };
 
+      console.log(`${debugPrefix} getNews queryParams:`, queryParams);
+      console.log(`${debugPrefix} getNews returnType:`, [NewsItem]);
+
       let authNames = [];
       let contentTypes = [];
       let accepts = ['application/json'];
       let returnType = [NewsItem];
+      
+      // Wrap the callback to add logging
+      const wrappedCallback = (error, data, response) => {
+        console.log(`${debugPrefix} getNews callback invoked`);
+        console.log(`${debugPrefix} getNews callback error:`, error);
+        console.log(`${debugPrefix} getNews callback data:`, data);
+        console.log(`${debugPrefix} getNews callback data type:`, typeof data);
+        if (Array.isArray(data)) {
+          console.log(`${debugPrefix} getNews callback data length:`, data.length);
+          if (data.length > 0) {
+            console.log(`${debugPrefix} getNews callback first item:`, data[0]);
+            console.log(`${debugPrefix} getNews callback first item type:`, typeof data[0]);
+            console.log(`${debugPrefix} getNews callback first item constructor:`, data[0]?.constructor?.name);
+          }
+        }
+        console.log(`${debugPrefix} getNews callback response status:`, response?.status);
+        
+        // Call the original callback
+        if (callback) {
+          callback(error, data, response);
+        }
+      };
+      
+      console.log(`${debugPrefix} getNews calling apiClient.callApi...`);
       return this.apiClient.callApi(
         '/api/data/news', 'GET',
         pathParams, queryParams, headerParams, formParams, postBody,
-        authNames, contentTypes, accepts, returnType, null, callback
+        authNames, contentTypes, accepts, returnType, null, wrappedCallback
       );
     }
 
