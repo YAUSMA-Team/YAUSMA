@@ -28,7 +28,7 @@ jobs:
           git config user.email "ci@yausma.org"
 
       - name: Run release process
-        run: nix develop . --command just release
+        run: nix develop .#release --command just release
 
       - name: Push changes
         uses: ad-m/github-push-action@master

@@ -119,6 +119,9 @@
 
             ] ++ commonBuildInputs;
           };
-
+        devShells.release = pkgs.mkShell {
+          buildInputs =
+            [ pkgs.git pkgs.just pkgs.nushell pkgs-unstable.git-cliff ];
+        };
       });
 }
