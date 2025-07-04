@@ -2,11 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.3] - 2025-07-04
+
+### Bug Fixes
+
+- Releases
+
+### Miscellaneous Tasks
+
+- Bump
+
 ## [1.5.2] - 2025-07-04
 
 ### Miscellaneous Tasks
 
 - Use PAT for actions/checkout
+- Test release mobile
 
 ## [1.5.1] - 2025-07-04
 
