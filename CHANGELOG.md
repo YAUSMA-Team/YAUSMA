@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.6] - 2025-07-04
+
+### Bug Fixes
+
+- Avoid infinite recurrsion
+- Fix workflow for release mobile
+
 ## [1.4.5] - 2025-07-04
 
 ### Bug Fixes
