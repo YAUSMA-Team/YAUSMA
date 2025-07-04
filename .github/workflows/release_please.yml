@@ -14,12 +14,14 @@ jobs:
         with:
           fetch-depth: 0  # Required for git cliff to work
 
-      - name: Setup Just
-        uses: extractions/setup-just@v1
+      # Setup Nix
+      - uses: cachix/install-nix-action@v20
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
 
       - name: Run release process
-        run: |
-          just release
+        run: nix develop . --command just release
 
       - name: Push changes
         uses: ad-m/github-push-action@master
