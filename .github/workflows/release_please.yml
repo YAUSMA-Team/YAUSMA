@@ -33,7 +33,7 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.YR_TOKEN }}
           tags: true  # Push tags as well
           # branch: ${{ github.ref_name }}
           branch: master
