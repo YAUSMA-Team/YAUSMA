@@ -1,0 +1,29 @@
+name: Release Please
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  push:
+    branches: [ master ]  # Or your release branch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for git cliff to work
+
+      - name: Setup Just
+        uses: extractions/setup-just@v1
+
+      - name: Run release process
+        run: |
+          just release
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: true  # Push tags as well
+          branch: ${{ github.ref_name }}
