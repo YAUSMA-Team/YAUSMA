@@ -25,7 +25,7 @@ class GlobalThemeManager {
         // Setup keyboard shortcuts
         this.setupKeyboardShortcuts();
         
-        console.log('<¨ Global Theme Manager initialized');
+        console.log('<ï¿½ Global Theme Manager initialized');
     }
 
     initSystemThemeQuery() {
@@ -36,6 +36,13 @@ class GlobalThemeManager {
     }
 
     loadSavedTheme() {
+        // Wait for CONFIG and storage to be available
+        if (typeof CONFIG === 'undefined' || typeof storage === 'undefined') {
+            console.warn('CONFIG or storage not available, using default theme');
+            this.applyTheme('light', false);
+            return;
+        }
+        
         const savedTheme = storage.get(CONFIG.STORAGE_KEYS.THEME);
         const userPrefs = storage.getUserPreferences();
         
@@ -44,12 +51,12 @@ class GlobalThemeManager {
         if (userPrefs.autoTheme && this.systemThemeQuery) {
             // Use system theme if auto-theme is enabled
             themeToApply = this.systemThemeQuery.matches ? 'dark' : 'light';
-        } else if (savedTheme && CONFIG.THEME.AVAILABLE.includes(savedTheme)) {
+        } else if (savedTheme && CONFIG.THEME.AVAILABLE && CONFIG.THEME.AVAILABLE.includes(savedTheme)) {
             // Use saved theme
             themeToApply = savedTheme;
         } else {
             // Use default theme
-            themeToApply = CONFIG.THEME.DEFAULT;
+            themeToApply = CONFIG.THEME.DEFAULT || 'light';
         }
         
         this.applyTheme(themeToApply, false);
@@ -87,9 +94,14 @@ class GlobalThemeManager {
      * @returns {Promise} Promise that resolves when theme is applied
      */
     async applyTheme(theme, animate = true) {
-        if (!CONFIG.THEME.AVAILABLE.includes(theme)) {
-            console.warn(`Invalid theme: ${theme}`);
-            return;
+        // Validate theme
+        const availableThemes = (typeof CONFIG !== 'undefined' && CONFIG.THEME && CONFIG.THEME.AVAILABLE) 
+            ? CONFIG.THEME.AVAILABLE 
+            : ['light', 'dark'];
+        
+        if (!availableThemes.includes(theme)) {
+            console.warn(`Invalid theme: ${theme}, using default`);
+            theme = 'light';
         }
 
         if (this.currentTheme === theme && !animate) {
@@ -117,8 +129,10 @@ class GlobalThemeManager {
             // Update theme toggle button
             this.updateThemeToggleButton(theme);
             
-            // Store theme preference
-            storage.set(CONFIG.STORAGE_KEYS.THEME, theme);
+            // Store theme preference if storage is available
+            if (typeof storage !== 'undefined' && typeof CONFIG !== 'undefined') {
+                storage.set(CONFIG.STORAGE_KEYS.THEME, theme);
+            }
             
             // Update current theme
             const previousTheme = this.currentTheme;
@@ -141,7 +155,7 @@ class GlobalThemeManager {
                 document.body.classList.remove('theme-transitioning');
             }
             
-            console.log(`<¨ Theme applied: ${theme}`);
+            console.log(`<ï¿½ Theme applied: ${theme}`);
             
         } catch (error) {
             console.error('Theme application error:', error);
@@ -183,7 +197,32 @@ class GlobalThemeManager {
         if (themeStylesheet) {
             const isInPages = window.location.pathname.includes('/pages/');
             const basePath = isInPages ? '../css/themes/' : 'css/themes/';
-            themeStylesheet.href = `${basePath}${theme}.css`;
+            const newHref = `${basePath}${theme}.css`;
+            
+            console.log(`ðŸŽ¨ Global Theme Manager updating stylesheet: ${newHref}`);
+            console.log(`ðŸ“ Current path: ${window.location.pathname}, isInPages: ${isInPages}`);
+            
+            // Add load error handling
+            const onLoad = () => {
+                console.log(`âœ… Global Theme Manager stylesheet loaded: ${newHref}`);
+                themeStylesheet.removeEventListener('load', onLoad);
+                themeStylesheet.removeEventListener('error', onError);
+            };
+            
+            const onError = () => {
+                console.error(`âŒ Global Theme Manager failed to load: ${newHref}`);
+                if (window.app && window.app.components && window.app.components.get('notifications')) {
+                    window.app.components.get('notifications').error(`Failed to load ${theme} theme stylesheet.`);
+                }
+                themeStylesheet.removeEventListener('load', onLoad);
+                themeStylesheet.removeEventListener('error', onError);
+            };
+            
+            themeStylesheet.addEventListener('load', onLoad);
+            themeStylesheet.addEventListener('error', onError);
+            themeStylesheet.href = newHref;
+        } else {
+            console.warn('ðŸš¨ Theme stylesheet element not found (#theme-stylesheet)');
         }
     }
 
@@ -262,7 +301,10 @@ class GlobalThemeManager {
 
     waitForTransition() {
         return new Promise(resolve => {
-            setTimeout(resolve, CONFIG.THEME.TRANSITION_DURATION);
+            const duration = (typeof CONFIG !== 'undefined' && CONFIG.THEME && CONFIG.THEME.TRANSITION_DURATION) 
+                ? CONFIG.THEME.TRANSITION_DURATION 
+                : 300;
+            setTimeout(resolve, duration);
         });
     }
 
@@ -289,6 +331,10 @@ class GlobalThemeManager {
     }
 
     handleSystemThemeChange(event) {
+        if (typeof storage === 'undefined') {
+            return;
+        }
+        
         const userPrefs = storage.getUserPreferences();
         
         if (userPrefs.autoTheme) {
@@ -358,6 +404,11 @@ class GlobalThemeManager {
      * @param {boolean} enabled - Whether to enable auto theme
      */
     setAutoTheme(enabled) {
+        if (typeof storage === 'undefined') {
+            console.warn('Storage not available for auto theme setting');
+            return;
+        }
+        
         const userPrefs = storage.getUserPreferences();
         userPrefs.autoTheme = enabled;
         storage.setUserPreferences(userPrefs);
@@ -372,6 +423,10 @@ class GlobalThemeManager {
      * @returns {boolean} Whether auto theme is enabled
      */
     isAutoThemeEnabled() {
+        if (typeof storage === 'undefined') {
+            return false;
+        }
+        
         const userPrefs = storage.getUserPreferences();
         return userPrefs.autoTheme || false;
     }
@@ -425,8 +480,8 @@ class GlobalThemeManager {
     getThemeConfig() {
         return {
             current: this.currentTheme,
-            available: CONFIG.THEME.AVAILABLE,
-            default: CONFIG.THEME.DEFAULT,
+            available: (typeof CONFIG !== 'undefined' && CONFIG.THEME && CONFIG.THEME.AVAILABLE) ? CONFIG.THEME.AVAILABLE : ['light', 'dark'],
+            default: (typeof CONFIG !== 'undefined' && CONFIG.THEME && CONFIG.THEME.DEFAULT) ? CONFIG.THEME.DEFAULT : 'light',
             autoTheme: this.isAutoThemeEnabled(),
             systemTheme: this.getSystemTheme(),
             isTransitioning: this.isTransitioning
@@ -446,7 +501,7 @@ class GlobalThemeManager {
         this.observers.clear();
         this.themeChangeCallbacks.clear();
         
-        console.log('<¨ Global Theme Manager destroyed');
+        console.log('<ï¿½ Global Theme Manager destroyed');
     }
 }
 

@@ -1,1029 +1,719 @@
 /**
  * YAUSMA Stocks Page JavaScript
- * Coinbase-inspired stock market dashboard functionality
+ * Handles stock display, search functionality, and theme-aware animations
  */
 
-class StocksDashboard {
-    constructor() {
-        this.stocksData = [];
-        this.watchlist = new Set();
-        this.currentTab = 'allStocks';
-        this.searchResults = [];
-        this.displayedStocks = 20;
-        this.charts = new Map();
-        
-        this.init();
-    }
+// Stocks page state
+var StocksPage = {
+    searchTerm: '',
+    isLoading: false,
+    stocks: [],
+    filteredStocks: []
+};
 
-    init() {
-        this.loadMockData();
-        this.bindEvents();
-        this.loadWatchlist();
-        this.updateMarketIndices();
-        this.startRealTimeUpdates();
-    }
-
-    // Mock Data Generation
-    loadMockData() {
-        this.stocksData = this.generateMockStocks();
-        this.renderCurrentTab();
-    }
-
-    generateMockStocks() {
-        const stocks = [
-            // Technology Sector
-            { symbol: 'AAPL', name: 'Apple Inc.', sector: 'technology', marketCap: 'large' },
-            { symbol: 'MSFT', name: 'Microsoft Corporation', sector: 'technology', marketCap: 'large' },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'technology', marketCap: 'large' },
-            { symbol: 'AMZN', name: 'Amazon.com Inc.', sector: 'technology', marketCap: 'large' },
-            { symbol: 'META', name: 'Meta Platforms Inc.', sector: 'technology', marketCap: 'large' },
-            { symbol: 'TSLA', name: 'Tesla Inc.', sector: 'technology', marketCap: 'large' },
-            { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'technology', marketCap: 'large' },
-            { symbol: 'NFLX', name: 'Netflix Inc.', sector: 'technology', marketCap: 'large' },
-            { symbol: 'CRM', name: 'Salesforce Inc.', sector: 'technology', marketCap: 'large' },
-            { symbol: 'ADBE', name: 'Adobe Inc.', sector: 'technology', marketCap: 'large' },
-            
-            // Healthcare Sector
-            { symbol: 'JNJ', name: 'Johnson & Johnson', sector: 'healthcare', marketCap: 'large' },
-            { symbol: 'PFE', name: 'Pfizer Inc.', sector: 'healthcare', marketCap: 'large' },
-            { symbol: 'UNH', name: 'UnitedHealth Group Inc.', sector: 'healthcare', marketCap: 'large' },
-            { symbol: 'ABBV', name: 'AbbVie Inc.', sector: 'healthcare', marketCap: 'large' },
-            { symbol: 'MRK', name: 'Merck & Co. Inc.', sector: 'healthcare', marketCap: 'large' },
-            
-            // Finance Sector
-            { symbol: 'JPM', name: 'JPMorgan Chase & Co.', sector: 'finance', marketCap: 'large' },
-            { symbol: 'BAC', name: 'Bank of America Corp.', sector: 'finance', marketCap: 'large' },
-            { symbol: 'WFC', name: 'Wells Fargo & Company', sector: 'finance', marketCap: 'large' },
-            { symbol: 'GS', name: 'Goldman Sachs Group Inc.', sector: 'finance', marketCap: 'large' },
-            { symbol: 'MS', name: 'Morgan Stanley', sector: 'finance', marketCap: 'large' },
-            
-            // Energy Sector
-            { symbol: 'XOM', name: 'Exxon Mobil Corporation', sector: 'energy', marketCap: 'large' },
-            { symbol: 'CVX', name: 'Chevron Corporation', sector: 'energy', marketCap: 'large' },
-            { symbol: 'COP', name: 'ConocoPhillips', sector: 'energy', marketCap: 'large' },
-            
-            // Consumer Sector
-            { symbol: 'WMT', name: 'Walmart Inc.', sector: 'consumer', marketCap: 'large' },
-            { symbol: 'PG', name: 'Procter & Gamble Co.', sector: 'consumer', marketCap: 'large' },
-            { symbol: 'KO', name: 'Coca-Cola Company', sector: 'consumer', marketCap: 'large' },
-            { symbol: 'PEP', name: 'PepsiCo Inc.', sector: 'consumer', marketCap: 'large' },
-            
-            // Industrial Sector
-            { symbol: 'BA', name: 'Boeing Company', sector: 'industrial', marketCap: 'large' },
-            { symbol: 'CAT', name: 'Caterpillar Inc.', sector: 'industrial', marketCap: 'large' },
-            { symbol: 'GE', name: 'General Electric Company', sector: 'industrial', marketCap: 'large' },
-            
-            // Materials Sector
-            { symbol: 'DD', name: 'DuPont de Nemours Inc.', sector: 'materials', marketCap: 'large' },
-            
-            // Utilities Sector
-            { symbol: 'NEE', name: 'NextEra Energy Inc.', sector: 'utilities', marketCap: 'large' }
-        ];
-
-        return stocks.map(stock => ({
-            ...stock,
-            price: this.generateRandomPrice(50, 500),
-            change: this.generateRandomChange(),
-            volume: this.generateRandomVolume(),
-            marketCapValue: this.generateMarketCap(stock.marketCap),
-            chartData: this.generateChartData(),
-            high52w: 0,
-            low52w: 0,
-            peRatio: this.generateRandomFloat(10, 50, 2),
-            dividend: this.generateRandomFloat(0, 5, 2),
-            beta: this.generateRandomFloat(0.5, 2.5, 2)
-        })).map(stock => ({
-            ...stock,
-            high52w: stock.price * this.generateRandomFloat(1.2, 1.8, 2),
-            low52w: stock.price * this.generateRandomFloat(0.6, 0.9, 2)
-        }));
-    }
-
-    generateRandomPrice(min, max) {
-        return parseFloat((Math.random() * (max - min) + min).toFixed(2));
-    }
-
-    generateRandomChange() {
-        const changePercent = (Math.random() - 0.5) * 10;
-        const changeAmount = changePercent * 5;
-        return {
-            percent: parseFloat(changePercent.toFixed(2)),
-            amount: parseFloat(changeAmount.toFixed(2))
-        };
-    }
-
-    generateRandomVolume() {
-        return Math.floor(Math.random() * 10000000) + 1000000;
-    }
-
-    generateMarketCap(size) {
-        switch (size) {
-            case 'large':
-                return Math.floor(Math.random() * 2000) + 100; // 100B - 2.1T
-            case 'mid':
-                return Math.floor(Math.random() * 8) + 2; // 2B - 10B
-            case 'small':
-                return Math.random() * 2; // 0 - 2B
-            default:
-                return Math.floor(Math.random() * 100) + 10;
+// Mock data matching the API structure provided by user
+var mockStocksData = [
+    {
+        "name": "Monero USD",
+        "short": "XMR-USD",
+        "sector": "CRYPTOCURRENCY",
+        "current_price": "$316.41",
+        "change": -1.58,
+        "high": 336.57,
+        "low": 316.03,
+        "symbol": "XMR-USD",
+        "volume": 126227824,
+        "news_article": {
+            "id": "f532845e-5229-4b9c-beea-6df5837f8b6f",
+            "title": "Best high-yield savings interest rates today, July 3, 2025 (top account pays 4.3% APY)",
+            "publisher": "Yahoo Personal Finance",
+            "source": "https://finance.yahoo.com/personal-finance/banking/article/best-high-yield-savings-interest-rates-today-thursday-july-3-2025-200632473.html",
+            "date": "1751573192"
+        }
+    },
+    {
+        "name": "MongoDB, Inc.",
+        "short": "MDB",
+        "sector": "EQUITY",
+        "current_price": "$211.34",
+        "change": 2.80,
+        "high": 213.79,
+        "low": 205.41,
+        "symbol": "MDB",
+        "volume": 1516513,
+        "news_article": {
+            "id": "e6552044-356a-3af2-81ef-985ae8837abc",
+            "title": "What Makes Atlas the Core Driver of MongoDB's Revenue Growth?",
+            "publisher": "Zacks",
+            "source": "https://finance.yahoo.com/news/makes-atlas-core-driver-mongodbs-171600546.html",
+            "date": "1751562960"
+        }
+    },
+    {
+        "name": "GitLab Inc.",
+        "short": "GTLB",
+        "sector": "EQUITY",
+        "current_price": "$46.37",
+        "change": 1.91,
+        "high": 46.73,
+        "low": 45.39,
+        "symbol": "GTLB",
+        "volume": 2197903,
+        "news_article": {
+            "id": "d6dfa439-1002-3df1-aa78-28abb318546a",
+            "title": "GitLab Maintains Buy Rating Despite Lowered Price Target, Shows Strong Seat Expansion",
+            "publisher": "Insider Monkey",
+            "source": "https://finance.yahoo.com/news/gitlab-maintains-buy-rating-despite-072056917.html",
+            "date": "1751440856"
+        }
+    },
+    {
+        "name": "Confluent, Inc.",
+        "short": "CFLT",
+        "sector": "EQUITY",
+        "current_price": "$26.30",
+        "change": 2.53,
+        "high": 26.70,
+        "low": 25.63,
+        "symbol": "CFLT",
+        "volume": 4695980,
+        "news_article": {
+            "id": "3d6e945d-6e4d-361b-924d-0e69d903fa1c",
+            "title": "The 5 Most Interesting Analyst Questions From Confluent's Q1 Earnings Call",
+            "publisher": "StockStory",
+            "source": "https://finance.yahoo.com/news/5-most-interesting-analyst-questions-122842359.html",
+            "date": "1750854522"
+        }
+    },
+    {
+        "name": "Apple Inc.",
+        "short": "AAPL",
+        "sector": "EQUITY",
+        "current_price": "$175.43",
+        "change": 1.66,
+        "high": 178.21,
+        "low": 173.52,
+        "symbol": "AAPL",
+        "volume": 89542103,
+        "news_article": {
+            "id": "apple-news-1",
+            "title": "Apple's Q3 Earnings Beat Expectations with Strong iPhone Sales",
+            "publisher": "MarketWatch",
+            "source": "https://www.marketwatch.com/story/apple-earnings-q3-2025",
+            "date": "1751550000"
+        }
+    },
+    {
+        "name": "Microsoft Corporation",
+        "short": "MSFT",
+        "sector": "EQUITY",
+        "current_price": "$387.92",
+        "change": 1.19,
+        "high": 392.45,
+        "low": 384.15,
+        "symbol": "MSFT",
+        "volume": 25847302,
+        "news_article": {
+            "id": "msft-news-1",
+            "title": "Microsoft Azure Growth Accelerates as AI Demand Surges",
+            "publisher": "Reuters",
+            "source": "https://www.reuters.com/technology/microsoft-azure-ai-growth-2025",
+            "date": "1751548000"
+        }
+    },
+    {
+        "name": "Tesla, Inc.",
+        "short": "TSLA",
+        "sector": "EQUITY",
+        "current_price": "$248.50",
+        "change": 2.33,
+        "high": 255.78,
+        "low": 243.12,
+        "symbol": "TSLA",
+        "volume": 156732891,
+        "news_article": {
+            "id": "tsla-news-1",
+            "title": "Tesla Deliveries Exceed Expectations Despite Production Challenges",
+            "publisher": "Bloomberg",
+            "source": "https://www.bloomberg.com/news/tesla-deliveries-q2-2025",
+            "date": "1751546000"
+        }
+    },
+    {
+        "name": "Bitcoin USD",
+        "short": "BTC-USD",
+        "sector": "CRYPTOCURRENCY",
+        "current_price": "$67,452.30",
+        "change": 3.25,
+        "high": 68901.45,
+        "low": 65234.12,
+        "symbol": "BTC-USD",
+        "volume": 892341567,
+        "news_article": {
+            "id": "btc-news-1",
+            "title": "Bitcoin Reaches New Monthly High as Institutional Adoption Grows",
+            "publisher": "CoinDesk",
+            "source": "https://www.coindesk.com/bitcoin-institutional-adoption-2025",
+            "date": "1751544000"
+        }
+    },
+    {
+        "name": "Ethereum USD",
+        "short": "ETH-USD",
+        "sector": "CRYPTOCURRENCY",
+        "current_price": "$3,421.67",
+        "change": -0.85,
+        "high": 3498.23,
+        "low": 3398.45,
+        "symbol": "ETH-USD",
+        "volume": 234567891,
+        "news_article": {
+            "id": "eth-news-1",
+            "title": "Ethereum's Latest Upgrade Shows Promise for Scalability Solutions",
+            "publisher": "CoinTelegraph",
+            "source": "https://cointelegraph.com/ethereum-upgrade-scalability-2025",
+            "date": "1751542000"
         }
     }
+];
 
-    generateRandomFloat(min, max, decimals) {
-        return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
+// Initialize stocks page when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.pathname.includes('stocks.html')) {
+        initStocksPage();
     }
-
-    generateChartData() {
-        const data = [];
-        let price = 100 + Math.random() * 400;
-        
-        for (let i = 0; i < 30; i++) {
-            price += (Math.random() - 0.5) * 10;
-            data.push(Math.max(0, price));
-        }
-        
-        return data;
-    }
-
-    // Event Binding
-    bindEvents() {
-        // Search functionality
-        const searchInput = document.getElementById('stockSearch');
-        const searchSuggestions = document.getElementById('searchSuggestions');
-        
-        if (searchInput) {
-            searchInput.addEventListener('input', this.debounce((e) => {
-                this.handleSearch(e.target.value);
-            }, 300));
-
-            searchInput.addEventListener('focus', () => {
-                if (searchInput.value.trim()) {
-                    searchSuggestions.classList.add('show');
-                }
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
-                    searchSuggestions.classList.remove('show');
-                }
-            });
-        }
-
-        // Filter controls
-        const sectorFilter = document.getElementById('sectorFilter');
-        const marketCapFilter = document.getElementById('marketCapFilter');
-        const sortFilter = document.getElementById('sortFilter');
-
-        [sectorFilter, marketCapFilter, sortFilter].forEach(filter => {
-            if (filter) {
-                filter.addEventListener('change', () => this.applyFilters());
-            }
-        });
-
-        // Tab switching
-        const tabButtons = document.querySelectorAll('[data-bs-toggle="pill"]');
-        tabButtons.forEach(button => {
-            button.addEventListener('shown.bs.tab', (e) => {
-                this.currentTab = e.target.getAttribute('data-bs-target').substring(1);
-                this.renderCurrentTab();
-            });
-        });
-
-        // Load more button
-        const loadMoreBtn = document.getElementById('loadMoreStocks');
-        if (loadMoreBtn) {
-            loadMoreBtn.addEventListener('click', () => {
-                this.displayedStocks += 20;
-                this.renderCurrentTab();
-            });
-        }
-
-        // Modal events
-        const stockModal = document.getElementById('stockDetailModal');
-        const addToWatchlistBtn = document.getElementById('addToWatchlistBtn');
-        
-        if (stockModal) {
-            stockModal.addEventListener('hidden.bs.modal', () => {
-                this.clearModalCharts();
-            });
-        }
-
-        if (addToWatchlistBtn) {
-            addToWatchlistBtn.addEventListener('click', (e) => {
-                const symbol = e.target.dataset.symbol;
-                if (symbol) {
-                    this.toggleWatchlist(symbol);
-                    this.updateWatchlistButton(symbol);
-                }
-            });
-        }
-    }
-
-    // Search functionality
-    handleSearch(query) {
-        const searchSuggestions = document.getElementById('searchSuggestions');
-        
-        if (!query.trim()) {
-            searchSuggestions.classList.remove('show');
-            return;
-        }
-
-        const results = this.stocksData.filter(stock => 
-            stock.symbol.toLowerCase().includes(query.toLowerCase()) ||
-            stock.name.toLowerCase().includes(query.toLowerCase())
-        ).slice(0, 5);
-
-        this.renderSearchSuggestions(results);
-        searchSuggestions.classList.add('show');
-    }
-
-    renderSearchSuggestions(results) {
-        const searchSuggestions = document.getElementById('searchSuggestions');
-        
-        if (results.length === 0) {
-            searchSuggestions.innerHTML = '<div class="suggestion-item">No stocks found</div>';
-            return;
-        }
-
-        searchSuggestions.innerHTML = results.map(stock => {
-            const changeClass = stock.change.percent >= 0 ? 'positive' : 'negative';
-            const changeIcon = stock.change.percent >= 0 ? 'bi-arrow-up' : 'bi-arrow-down';
-            
-            return `
-                <div class="suggestion-item" onclick="stocksDashboard.selectStock('${stock.symbol}')">
-                    <div class="suggestion-main">
-                        <div class="suggestion-symbol">${stock.symbol}</div>
-                        <div class="suggestion-name">${stock.name}</div>
-                    </div>
-                    <div class="suggestion-metrics">
-                        <div class="suggestion-price">$${stock.price.toFixed(2)}</div>
-                        <div class="suggestion-change ${changeClass}">
-                            <i class="bi ${changeIcon}"></i>
-                            ${Math.abs(stock.change.percent).toFixed(2)}%
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    selectStock(symbol) {
-        const stock = this.stocksData.find(s => s.symbol === symbol);
-        if (stock) {
-            this.showStockDetail(stock);
-        }
-        
-        const searchSuggestions = document.getElementById('searchSuggestions');
-        searchSuggestions.classList.remove('show');
-    }
-
-    // Filter functionality
-    applyFilters() {
-        this.renderCurrentTab();
-    }
-
-    getFilteredStocks() {
-        const sectorFilter = document.getElementById('sectorFilter')?.value || '';
-        const marketCapFilter = document.getElementById('marketCapFilter')?.value || '';
-        const sortFilter = document.getElementById('sortFilter')?.value || 'symbol';
-
-        let filtered = [...this.stocksData];
-
-        if (sectorFilter) {
-            filtered = filtered.filter(stock => stock.sector === sectorFilter);
-        }
-
-        if (marketCapFilter) {
-            filtered = filtered.filter(stock => stock.marketCap === marketCapFilter);
-        }
-
-        // Sort stocks
-        filtered.sort((a, b) => {
-            switch (sortFilter) {
-                case 'price':
-                    return b.price - a.price;
-                case 'change':
-                    return b.change.percent - a.change.percent;
-                case 'volume':
-                    return b.volume - a.volume;
-                case 'marketCap':
-                    return b.marketCapValue - a.marketCapValue;
-                default:
-                    return a.symbol.localeCompare(b.symbol);
-            }
-        });
-
-        return filtered;
-    }
-
-    // Tab rendering
-    renderCurrentTab() {
-        switch (this.currentTab) {
-            case 'allStocks':
-                this.renderAllStocks();
-                break;
-            case 'watchlist':
-                this.renderWatchlist();
-                break;
-            case 'topGainers':
-                this.renderTopGainers();
-                break;
-            case 'topLosers':
-                this.renderTopLosers();
-                break;
-            case 'mostActive':
-                this.renderMostActive();
-                break;
-            case 'sectors':
-                this.renderSectors();
-                break;
-        }
-    }
-
-    renderAllStocks() {
-        const filtered = this.getFilteredStocks();
-        const container = document.getElementById('stocksGrid');
-        const loadMoreBtn = document.getElementById('loadMoreStocks');
-        
-        if (!container) return;
-
-        const stocksToShow = filtered.slice(0, this.displayedStocks);
-        container.innerHTML = stocksToShow.map(stock => this.createStockCard(stock)).join('');
-        
-        // Show/hide load more button
-        if (loadMoreBtn) {
-            loadMoreBtn.style.display = filtered.length > this.displayedStocks ? 'block' : 'none';
-        }
-
-        this.renderStockCharts(stocksToShow);
-    }
-
-    renderWatchlist() {
-        const container = document.getElementById('watchlistGrid');
-        const emptyState = document.getElementById('watchlistEmpty');
-        
-        if (!container || !emptyState) return;
-
-        const watchlistStocks = this.stocksData.filter(stock => this.watchlist.has(stock.symbol));
-        
-        if (watchlistStocks.length === 0) {
-            emptyState.style.display = 'block';
-            container.innerHTML = '';
-        } else {
-            emptyState.style.display = 'none';
-            container.innerHTML = watchlistStocks.map(stock => this.createStockCard(stock)).join('');
-            this.renderStockCharts(watchlistStocks);
-        }
-    }
-
-    renderTopGainers() {
-        const container = document.getElementById('gainersGrid');
-        if (!container) return;
-
-        const gainers = [...this.stocksData]
-            .filter(stock => stock.change.percent > 0)
-            .sort((a, b) => b.change.percent - a.change.percent)
-            .slice(0, 20);
-
-        container.innerHTML = gainers.map(stock => this.createStockCard(stock)).join('');
-        this.renderStockCharts(gainers);
-    }
-
-    renderTopLosers() {
-        const container = document.getElementById('losersGrid');
-        if (!container) return;
-
-        const losers = [...this.stocksData]
-            .filter(stock => stock.change.percent < 0)
-            .sort((a, b) => a.change.percent - b.change.percent)
-            .slice(0, 20);
-
-        container.innerHTML = losers.map(stock => this.createStockCard(stock)).join('');
-        this.renderStockCharts(losers);
-    }
-
-    renderMostActive() {
-        const container = document.getElementById('activeGrid');
-        if (!container) return;
-
-        const mostActive = [...this.stocksData]
-            .sort((a, b) => b.volume - a.volume)
-            .slice(0, 20);
-
-        container.innerHTML = mostActive.map(stock => this.createStockCard(stock)).join('');
-        this.renderStockCharts(mostActive);
-    }
-
-    renderSectors() {
-        const container = document.getElementById('sectorsGrid');
-        if (!container) return;
-
-        const sectors = this.groupBySector();
-        container.innerHTML = Object.keys(sectors).map(sectorName => 
-            this.createSectorCard(sectorName, sectors[sectorName])
-        ).join('');
-    }
-
-    groupBySector() {
-        const sectors = {};
-        
-        this.stocksData.forEach(stock => {
-            if (!sectors[stock.sector]) {
-                sectors[stock.sector] = [];
-            }
-            sectors[stock.sector].push(stock);
-        });
-
-        return sectors;
-    }
-
-    // Card creation
-    createStockCard(stock) {
-        const changeClass = stock.change.percent >= 0 ? 'positive' : 'negative';
-        const changeIcon = stock.change.percent >= 0 ? 'bi-arrow-up' : 'bi-arrow-down';
-        const watchlistClass = this.watchlist.has(stock.symbol) ? 'active' : '';
-        
-        // Calculate 52W range percentage
-        const rangePercent = ((stock.price - stock.low52w) / (stock.high52w - stock.low52w)) * 100;
-        
-        return `
-            <div class="stock-card" onclick="stocksDashboard.navigateToStockDetail('${stock.symbol}')">
-                <div class="stock-card-header">
-                    <div class="stock-info">
-                        <div class="stock-symbol">${stock.symbol}</div>
-                        <div class="stock-name">${stock.name}</div>
-                        <div class="stock-sector">${this.formatSectorName(stock.sector)}</div>
-                    </div>
-                    <div class="stock-actions">
-                        <button class="btn-watchlist ${watchlistClass}" onclick="event.stopPropagation(); stocksDashboard.toggleWatchlist('${stock.symbol}')" title="${this.watchlist.has(stock.symbol) ? 'Remove from' : 'Add to'} watchlist">
-                            <i class="bi bi-bookmark${this.watchlist.has(stock.symbol) ? '-fill' : ''}"></i>
-                        </button>
-                        <button class="btn-trade" onclick="event.stopPropagation(); stocksDashboard.showQuickTrade('${stock.symbol}')" title="Quick trade">
-                            <i class="bi bi-lightning-fill"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="stock-price-section">
-                    <div class="stock-price">$${stock.price.toFixed(2)}</div>
-                    <div class="stock-change ${changeClass}">
-                        <i class="bi ${changeIcon}"></i>
-                        $${Math.abs(stock.change.amount).toFixed(2)} (${Math.abs(stock.change.percent).toFixed(2)}%)
-                    </div>
-                </div>
-                
-                <div class="stock-chart">
-                    <canvas id="chart-${stock.symbol}" width="300" height="80"></canvas>
-                </div>
-                
-                <div class="stock-metadata">
-                    <div class="metadata-item">
-                        <span class="metadata-label">Volume</span>
-                        <span class="metadata-value">${this.formatNumber(stock.volume)}</span>
-                    </div>
-                    <div class="metadata-item">
-                        <span class="metadata-label">Market Cap</span>
-                        <span class="metadata-value">${this.formatMarketCap(stock.marketCapValue)}</span>
-                    </div>
-                    <div class="metadata-item">
-                        <span class="metadata-label">P/E Ratio</span>
-                        <span class="metadata-value">${stock.peRatio}</span>
-                    </div>
-                    <div class="metadata-item">
-                        <span class="metadata-label">52W Range</span>
-                        <span class="metadata-value">
-                            <div class="range-bar">
-                                <div class="range-fill" style="width: ${rangePercent}%"></div>
-                                <div class="range-indicator" style="left: ${rangePercent}%"></div>
-                            </div>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    createSectorCard(sectorName, stocks) {
-        const avgChange = stocks.reduce((sum, stock) => sum + stock.change.percent, 0) / stocks.length;
-        const changeClass = avgChange >= 0 ? 'positive' : 'negative';
-        const topStocks = stocks.sort((a, b) => b.change.percent - a.change.percent).slice(0, 5);
-        
-        return `
-            <div class="sector-card" onclick="stocksDashboard.filterBySector('${sectorName}')">
-                <div class="sector-header">
-                    <div class="sector-name">${this.formatSectorName(sectorName)}</div>
-                    <div class="sector-change ${changeClass}">${avgChange >= 0 ? '+' : ''}${avgChange.toFixed(2)}%</div>
-                </div>
-                <div class="sector-stocks">
-                    ${topStocks.map(stock => `
-                        <div class="sector-stock-item">
-                            <span class="sector-stock-symbol">${stock.symbol}</span>
-                            <span class="sector-stock-change ${stock.change.percent >= 0 ? 'positive' : 'negative'}">
-                                ${stock.change.percent >= 0 ? '+' : ''}${stock.change.percent.toFixed(2)}%
-                            </span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    // Chart rendering
-    renderStockCharts(stocks) {
-        // Wait for DOM to be ready
-        setTimeout(() => {
-            stocks.forEach(stock => {
-                const canvas = document.getElementById(`chart-${stock.symbol}`);
-                if (canvas && !this.charts.has(stock.symbol)) {
-                    this.createStockChart(canvas, stock);
-                }
-            });
-        }, 100);
-    }
-
-    createStockChart(canvas, stock) {
-        const ctx = canvas.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 80);
-        
-        const isPositive = stock.change.percent >= 0;
-        const color = isPositive ? 
-            'rgba(0, 211, 149, 0.8)' : 
-            'rgba(249, 35, 100, 0.8)';
-        const bgColor = isPositive ? 
-            'rgba(0, 211, 149, 0.1)' : 
-            'rgba(249, 35, 100, 0.1)';
-        
-        gradient.addColorStop(0, color);
-        gradient.addColorStop(1, bgColor);
-
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: Array.from({length: stock.chartData.length}, (_, i) => i),
-                datasets: [{
-                    data: stock.chartData,
-                    borderColor: color,
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
-                },
-                scales: {
-                    x: { display: false },
-                    y: { display: false }
-                },
-                elements: {
-                    point: { radius: 0 }
-                },
-                interaction: {
-                    intersect: false
-                }
-            }
-        });
-
-        this.charts.set(stock.symbol, chart);
-    }
-
-    // Stock detail modal
-    showStockDetail(stock) {
-        const modal = new bootstrap.Modal(document.getElementById('stockDetailModal'));
-        const modalTitle = document.getElementById('stockDetailModalLabel');
-        const modalContent = document.getElementById('stockDetailContent');
-        const addToWatchlistBtn = document.getElementById('addToWatchlistBtn');
-
-        modalTitle.textContent = `${stock.symbol} - ${stock.name}`;
-        modalContent.innerHTML = this.createStockDetailContent(stock);
-        
-        addToWatchlistBtn.dataset.symbol = stock.symbol;
-        addToWatchlistBtn.textContent = this.watchlist.has(stock.symbol) ? 
-            'Remove from Watchlist' : 'Add to Watchlist';
-
-        modal.show();
-
-        // Create detailed chart
-        setTimeout(() => {
-            this.createDetailChart(stock);
-        }, 300);
-    }
-
-    createStockDetailContent(stock) {
-        const changeClass = stock.change.percent >= 0 ? 'positive' : 'negative';
-        const changeIcon = stock.change.percent >= 0 ? 'bi-arrow-up' : 'bi-arrow-down';
-        
-        return `
-            <div class="stock-detail-header">
-                <div class="stock-detail-info">
-                    <h2>${stock.symbol}</h2>
-                    <p>${stock.name}</p>
-                    <p><strong>Sector:</strong> ${this.formatSectorName(stock.sector)}</p>
-                </div>
-                <div class="stock-detail-price">
-                    <div class="stock-price">$${stock.price.toFixed(2)}</div>
-                    <div class="stock-change ${changeClass}">
-                        <i class="bi ${changeIcon}"></i>
-                        $${Math.abs(stock.change.amount).toFixed(2)} (${Math.abs(stock.change.percent).toFixed(2)}%)
-                    </div>
-                </div>
-            </div>
-            
-            <div class="stock-detail-chart">
-                <canvas id="detailChart" width="600" height="300"></canvas>
-            </div>
-            
-            <div class="stock-detail-metrics">
-                <div class="metric-card">
-                    <div class="metric-label">Market Cap</div>
-                    <div class="metric-value">${this.formatMarketCap(stock.marketCapValue)}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Volume</div>
-                    <div class="metric-value">${this.formatNumber(stock.volume)}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">52W High</div>
-                    <div class="metric-value">$${stock.high52w.toFixed(2)}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">52W Low</div>
-                    <div class="metric-value">$${stock.low52w.toFixed(2)}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">P/E Ratio</div>
-                    <div class="metric-value">${stock.peRatio}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Dividend Yield</div>
-                    <div class="metric-value">${stock.dividend}%</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Beta</div>
-                    <div class="metric-value">${stock.beta}</div>
-                </div>
-            </div>
-        `;
-    }
-
-    createDetailChart(stock) {
-        const canvas = document.getElementById('detailChart');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        
-        const isPositive = stock.change.percent >= 0;
-        const color = isPositive ? 
-            'rgba(0, 211, 149, 1)' : 
-            'rgba(249, 35, 100, 1)';
-        const bgColor = isPositive ? 
-            'rgba(0, 211, 149, 0.1)' : 
-            'rgba(249, 35, 100, 0.1)';
-        
-        gradient.addColorStop(0, color);
-        gradient.addColorStop(1, bgColor);
-
-        // Generate more detailed chart data
-        const detailedData = this.generateDetailedChartData(stock.chartData);
-
-        this.detailChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: detailedData.labels,
-                datasets: [{
-                    label: stock.symbol,
-                    data: detailedData.data,
-                    borderColor: color,
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 2,
-                    pointHoverRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        display: true,
-                        grid: { display: false }
-                    },
-                    y: {
-                        display: true,
-                        grid: { color: 'rgba(0,0,0,0.1)' }
-                    }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleColor: 'white',
-                        bodyColor: 'white',
-                        borderColor: color,
-                        borderWidth: 1
-                    }
-                }
-            }
-        });
-    }
-
-    generateDetailedChartData(baseData) {
-        const labels = [];
-        const data = [];
-        
-        // Generate last 30 days of data
-        for (let i = 29; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-            data.push(baseData[Math.floor(Math.random() * baseData.length)]);
-        }
-        
-        return { labels, data };
-    }
-
-    clearModalCharts() {
-        if (this.detailChart) {
-            this.detailChart.destroy();
-            this.detailChart = null;
-        }
-    }
-
-    // Watchlist functionality
-    toggleWatchlist(symbol) {
-        if (this.watchlist.has(symbol)) {
-            this.watchlist.delete(symbol);
-        } else {
-            this.watchlist.add(symbol);
-        }
-        
-        this.saveWatchlist();
-        this.updateWatchlistButtons();
-        
-        if (this.currentTab === 'watchlist') {
-            this.renderWatchlist();
-        }
-    }
-
-    updateWatchlistButtons() {
-        document.querySelectorAll('.btn-watchlist').forEach(btn => {
-            const symbol = btn.onclick.toString().match(/'([^']+)'/)?.[1];
-            if (symbol) {
-                const isInWatchlist = this.watchlist.has(symbol);
-                btn.classList.toggle('active', isInWatchlist);
-                btn.querySelector('i').className = `bi bi-bookmark${isInWatchlist ? '-fill' : ''}`;
-            }
-        });
-    }
-
-    updateWatchlistButton(symbol) {
-        const addToWatchlistBtn = document.getElementById('addToWatchlistBtn');
-        if (addToWatchlistBtn && addToWatchlistBtn.dataset.symbol === symbol) {
-            addToWatchlistBtn.textContent = this.watchlist.has(symbol) ? 
-                'Remove from Watchlist' : 'Add to Watchlist';
-        }
-        this.updateWatchlistButtons();
-    }
-
-    loadWatchlist() {
-        const saved = localStorage.getItem('yausma_watchlist');
-        if (saved) {
-            this.watchlist = new Set(JSON.parse(saved));
-        }
-    }
-
-    saveWatchlist() {
-        localStorage.setItem('yausma_watchlist', JSON.stringify([...this.watchlist]));
-    }
-
-    // Market indices updates
-    updateMarketIndices() {
-        const indices = [
-            { id: 'spyIndex', symbol: 'SPY', value: 4567.89, change: 1.2 },
-            { id: 'nasdaqIndex', symbol: 'QQQ', value: 14234.56, change: 0.8 },
-            { id: 'dowIndex', symbol: 'DIA', value: 34789.12, change: -0.3 }
-        ];
-
-        indices.forEach(index => {
-            const element = document.getElementById(index.id);
-            if (element) {
-                const changeEl = element.querySelector('.index-change');
-                changeEl.className = `index-change ${index.change >= 0 ? 'positive' : 'negative'}`;
-                changeEl.textContent = `${index.change >= 0 ? '+' : ''}${index.change}%`;
-            }
-        });
-    }
-
-    // Real-time updates simulation
-    startRealTimeUpdates() {
-        setInterval(() => {
-            this.updateStockPrices();
-        }, 10000); // Update every 10 seconds
-    }
-
-    updateStockPrices() {
-        this.stocksData.forEach(stock => {
-            // Store previous price for animation
-            const previousPrice = stock.price;
-            
-            // Small random price movement (0.1% to 0.5%)
-            const changePercent = (Math.random() - 0.5) * 1;
-            const change = (stock.price * changePercent) / 100;
-            stock.price = Math.max(1, stock.price + change);
-            
-            // Update change values from previous close
-            const newChangePercent = ((stock.price - stock.previousClose) / stock.previousClose) * 100;
-            stock.change.percent = newChangePercent;
-            stock.change.amount = stock.price - stock.previousClose;
-            
-            // Update volume with realistic fluctuation
-            const volumeChange = (Math.random() - 0.5) * 0.2; // ±10%
-            stock.volume = Math.max(100000, stock.volume * (1 + volumeChange));
-            
-            // Animate price change in UI
-            this.animatePriceChange(stock.symbol, previousPrice, stock.price);
-        });
-
-        // Update market indices
-        this.updateMarketIndices();
-        
-        // Re-render current tab if not sectors
-        if (this.currentTab !== 'sectors') {
-            this.renderCurrentTab();
-        }
-    }
-
-    animatePriceChange(symbol, oldPrice, newPrice) {
-        const priceElement = document.querySelector(`[onclick*="${symbol}"] .stock-price`);
-        if (!priceElement) return;
-        
-        priceElement.classList.remove('price-flash-up', 'price-flash-down');
-        
-        if (newPrice > oldPrice) {
-            priceElement.classList.add('price-flash-up');
-        } else if (newPrice < oldPrice) {
-            priceElement.classList.add('price-flash-down');
-        }
-        
-        setTimeout(() => {
-            priceElement.classList.remove('price-flash-up', 'price-flash-down');
-        }, 1000);
-    }
-
-    // Navigation functions
-    navigateToStockDetail(symbol) {
-        // In a real application, this would navigate to stock detail page
-        window.location.href = `stock-detail.html?symbol=${symbol}`;
-    }
-
-    showQuickTrade(symbol) {
-        const stock = this.stocksData.find(s => s.symbol === symbol);
-        if (!stock) return;
-
-        // Create quick trade modal
-        const modal = document.createElement('div');
-        modal.className = 'modal fade';
-        modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Quick Trade - ${stock.symbol}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="trade-summary">
-                            <div class="trade-symbol">${stock.symbol}</div>
-                            <div class="trade-price">$${stock.price.toFixed(2)}</div>
-                            <div class="trade-change ${stock.change.percent >= 0 ? 'positive' : 'negative'}">
-                                ${stock.change.percent >= 0 ? '+' : ''}${stock.change.percent.toFixed(2)}%
-                            </div>
-                        </div>
-                        <div class="trade-actions mt-4">
-                            <button class="btn btn-success btn-lg me-2" onclick="stocksDashboard.executeTrade('${stock.symbol}', 'buy')">
-                                <i class="bi bi-plus-circle me-2"></i>Buy
-                            </button>
-                            <button class="btn btn-danger btn-lg" onclick="stocksDashboard.executeTrade('${stock.symbol}', 'sell')">
-                                <i class="bi bi-dash-circle me-2"></i>Sell
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        const bsModal = new bootstrap.Modal(modal);
-        bsModal.show();
-        
-        modal.addEventListener('hidden.bs.modal', () => {
-            modal.remove();
-        });
-    }
-
-    executeTrade(symbol, action) {
-        // Simulate trade execution
-        const stock = this.stocksData.find(s => s.symbol === symbol);
-        const actionText = action === 'buy' ? 'purchased' : 'sold';
-        
-        // Close the modal
-        const modal = document.querySelector('.modal.show');
-        if (modal) {
-            bootstrap.Modal.getInstance(modal).hide();
-        }
-        
-        // Show success notification
-        this.showTradeNotification(`Successfully ${actionText} ${stock.symbol} at $${stock.price.toFixed(2)}`, 'success');
-    }
-
-    showTradeNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type} alert-dismissible fade show trade-notification`;
-        notification.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            z-index: 1060;
-            min-width: 300px;
-            animation: slideInRight 0.3s ease-out;
-        `;
-        
-        notification.innerHTML = `
-            <i class="bi bi-check-circle-fill me-2"></i>${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            if (notification.parentElement) {
-                notification.classList.add('fade');
-                setTimeout(() => notification.remove(), 150);
-            }
-        }, 4000);
-    }
-
-    // Utility functions
-    filterBySector(sector) {
-        document.getElementById('sectorFilter').value = sector;
-        
-        // Switch to all stocks tab
-        const allStocksTab = document.querySelector('[data-bs-target="#allStocks"]');
-        if (allStocksTab) {
-            const tab = new bootstrap.Tab(allStocksTab);
-            tab.show();
-        }
-        
-        this.applyFilters();
-    }
-
-    formatNumber(num) {
-        if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-        if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-        if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-        return num.toString();
-    }
-
-    formatMarketCap(cap) {
-        if (cap >= 1000) return (cap / 1000).toFixed(1) + 'T';
-        if (cap >= 1) return cap.toFixed(1) + 'B';
-        return (cap * 1000).toFixed(0) + 'M';
-    }
-
-    formatSectorName(sector) {
-        return sector.charAt(0).toUpperCase() + sector.slice(1);
-    }
-
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-}
-
-// Initialize dashboard when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    window.stocksDashboard = new StocksDashboard();
 });
 
-// Export for testing
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = StocksDashboard;
+// Main stocks page initialization
+function initStocksPage() {
+    try {
+        initSearch();
+        initThemeAnimations();
+        initStatsCounter();
+        
+        // Load initial data
+        loadStocksData();
+        
+        if (YAUSMA.debug) {
+            console.log('Stocks page initialized successfully');
+        }
+        
+    } catch (error) {
+        console.error('Failed to initialize stocks page:', error);
+    }
 }
+
+// Initialize search functionality
+function initSearch() {
+    var searchInput = document.getElementById('stockSearch');
+    var clearButton = document.getElementById('clearSearch');
+    
+    if (searchInput) {
+        // Debounced search
+        var debouncedSearch = debounce(function(value) {
+            StocksPage.searchTerm = value;
+            performSearch();
+        }, 300);
+        
+        searchInput.addEventListener('input', function() {
+            debouncedSearch(this.value);
+        });
+        
+        // Search icon animation
+        searchInput.addEventListener('focus', function() {
+            var searchIcon = this.parentElement.querySelector('.search-icon');
+            if (searchIcon) {
+                searchIcon.style.color = 'var(--interactive-blue)';
+            }
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            var searchIcon = this.parentElement.querySelector('.search-icon');
+            if (searchIcon) {
+                searchIcon.style.color = 'var(--text-tertiary)';
+            }
+        });
+    }
+    
+    if (clearButton) {
+        clearButton.addEventListener('click', function() {
+            clearSearch();
+        });
+    }
+}
+
+// Initialize theme-aware animations
+function initThemeAnimations() {
+    // Add smooth transitions for theme changes
+    var stockCards = document.querySelectorAll('.stock-card');
+    stockCards.forEach(function(card) {
+        card.style.transition = 'all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease';
+    });
+    
+    // Add hover animations
+    stockCards.forEach(function(card) {
+        card.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('loading-card')) {
+                this.style.transform = 'translateY(-4px)';
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('loading-card')) {
+                this.style.transform = 'translateY(0)';
+            }
+        });
+    });
+}
+
+// Initialize stats counter animation
+function initStatsCounter() {
+    var stats = document.querySelectorAll('.stat-number[data-target]');
+    
+    function animateCounter(element) {
+        var target = parseInt(element.getAttribute('data-target'));
+        var duration = 2000; // 2 seconds
+        var start = 0;
+        var startTime = null;
+        
+        function updateCounter(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var current = Math.floor(progress * target);
+            element.textContent = current;
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            }
+        }
+        
+        requestAnimationFrame(updateCounter);
+    }
+    
+    // Use Intersection Observer to trigger animation when visible
+    if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        stats.forEach(function(stat) {
+            observer.observe(stat);
+        });
+    } else {
+        // Fallback for older browsers
+        stats.forEach(function(stat) {
+            animateCounter(stat);
+        });
+    }
+}
+
+// Perform search with search term
+function performSearch() {
+    if (StocksPage.isLoading) return;
+    
+    var searchTerm = StocksPage.searchTerm.toLowerCase().trim();
+    
+    if (searchTerm === '') {
+        // Show all stocks if search is empty
+        StocksPage.filteredStocks = StocksPage.stocks;
+    } else {
+        // Filter stocks by symbol or name
+        StocksPage.filteredStocks = StocksPage.stocks.filter(function(stock) {
+            return stock.symbol.toLowerCase().includes(searchTerm) ||
+                   stock.name.toLowerCase().includes(searchTerm) ||
+                   stock.short.toLowerCase().includes(searchTerm);
+        });
+    }
+    
+    // Update UI
+    updateStocksGrid(StocksPage.filteredStocks);
+    updateResultsCount(StocksPage.filteredStocks.length);
+    
+    // Show empty state if no results
+    if (StocksPage.filteredStocks.length === 0) {
+        showEmptyState();
+    } else {
+        hideEmptyState();
+    }
+}
+
+// Load stocks data from API
+async function loadStocksData() {
+    try {
+        console.log('=== LOADING STOCKS DATA ===');
+        console.log('StocksAPI client available:', !!window.stocksApiClient);
+        console.log('StocksAPI client config:', window.stocksApiClient ? window.stocksApiClient.getConfig() : 'N/A');
+        
+        showLoadingState();
+        
+        // Check if API client is available
+        if (!window.stocksApiClient) {
+            throw new Error('Stocks API client not available. Please ensure the API client script is loaded.');
+        }
+        
+        console.log('Calling fetchMarketOverview...');
+        const stocks = await stocksApiClient.fetchMarketOverview();
+        
+        console.log('Received stocks:', stocks);
+        console.log('Stocks count:', stocks.length);
+        
+        // Update state
+        StocksPage.stocks = stocks;
+        StocksPage.filteredStocks = stocks;
+        
+        // Update UI
+        console.log('Updating stocks grid...');
+        updateStocksGrid(stocks);
+        updateResultsCount(stocks.length);
+        
+        if (stocks.length === 0) {
+            console.log('No stocks found, showing empty state');
+            showEmptyState();
+        } else {
+            console.log('Stocks found, hiding empty state');
+            hideEmptyState();
+        }
+        
+        console.log(`=== LOADED ${stocks.length} STOCKS SUCCESSFULLY ===`);
+        
+        // Re-initialize animations for new cards
+        setTimeout(initThemeAnimations, 100);
+        
+    } catch (error) {
+        console.error('=== ERROR LOADING STOCKS DATA ===');
+        console.error('Error:', error);
+        console.error('Error type:', error.constructor.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('=== END ERROR LOADING STOCKS DATA ===');
+        
+        // Handle error by showing empty state with error message
+        handleStockLoadError(error);
+    } finally {
+        hideLoadingState();
+        StocksPage.isLoading = false;
+    }
+}
+
+// Handle stock loading errors
+function handleStockLoadError(error) {
+    console.error('Stock loading error:', error);
+    
+    // Show error message to user
+    var stocksGrid = document.getElementById('stocksGrid');
+    var emptyState = document.getElementById('emptyState');
+    
+    if (stocksGrid && emptyState) {
+        stocksGrid.style.display = 'none';
+        emptyState.classList.remove('d-none');
+        
+        // Update empty state with error message
+        var emptyContent = emptyState.querySelector('.empty-state-content');
+        if (emptyContent) {
+            emptyContent.innerHTML = `
+                <div class="empty-state-icon">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                </div>
+                <h3>Unable to load stocks</h3>
+                <p class="error-message">${escapeHtml(error.message)}</p>
+                <div class="error-actions">
+                    <button class="btn btn-primary" onclick="retryLoadStocks()">Try Again</button>
+                    <button class="btn btn-outline-secondary" onclick="loadMockData()">Load Sample Data</button>
+                </div>
+            `;
+        }
+    }
+    
+    // Update results count to show error state
+    updateResultsCount(0);
+}
+
+// Retry loading stocks after error
+function retryLoadStocks() {
+    console.log('Retrying stock data load...');
+    loadStocksData();
+}
+
+// Load mock data as fallback
+function loadMockData() {
+    try {
+        console.log('Loading mock data as fallback...');
+        StocksPage.stocks = mockStocksData;
+        StocksPage.filteredStocks = mockStocksData;
+        
+        updateStocksGrid(StocksPage.stocks);
+        updateResultsCount(StocksPage.stocks.length);
+        hideEmptyState();
+        
+        // Re-initialize animations for new cards
+        setTimeout(initThemeAnimations, 100);
+        
+        console.log('Mock data loaded successfully');
+        
+    } catch (error) {
+        console.error('Error loading mock data:', error);
+    }
+}
+
+// Update stocks grid
+function updateStocksGrid(stocks) {
+    var stocksGrid = document.getElementById('stocksGrid');
+    if (!stocksGrid) return;
+    
+    // Clear current stocks
+    stocksGrid.innerHTML = '';
+    
+    // Add new stocks
+    stocks.forEach(function(stock) {
+        var stockElement = createStockElement(stock);
+        stocksGrid.appendChild(stockElement);
+    });
+}
+
+// Create HTML element for a stock
+function createStockElement(stock) {
+    var colDiv = document.createElement('div');
+    colDiv.className = 'col-lg-4 col-md-6 mb-4';
+    
+    var stockCard = document.createElement('div');
+    stockCard.className = 'stock-card';
+    stockCard.setAttribute('data-symbol', stock.symbol);
+    
+    // Format change percentage
+    var changePercent = stock.change.toFixed(2);
+    var changeClass = stock.change >= 0 ? 'positive' : 'negative';
+    var changeIcon = stock.change >= 0 ? 'bi-arrow-up' : 'bi-arrow-down';
+    var changeSign = stock.change >= 0 ? '+' : '';
+    
+    // Format volume
+    var formattedVolume = formatVolume(stock.volume);
+    
+    // Format high/low prices
+    var formattedHigh = formatPrice(stock.high);
+    var formattedLow = formatPrice(stock.low);
+    
+    // Determine sector badge class
+    var sectorClass = stock.sector.toLowerCase();
+    
+    // Format news date
+    var newsDate = formatNewsDate(parseInt(stock.news_article.date) * 1000);
+    
+    stockCard.innerHTML = `
+        <div class="stock-card-header">
+            <div class="stock-info">
+                <h4 class="stock-symbol">${escapeHtml(stock.symbol)}</h4>
+                <p class="stock-name">${escapeHtml(stock.name)}</p>
+            </div>
+            <span class="sector-badge ${sectorClass}">${stock.sector}</span>
+        </div>
+        
+        <div class="stock-price-info">
+            <div class="current-price">${escapeHtml(stock.current_price)}</div>
+            <div class="price-change ${changeClass}">
+                <i class="bi ${changeIcon}"></i>
+                ${changeSign}${changePercent}%
+            </div>
+        </div>
+        
+        <div class="stock-stats">
+            <div class="stat-item-small">
+                <span class="stat-label-small">High</span>
+                <span class="stat-value-small">${formattedHigh}</span>
+            </div>
+            <div class="stat-item-small">
+                <span class="stat-label-small">Low</span>
+                <span class="stat-value-small">${formattedLow}</span>
+            </div>
+            <div class="stat-item-small">
+                <span class="stat-label-small">Volume</span>
+                <span class="stat-value-small">${formattedVolume}</span>
+            </div>
+            <div class="stat-item-small">
+                <span class="stat-label-small">Sector</span>
+                <span class="stat-value-small">${stock.sector}</span>
+            </div>
+        </div>
+        
+        <div class="news-preview">
+            <div class="news-headline">${escapeHtml(stock.news_article.title)}</div>
+            <div class="news-meta">
+                <span class="news-publisher">${escapeHtml(stock.news_article.publisher)}</span>
+                <span class="news-date">${newsDate}</span>
+            </div>
+        </div>
+    `;
+    
+    // Add click handler for stock card
+    stockCard.addEventListener('click', function() {
+        handleStockClick(stock);
+    });
+    
+    colDiv.appendChild(stockCard);
+    return colDiv;
+}
+
+// Handle stock card click
+function handleStockClick(stock) {
+    // In a real app, this would navigate to stock detail page
+    console.log('Clicked on stock:', stock.symbol);
+    
+    // For now, show a simple alert
+    alert(`Stock: ${stock.name} (${stock.symbol})\nPrice: ${stock.current_price}\nChange: ${stock.change.toFixed(2)}%`);
+}
+
+// Format volume number
+function formatVolume(volume) {
+    if (volume >= 1000000000) {
+        return (volume / 1000000000).toFixed(1) + 'B';
+    } else if (volume >= 1000000) {
+        return (volume / 1000000).toFixed(1) + 'M';
+    } else if (volume >= 1000) {
+        return (volume / 1000).toFixed(1) + 'K';
+    }
+    return volume.toString();
+}
+
+// Format price number to exactly 2 decimal places
+function formatPrice(price) {
+    try {
+        if (typeof price === 'string') {
+            // If already formatted string, ensure 2 decimal places
+            const numericPrice = parseFloat(price.replace(/[$,]/g, ''));
+            if (isNaN(numericPrice)) return '$0.00';
+            return '$' + numericPrice.toFixed(2);
+        }
+        
+        if (typeof price === 'number') {
+            return '$' + price.toFixed(2);
+        }
+        
+        return '$0.00';
+    } catch (error) {
+        console.warn('Error formatting price:', price, error);
+        return '$0.00';
+    }
+}
+
+// Format news date
+function formatNewsDate(timestamp) {
+    var date = new Date(timestamp);
+    var now = new Date();
+    var diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+    
+    if (diffHours < 1) {
+        return 'Just now';
+    } else if (diffHours < 24) {
+        return diffHours + ' hour' + (diffHours === 1 ? '' : 's') + ' ago';
+    } else {
+        var diffDays = Math.floor(diffHours / 24);
+        return diffDays + ' day' + (diffDays === 1 ? '' : 's') + ' ago';
+    }
+}
+
+// Show loading state
+function showLoadingState() {
+    var stocksGrid = document.getElementById('stocksGrid');
+    var loadingState = document.getElementById('loadingState');
+    var emptyState = document.getElementById('emptyState');
+    
+    if (stocksGrid) stocksGrid.style.display = 'none';
+    if (emptyState) emptyState.classList.add('d-none');
+    if (loadingState) loadingState.classList.remove('d-none');
+    
+    StocksPage.isLoading = true;
+}
+
+// Hide loading state
+function hideLoadingState() {
+    var stocksGrid = document.getElementById('stocksGrid');
+    var loadingState = document.getElementById('loadingState');
+    
+    if (loadingState) loadingState.classList.add('d-none');
+    if (stocksGrid) stocksGrid.style.display = 'flex';
+    
+    StocksPage.isLoading = false;
+}
+
+// Show empty state
+function showEmptyState() {
+    var stocksGrid = document.getElementById('stocksGrid');
+    var emptyState = document.getElementById('emptyState');
+    
+    if (stocksGrid) stocksGrid.style.display = 'none';
+    if (emptyState) emptyState.classList.remove('d-none');
+}
+
+// Hide empty state
+function hideEmptyState() {
+    var stocksGrid = document.getElementById('stocksGrid');
+    var emptyState = document.getElementById('emptyState');
+    
+    if (emptyState) emptyState.classList.add('d-none');
+    if (stocksGrid) stocksGrid.style.display = 'flex';
+}
+
+// Update results count
+function updateResultsCount(count) {
+    var resultsCount = document.getElementById('resultsCount');
+    if (resultsCount) {
+        resultsCount.textContent = count;
+    }
+}
+
+// Clear search
+function clearSearch() {
+    StocksPage.searchTerm = '';
+    
+    // Reset search input
+    var searchInput = document.getElementById('stockSearch');
+    if (searchInput) searchInput.value = '';
+    
+    // Reset to show all stocks
+    performSearch();
+}
+
+// Utility function to escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Debounce utility function
+function debounce(func, wait) {
+    var timeout;
+    return function executedFunction() {
+        var later = function() {
+            clearTimeout(timeout);
+            func.apply(this, arguments);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Export functions for global use
+window.StocksPage = StocksPage;
+window.clearSearch = clearSearch;
+window.retryLoadStocks = retryLoadStocks;
+window.loadMockData = loadMockData;
+
+// Theme integration
+document.addEventListener('themeChanged', function(e) {
+    // Re-initialize animations for new theme
+    setTimeout(initThemeAnimations, 100);
+});
+
+// Handle page visibility change to potentially refresh data
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && window.location.pathname.includes('stocks.html')) {
+        // Optionally refresh data when page becomes visible
+        console.log('Stocks page became visible - could refresh data here');
+    }
+});
