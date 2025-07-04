@@ -31,6 +31,7 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
+
       # No need for Nix installation - it's preinstalled on NixOS runners
       # - run: cd mobile && nix develop . --command flutter pub get
       - run: cd mobile && nix develop . --command just gen-client
