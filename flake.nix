@@ -116,7 +116,7 @@
               jdk17
 
               # Misc
-              git-cliff
+              pkgs-unstable.git-cliff
             ] ++ commonBuildInputs;
           };
 

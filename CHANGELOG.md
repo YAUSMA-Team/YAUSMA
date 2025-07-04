@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.0.0] - 2025-07-04
+
+### Features
+
+- Add git-cliff
+
+## [0.1.0] - 2025-07-04
 
 ### Bug Fixes
 
@@ -31,6 +37,7 @@ All notable changes to this project will be documented in this file.
 - Deploy server
 - Fix deploy step
 - Add workflow dispatch for server ci
+- Trigger actions for web as well
 
 ### Backend
 
