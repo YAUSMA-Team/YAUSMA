@@ -39,9 +39,7 @@
           # Chore
           just
           nushell
-          parallel
           openapi-generator-cli
-          pkgs-unstable.git-cliff
         ];
         server = pkgs-unstable.rustPlatform.buildRustPackage {
           pname = "yausma-server-unwrapped";
@@ -54,6 +52,8 @@
           # ];
           # 
         };
+
+        sh = self.devShells.${system};
       in {
         packages."server-unwrapped" = server;
 
@@ -102,24 +102,29 @@
           };
         };
 
-        devShells.default = with pkgs;
+        devShells.mobile = with pkgs;
           mkShell {
             ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
-            RUST_LOG = "debug";
 
             buildInputs = [
-              # Backend
-              rust
-              caddy
-
-              # Mobile
               flutter
               androidSdk # The customized SDK that we've made above
               jdk17
-
             ] ++ commonBuildInputs;
           };
+
+        devShells.backend = with pkgs;
+          mkShell {
+            RUST_LOG = "debug";
+            buildInputs = [
+              # Backend
+              rust
+            ] ++ commonBuildInputs;
+          };
+
         devShells.release = with pkgs-unstable;
           mkShell { buildInputs = [ git just nushell git-cliff ]; };
+
+        devShells.default = sh.backend // sh.release // sh.mobile;
       });
 }

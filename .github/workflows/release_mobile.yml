@@ -33,8 +33,8 @@ jobs:
             experimental-features = nix-command flakes
       # No need for Nix installation - it's preinstalled on NixOS runners
       # - run: cd mobile && nix develop . --command flutter pub get
-      - run: cd mobile && nix develop . --command just gen-client
-      - run: cd mobile && nix develop . --command flutter build apk --release
+      - run: cd mobile && nix develop .#mobile --command just gen-client
+      - run: cd mobile && nix develop .#mobile --command flutter build apk --release
       - run: mv mobile/build/app/outputs/flutter-apk/app-release.apk ./yausma.apk
 
       # Generate changelog
