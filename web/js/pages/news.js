@@ -132,6 +132,7 @@ function initThemeAnimations() {
 
 // Perform search with search term only
 async function performSearch() {
+    const debugPrefix = '[YAUSMA-NEWS-SEARCH-DEBUG]';
     if (NewsPage.isLoading) return;
     
     NewsPage.isLoading = true;
@@ -140,15 +141,46 @@ async function performSearch() {
     showLoadingState();
     
     try {
-        // Use real API to fetch news with search term
-        const searchParams = {
-            search: NewsPage.searchTerm
-        };
+        console.log(`${debugPrefix} === PERFORMING SEARCH ===`);
+        console.log(`${debugPrefix} Search term:`, NewsPage.searchTerm);
+        console.log(`${debugPrefix} window.dataApi available:`, !!window.dataApi);
         
-        console.log('Performing search with term:', NewsPage.searchTerm);
+        let articles;
         
-        // Fetch articles from API
-        const articles = await newsApiClient.fetchAllNews(searchParams);
+        // Check if API client is available
+        if (window.dataApi) {
+            // Use real API to fetch news
+            const searchParams = NewsPage.searchTerm ? { ticker: NewsPage.searchTerm } : {};
+            console.log(`${debugPrefix} Search params:`, searchParams);
+            
+            articles = await new Promise((resolve, reject) => {
+                console.log(`${debugPrefix} Creating Promise for search getNews call`);
+                
+                window.dataApi.getNews(searchParams, (error, data, response) => {
+                    console.log(`${debugPrefix} Search getNews callback invoked`);
+                    console.log(`${debugPrefix} Search callback error:`, error);
+                    console.log(`${debugPrefix} Search callback data:`, data);
+                    console.log(`${debugPrefix} Search callback data type:`, typeof data);
+                    console.log(`${debugPrefix} Search callback response status:`, response?.status);
+                    
+                    if (error) {
+                        console.error(`${debugPrefix} API error searching news:`, error);
+                        reject(error);
+                    } else {
+                        console.log(`${debugPrefix} Search API success, resolving with:`, data || []);
+                        resolve(data || []);
+                    }
+                });
+            });
+            
+        } else {
+            // API client not available
+            console.log(`${debugPrefix} API client not available`);
+            articles = [];
+        }
+        
+        console.log(`${debugPrefix} Search final articles:`, articles);
+        console.log(`${debugPrefix} Search final articles count:`, articles.length);
         
         // Update articles in state
         NewsPage.articles = articles;
@@ -161,13 +193,17 @@ async function performSearch() {
         
         // Show empty state if no results
         if (articles.length === 0) {
+            console.log(`${debugPrefix} No search results, showing empty state`);
             showEmptyState();
         } else {
+            console.log(`${debugPrefix} Search results found, hiding empty state`);
             hideEmptyState();
         }
         
+        console.log(`${debugPrefix} === SEARCH COMPLETED SUCCESSFULLY ===`);
+        
     } catch (error) {
-        console.error('Error performing search:', error);
+        console.error(`${debugPrefix} Error performing search:`, error);
         handleSearchError(error);
         
     } finally {
@@ -387,165 +423,108 @@ function updateResultsCount(count) {
     }
 }
 
-// Mock news data similar to stock API structure
-var mockNewsData = [
-    {
-        "name": "MongoDB, Inc.",
-        "short": "MDB",
-        "sector": "EQUITY",
-        "current_price": "$211.34",
-        "change": 2.80,
-        "symbol": "MDB",
-        "news_article": {
-            "id": "e6552044-356a-3af2-81ef-985ae8837abc",
-            "title": "What Makes Atlas the Core Driver of MongoDB's Revenue Growth?",
-            "publisher": "Zacks",
-            "source": "https://finance.yahoo.com/news/makes-atlas-core-driver-mongodbs-171600546.html",
-            "date": "1751562960"
-        }
-    },
-    {
-        "name": "GitLab Inc.",
-        "short": "GTLB",
-        "sector": "EQUITY",
-        "current_price": "$46.37",
-        "change": 1.91,
-        "symbol": "GTLB",
-        "news_article": {
-            "id": "d6dfa439-1002-3df1-aa78-28abb318546a",
-            "title": "GitLab Maintains Buy Rating Despite Lowered Price Target, Shows Strong Seat Expansion",
-            "publisher": "Insider Monkey",
-            "source": "https://finance.yahoo.com/news/gitlab-maintains-buy-rating-despite-072056917.html",
-            "date": "1751440856"
-        }
-    },
-    {
-        "name": "Apple Inc.",
-        "short": "AAPL",
-        "sector": "EQUITY",
-        "current_price": "$175.43",
-        "change": 1.66,
-        "symbol": "AAPL",
-        "news_article": {
-            "id": "apple-news-1",
-            "title": "Apple's Q3 Earnings Beat Expectations with Strong iPhone Sales",
-            "publisher": "MarketWatch",
-            "source": "https://www.marketwatch.com/story/apple-earnings-q3-2025",
-            "date": "1751550000"
-        }
-    },
-    {
-        "name": "Tesla, Inc.",
-        "short": "TSLA",
-        "sector": "EQUITY",
-        "current_price": "$248.50",
-        "change": 2.33,
-        "symbol": "TSLA",
-        "news_article": {
-            "id": "tsla-news-1",
-            "title": "Tesla Deliveries Exceed Expectations Despite Production Challenges",
-            "publisher": "Bloomberg",
-            "source": "https://www.bloomberg.com/news/tesla-deliveries-q2-2025",
-            "date": "1751546000"
-        }
-    },
-    {
-        "name": "Bitcoin USD",
-        "short": "BTC-USD",
-        "sector": "CRYPTOCURRENCY",
-        "current_price": "$67,452.30",
-        "change": 3.25,
-        "symbol": "BTC-USD",
-        "news_article": {
-            "id": "btc-news-1",
-            "title": "Bitcoin Reaches New Monthly High as Institutional Adoption Grows",
-            "publisher": "CoinDesk",
-            "source": "https://www.coindesk.com/bitcoin-institutional-adoption-2025",
-            "date": "1751544000"
-        }
-    },
-    {
-        "name": "Ethereum USD",
-        "short": "ETH-USD",
-        "sector": "CRYPTOCURRENCY",
-        "current_price": "$3,421.67",
-        "change": -0.85,
-        "symbol": "ETH-USD",
-        "news_article": {
-            "id": "eth-news-1",
-            "title": "Ethereum's Latest Upgrade Shows Promise for Scalability Solutions",
-            "publisher": "CoinTelegraph",
-            "source": "https://cointelegraph.com/ethereum-upgrade-scalability-2025",
-            "date": "1751542000"
-        }
-    },
-    // Add some standalone news articles (without stock context)
-    {
-        "id": "market-news-1",
-        "title": "Federal Reserve Signals Potential Interest Rate Changes in Q4 2025",
-        "publisher": "Reuters",
-        "source": "https://www.reuters.com/fed-interest-rates-q4-2025",
-        "date": "1751540000"
-    },
-    {
-        "id": "market-news-2",
-        "title": "Global Market Outlook: Tech Stocks Continue to Lead Recovery",
-        "publisher": "Financial Times",
-        "source": "https://www.ft.com/global-market-outlook-tech-2025",
-        "date": "1751538000"
-    }
-];
 
 // Load news articles on page initialization
 async function loadNewsArticles() {
+    const debugPrefix = '[YAUSMA-NEWS-DEBUG]';
     try {
-        console.log('=== LOADING INITIAL NEWS ARTICLES ===');
+        console.log(`${debugPrefix} === LOADING INITIAL NEWS ARTICLES ===`);
+        console.log(`${debugPrefix} window.dataApi available:`, !!window.dataApi);
+        console.log(`${debugPrefix} typeof window.dataApi:`, typeof window.dataApi);
+        
+        if (window.dataApi) {
+            console.log(`${debugPrefix} dataApi.apiClient available:`, !!window.dataApi.apiClient);
+            console.log(`${debugPrefix} dataApi.apiClient.basePath:`, window.dataApi.apiClient?.basePath);
+        }
         
         // Show loading state
         showLoadingState();
         
-        // Simulate API delay and then use mock data
-        setTimeout(function() {
-            try {
-                var articles = mockNewsData;
+        let articles;
+        
+        // Check if API client is available
+        if (window.dataApi) {
+            console.log(`${debugPrefix} Using real API to fetch all news`);
+            
+            // Use real API to fetch all news
+            articles = await new Promise((resolve, reject) => {
+                console.log(`${debugPrefix} Creating Promise for getNews call`);
+                console.log(`${debugPrefix} Calling window.dataApi.getNews with empty params`);
                 
-                console.log('Received articles:', articles);
-                console.log('Articles count:', articles.length);
-                
-                // Update state
-                NewsPage.articles = articles;
-                
-                // Update UI
-                console.log('Updating news grid...');
-                updateNewsGrid(articles);
-                updateResultsCount(articles.length);
-                
-                if (articles.length === 0) {
-                    console.log('No articles found, showing empty state');
-                    showEmptyState();
-                } else {
-                    console.log('Articles found, hiding empty state');
-                    hideEmptyState();
-                }
-                
-                console.log(`=== LOADED ${articles.length} NEWS ARTICLES SUCCESSFULLY ===`);
-                
-            } catch (error) {
-                console.error('Error processing mock news data:', error);
-                handleSearchError(error);
-            } finally {
-                hideLoadingState();
-            }
-        }, 600);
+                window.dataApi.getNews({}, (error, data, response) => {
+                    console.log(`${debugPrefix} getNews Promise callback invoked`);
+                    console.log(`${debugPrefix} getNews Promise callback error:`, error);
+                    console.log(`${debugPrefix} getNews Promise callback error type:`, error?.constructor?.name);
+                    console.log(`${debugPrefix} getNews Promise callback data:`, data);
+                    console.log(`${debugPrefix} getNews Promise callback data type:`, typeof data);
+                    console.log(`${debugPrefix} getNews Promise callback data isArray:`, Array.isArray(data));
+                    console.log(`${debugPrefix} getNews Promise callback response:`, response);
+                    console.log(`${debugPrefix} getNews Promise callback response status:`, response?.status);
+                    console.log(`${debugPrefix} getNews Promise callback response body:`, response?.body);
+                    console.log(`${debugPrefix} getNews Promise callback response text:`, response?.text);
+                    
+                    if (error) {
+                        console.error(`${debugPrefix} API error loading news:`, error);
+                        console.error(`${debugPrefix} API error details:`, {
+                            name: error.name,
+                            message: error.message,
+                            stack: error.stack,
+                            response: error.response
+                        });
+                        reject(error);
+                    } else {
+                        console.log(`${debugPrefix} API success, resolving with data:`, data);
+                        console.log(`${debugPrefix} Data fallback check: data || [] =`, data || []);
+                        resolve(data || []);
+                    }
+                });
+            });
+            
+        } else {
+            console.log(`${debugPrefix} API client not available`);
+            articles = [];
+        }
+        
+        console.log(`${debugPrefix} Final received articles:`, articles);
+        console.log(`${debugPrefix} Final articles type:`, typeof articles);
+        console.log(`${debugPrefix} Final articles isArray:`, Array.isArray(articles));
+        console.log(`${debugPrefix} Final articles count:`, articles.length);
+        
+        if (Array.isArray(articles) && articles.length > 0) {
+            console.log(`${debugPrefix} First article structure:`, articles[0]);
+            console.log(`${debugPrefix} First article keys:`, Object.keys(articles[0] || {}));
+        }
+        
+        // Update state
+        NewsPage.articles = articles;
+        console.log(`${debugPrefix} Updated NewsPage.articles:`, NewsPage.articles);
+        
+        // Update UI
+        console.log(`${debugPrefix} Updating news grid...`);
+        updateNewsGrid(articles);
+        updateResultsCount(articles.length);
+        
+        if (articles.length === 0) {
+            console.log(`${debugPrefix} No articles found, showing empty state`);
+            showEmptyState();
+        } else {
+            console.log(`${debugPrefix} Articles found, hiding empty state`);
+            hideEmptyState();
+        }
+        
+        console.log(`${debugPrefix} === LOADED ${articles.length} NEWS ARTICLES SUCCESSFULLY ===`);
         
     } catch (error) {
-        console.error('=== ERROR LOADING INITIAL NEWS ARTICLES ===');
-        console.error('Error:', error);
-        console.error('Error type:', error.constructor.name);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-        console.error('=== END ERROR LOADING INITIAL NEWS ARTICLES ===');
+        console.error(`${debugPrefix} === ERROR LOADING INITIAL NEWS ARTICLES ===`);
+        console.error(`${debugPrefix} Error:`, error);
+        console.error(`${debugPrefix} Error type:`, error.constructor.name);
+        console.error(`${debugPrefix} Error message:`, error.message);
+        console.error(`${debugPrefix} Error stack:`, error.stack);
+        console.error(`${debugPrefix} === END ERROR LOADING INITIAL NEWS ARTICLES ===`);
+        
+        // Show error state
         handleSearchError(error);
+    } finally {
         hideLoadingState();
     }
 }
@@ -559,18 +538,31 @@ var TickerNewsAPI = {
      * @returns {Promise<Array>} Array of ticker-specific news articles
      */
     fetchTickerNews: function(ticker, filters) {
-        if (!window.newsApiClient) {
-            throw new Error('News API client not available');
-        }
-        return newsApiClient.fetchTickerNews(ticker, filters);
+        return new Promise((resolve, reject) => {
+            if (!window.dataApi) {
+                reject(new Error('DataApi client not available'));
+                return;
+            }
+            
+            const searchParams = { ticker: ticker };
+            
+            window.dataApi.getNews(searchParams, (error, data, response) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(data || []);
+                }
+            });
+        });
     },
     
     /**
-     * Get supported tickers
+     * Get supported tickers - placeholder implementation
      * @returns {Array<string>} Array of supported ticker symbols
      */
     getSupportedTickers: function() {
-        return window.newsApiClient ? newsApiClient.getSupportedTickers() : [];
+        // This would need to be implemented based on backend capabilities
+        return ['AAPL', 'MSFT', 'TSLA', 'BTC-USD', 'ETH-USD', 'MDB', 'GTLB', 'CFLT'];
     },
     
     /**
@@ -579,7 +571,7 @@ var TickerNewsAPI = {
      * @returns {boolean} Whether ticker is supported
      */
     isTickerSupported: function(ticker) {
-        return window.newsApiClient ? newsApiClient.isTickerSupported(ticker) : false;
+        return this.getSupportedTickers().includes(ticker.toUpperCase());
     }
 };
 
@@ -777,6 +769,7 @@ function updateNewsGrid(articles) {
         throw error;
     }
 }
+
 
 // Theme integration
 document.addEventListener('themeChanged', function(e) {

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro - YAUSMA | Advanced Stock Market Analysis</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Main CSS -->
+    <link href="../css/main.css" rel="stylesheet">
+    <!-- Theme CSS Files -->
+    <link href="../css/themes/light.css" rel="stylesheet">
+    <link href="../css/themes/dark.css" rel="stylesheet">
+    <!-- Pro Page CSS -->
+    <link href="../css/pages/pro.css" rel="stylesheet">
+</head>
+
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand" href="../index.html">
+                <i class="logo-icon bi bi-graph-up"></i>
+                <span>YAUSMA</span>
+            </a>
+            
+            <!-- Mobile Menu Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Menu -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto" id="mainNavigation">
+                    <li class="nav-item">
+                        <a class="nav-link" href="stocks.html">Stocks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="news.html">News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="portfolio.html">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="pro.html">Pro</a>
+                    </li>
+                </ul>
+                
+                <!-- Right Side Actions -->
+                <div class="navbar-actions">
+                    <!-- Theme Toggle -->
+                    <button class="btn-theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                        <i class="theme-icon-light bi bi-sun"></i>
+                        <i class="theme-icon-dark bi bi-moon"></i>
+                    </button>
+                    
+                    <!-- Auth Buttons -->
+                    <a href="auth.html" class="btn btn-outline-secondary">Sign In</a>
+                    <a href="auth.html" class="btn btn-primary">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pro-hero-section">
+        <div class="container">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <div class="pro-hero-content">
+                        <h1 class="pro-hero-title">
+                            Upgrade to <span class="highlight-text">YAUSMA Pro</span>
+                        </h1>
+                        <p class="pro-hero-subtitle">
+                            Get advanced analytics, real-time alerts, and professional-grade tools to make smarter investment decisions.
+                        </p>
+                        <div class="pro-hero-actions">
+                            <a href="#pricing" class="btn btn-primary btn-lg">Start Free Trial</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Comparison Section -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title">Free vs Pro Features</h2>
+                    <p class="section-subtitle">See what you get with YAUSMA Pro</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="features-comparison">
+                        <div class="comparison-table">
+                            <div class="comparison-header">
+                                <div class="feature-column">Features</div>
+                                <div class="plan-column">
+                                    <div class="plan-name">Free</div>
+                                </div>
+                                <div class="plan-column pro-column">
+                                    <div class="plan-name">Pro</div>
+                                    </div>
+                            </div>
+                            
+                            <div class="comparison-row">
+                                <div class="feature-name">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                    Real-time Stock Data
+                                </div>
+                                <div class="plan-feature">
+                                    <span class="feature-x">X</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="bi bi-check-lg text-success"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="comparison-row">
+                                <div class="feature-name">
+                                    <i class="bi bi-bell"></i>
+                                    Price Alerts
+                                </div>
+                                <div class="plan-feature">
+                                    <span class="feature-x">X</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="bi bi-check-lg text-success"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="comparison-row">
+                                <div class="feature-name">
+                                    <i class="bi bi-bar-chart"></i>
+                                    Advanced Charts
+                                </div>
+                                <div class="plan-feature">
+                                    <span class="feature-x">X</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="bi bi-check-lg text-success"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="comparison-row">
+                                <div class="feature-name">
+                                    <i class="bi bi-briefcase"></i>
+                                    Portfolio Analytics
+                                </div>
+                                <div class="plan-feature">
+                                    <span class="feature-x">X</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="bi bi-check-lg text-success"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="comparison-row">
+                                <div class="feature-name">
+                                    <i class="bi bi-newspaper"></i>
+                                    Premium News
+                                </div>
+                                <div class="plan-feature">
+                                    <span class="feature-x">X</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="bi bi-check-lg text-success"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="comparison-row">
+                                <div class="feature-name">
+                                    <i class="bi bi-cloud-download"></i>
+                                    Export Data
+                                </div>
+                                <div class="plan-feature">
+                                    <span class="feature-x">X</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="bi bi-check-lg text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title">Choose Your Plan</h2>
+                    <p class="section-subtitle">Start with a free trial, upgrade anytime</p>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3 class="plan-name">Free</h3>
+                            <div class="plan-price">
+                                <span class="currency">$</span>
+                                <span class="amount">0</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <div class="pricing-features">
+                            <ul>
+                                <li><i class="bi bi-check"></i> Basic stock data</li>
+                                <li><i class="bi bi-check"></i> Limited news access</li>
+                                <li><i class="bi bi-check"></i> Basic portfolio tracking</li>
+                                <li><i class="bi bi-check"></i> Community support</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-action">
+                            <a href="auth.html" class="btn btn-primary btn-block">Get Started</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3 class="plan-name">Pro</h3>
+                            <div class="plan-price">
+                                <span class="currency">$</span>
+                                <span class="amount">29</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <div class="pricing-features">
+                            <ul>
+                                <li><i class="bi bi-check"></i> Real-time stock data</li>
+                                <li><i class="bi bi-check"></i> Advanced charts & indicators</li>
+                                <li><i class="bi bi-check"></i> Unlimited price alerts</li>
+                                <li><i class="bi bi-check"></i> Premium news & analysis</li>
+                                <li><i class="bi bi-check"></i> Advanced portfolio analytics</li>
+                                <li><i class="bi bi-check"></i> Export & API access</li>
+                                <li><i class="bi bi-check"></i> Priority support</li>
+                            </ul>
+                        </div>
+                        <div class="pricing-action">
+                            <a href="auth.html" class="btn btn-primary btn-block">Start Free Trial</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="pricing-note">
+                        <i class="bi bi-shield-check"></i>
+                        14-day free trial " No credit card required " Cancel anytime
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title">Why Choose YAUSMA Pro?</h2>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="bi bi-lightning-charge"></i>
+                        </div>
+                        <h4>Real-time Data</h4>
+                        <p>Get live market data with zero delay. Make decisions based on the most current information available.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h4>Advanced Analytics</h4>
+                        <p>Professional-grade charts, technical indicators, and analysis tools used by institutional investors.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="bi bi-bell-fill"></i>
+                        </div>
+                        <h4>Smart Alerts</h4>
+                        <p>Never miss an opportunity with intelligent price alerts and market notifications tailored to your portfolio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>YAUSMA</h5>
+                    <p>Your trusted partner for stock market analysis and investment decisions.</p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>Products</h6>
+                    <ul class="footer-links">
+                        <li><a href="stocks.html">Stock Analysis</a></li>
+                        <li><a href="portfolio.html">Portfolio</a></li>
+                        <li><a href="news.html">Market News</a></li>
+                        <li><a href="pro.html">Pro Features</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>Company</h6>
+                    <ul class="footer-links">
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>Legal</h6>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Disclaimer</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 YAUSMA. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Cookie Manager (must load before main.js) -->
+    <script src="../js/utils/cookie-manager.js"></script>
+    <!-- Auth Manager (must load before main.js) -->
+    <script src="../js/utils/auth-manager.js"></script>
+    <!-- Main JavaScript -->
+    <script src="../js/main.js"></script>
+    <!-- Global Theme Manager -->
+    <script src="../js/utils/global-theme-manager.js"></script>
+    
+    <!-- Page Protection -->
+    <script>
+        // Protect this page - require authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.authManager.protectPage()) {
+                return; // Will redirect to auth page if not logged in
+            }
+        });
+    </script>
+    
+    <!-- Pro Page JavaScript -->
+    <script src="../js/pages/pro.js"></script>
+</body>
+</html>

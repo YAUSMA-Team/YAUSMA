@@ -37,10 +37,7 @@
             
             <!-- Navigation Menu -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="index.html">Home</a>
-                    </li>
+                <ul class="navbar-nav me-auto" id="mainNavigation">
                     <li class="nav-item">
                         <a class="nav-link" href="pages/stocks.html">Stocks</a>
                     </li>
@@ -235,9 +232,6 @@
                                 <h4 class="stock-symbol">AAPL</h4>
                                 <p class="stock-name">Apple Inc.</p>
                             </div>
-                            <button class="btn-watchlist" onclick="event.stopPropagation(); toggleWatchlist('AAPL')">
-                                <i class="bi bi-bookmark"></i>
-                            </button>
                         </div>
                         <div class="stock-price-info">
                             <div class="current-price" id="aaplPrice">$175.43</div>
@@ -257,9 +251,6 @@
                                 <h4 class="stock-symbol">MSFT</h4>
                                 <p class="stock-name">Microsoft Corp.</p>
                             </div>
-                            <button class="btn-watchlist" onclick="event.stopPropagation(); toggleWatchlist('MSFT')">
-                                <i class="bi bi-bookmark"></i>
-                            </button>
                         </div>
                         <div class="stock-price-info">
                             <div class="current-price" id="msftPrice">$387.92</div>
@@ -279,9 +270,6 @@
                                 <h4 class="stock-symbol">GOOGL</h4>
                                 <p class="stock-name">Alphabet Inc.</p>
                             </div>
-                            <button class="btn-watchlist" onclick="event.stopPropagation(); toggleWatchlist('GOOGL')">
-                                <i class="bi bi-bookmark"></i>
-                            </button>
                         </div>
                         <div class="stock-price-info">
                             <div class="current-price" id="googlPrice">$142.56</div>
@@ -301,9 +289,6 @@
                                 <h4 class="stock-symbol">TSLA</h4>
                                 <p class="stock-name">Tesla Inc.</p>
                             </div>
-                            <button class="btn-watchlist" onclick="event.stopPropagation(); toggleWatchlist('TSLA')">
-                                <i class="bi bi-bookmark"></i>
-                            </button>
                         </div>
                         <div class="stock-price-info">
                             <div class="current-price" id="tslaPrice">$248.50</div>
@@ -417,6 +402,10 @@
 
     <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Cookie Manager (must load before main.js) -->
+    <script src="js/utils/cookie-manager.js"></script>
+    <!-- Auth Manager (must load before main.js) -->
+    <script src="js/utils/auth-manager.js"></script>
     <!-- Main JavaScript -->
     <script src="js/main.js"></script>
     <!-- Global Theme Manager -->
