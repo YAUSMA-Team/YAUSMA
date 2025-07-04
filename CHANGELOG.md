@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2025-07-04
+
+### Bug Fixes
+
+- Fix ci
+- Add nushell in flake.nix
+- Fix ci once more
+- Add W perms for action
+
+### Features
+
+- Add release please workflow
+
+### Performance
+
+- Optimize perf for release please
+
 ## [1.2.0] - 2025-07-04
 
 ### Features
