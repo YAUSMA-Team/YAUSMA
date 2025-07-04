@@ -1,9 +1,16 @@
 name: Release Server Docker + Deploy
 
+# on:
+#   push:
+#     paths: ['flake.nix', 'backend/**', '.github/workflows/release_server_docker.yml', "web/**"]
+#     branches: ['master']
+#   workflow_dispatch:
 on:
   push:
-    paths: ['flake.nix', 'backend/**', '.github/workflows/release_server_docker.yml', "web/**"]
-    branches: ['master']
+    # paths: ['flake.nix', 'backend/**', '.github/workflows/release_server.yml', 'web/**']
+    # branches: ['master']
+    tags:
+      - 'v*.*.*'  # Trigger on version tags (e.g., v1.0.0)
   workflow_dispatch:
 
 # Automatically cancels any existing runs in the same group
@@ -42,10 +49,10 @@ jobs:
       - name: Push to GitHub Packages
         run: |
           docker load < ./result
-          docker tag yausma-server-image ghcr.io/yausma-team/yausma/yausma-server:${{ github.sha }}
+          docker tag yausma-server-image ghcr.io/yausma-team/yausma/yausma-server:${{ github.ref_name }}
           docker tag yausma-server-image ghcr.io/yausma-team/yausma/yausma-server:latest
 
-          docker push ghcr.io/yausma-team/yausma/yausma-server:${{ github.sha }}
+          docker push ghcr.io/yausma-team/yausma/yausma-server:${{ github.ref_name }}
           docker push ghcr.io/yausma-team/yausma/yausma-server:latest 
 
       - name: Trigger Deployment Webhook
