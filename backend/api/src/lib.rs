@@ -19,6 +19,7 @@ use rocket_okapi::{
     response::OpenApiResponderInner,
 };
 use rocket_cors::{AllowedOrigins, CorsOptions};
+use std::collections::HashSet;
 use tokio::sync::RwLock;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use yahoo_finance_api::YahooConnector;
@@ -268,13 +269,15 @@ pub async fn launch() -> Result<Rocket<Build>, rocket_cors::Error> {
             "http://localhost:8080",  // Development web server
             "http://127.0.0.1:8080",  // Development web server
         ]))
-        .allowed_methods(vec![
-            rocket::http::Method::Get,
-            rocket::http::Method::Post,
-            rocket::http::Method::Put,
-            rocket::http::Method::Delete,
-            rocket::http::Method::Options,
-        ])
+        .allowed_methods({
+            let mut methods = HashSet::new();
+            methods.insert("GET".parse().unwrap());
+            methods.insert("POST".parse().unwrap());
+            methods.insert("PUT".parse().unwrap());
+            methods.insert("DELETE".parse().unwrap());
+            methods.insert("OPTIONS".parse().unwrap());
+            methods
+        })
         .allowed_headers(rocket_cors::AllowedHeaders::some(&[
             "Accept",
             "Accept-Language",
