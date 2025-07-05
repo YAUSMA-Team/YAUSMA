@@ -18,6 +18,7 @@ use rocket_okapi::{
     openapi, openapi_get_spec,
     response::OpenApiResponderInner,
 };
+use rocket_cors::{AllowedOrigins, CorsOptions};
 use tokio::sync::RwLock;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use yahoo_finance_api::YahooConnector;
@@ -253,12 +254,40 @@ pub fn get_spec() -> OpenApi {
 }
 use tracing_subscriber::filter::EnvFilter;
 
-pub async fn launch() -> Rocket<Build> {
+pub async fn launch() -> Result<Rocket<Build>, rocket_cors::Error> {
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
         .with(EnvFilter::from_default_env())
         .init();
-    rocket::build()
+
+    // Configure CORS
+    let cors = CorsOptions::default()
+        .allowed_origins(AllowedOrigins::some_exact(&[
+            "https://yausma.org",
+            "https://www.yausma.org",
+            "http://localhost:8080",  // Development web server
+            "http://127.0.0.1:8080",  // Development web server
+        ]))
+        .allowed_methods(vec![
+            rocket::http::Method::Get,
+            rocket::http::Method::Post,
+            rocket::http::Method::Put,
+            rocket::http::Method::Delete,
+            rocket::http::Method::Options,
+        ])
+        .allowed_headers(rocket_cors::AllowedHeaders::some(&[
+            "Accept",
+            "Accept-Language",
+            "Content-Type",
+            "Content-Language",
+            "Authorization",
+            "X-Requested-With",
+        ]))
+        .allow_credentials(true)
+        .to_cors()?;
+
+    Ok(rocket::build()
+        .attach(cors)
         .mount(
             "/",
             FileServer::from(if cfg!(debug_assertions) {
@@ -279,7 +308,7 @@ pub async fn launch() -> Rocket<Build> {
                 landing,
                 // static_files
             ],
-        )
+        ))
 }
 
 #[derive(Responder)]

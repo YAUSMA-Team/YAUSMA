@@ -536,8 +536,8 @@ function initApiClients() {
     try {
         // Check if OpenAPI client is available
         if (typeof ApiClient !== 'undefined') {
-            // Configure API client with backend URL
-            YAUSMA.apiClient = new ApiClient('http://localhost:8000');
+            // Configure API client with auto-detected URL
+            YAUSMA.apiClient = new ApiClient();
             
             // Create API instances if available
             if (typeof DataApi !== 'undefined') {
@@ -655,7 +655,8 @@ window.YAUSMA_DEBUG = {
     // Raw fetch test
     testRawFetch: function(endpoint) {
         endpoint = endpoint || '/api/data/news';
-        const url = 'http://localhost:8000' + endpoint;
+        const baseUrl = typeof ApiClient !== 'undefined' ? ApiClient.getDefaultBasePath() : 'http://localhost:8000';
+        const url = baseUrl + endpoint;
         
         console.log('[YAUSMA-DEBUG] Testing raw fetch to:', url);
         
@@ -717,7 +718,8 @@ window.YAUSMA_DEBUG = {
         }
         
         endpoint = endpoint || '/api/data/news';
-        const url = 'http://localhost:8000' + endpoint;
+        const baseUrl = typeof ApiClient !== 'undefined' ? ApiClient.getDefaultBasePath() : 'http://localhost:8000';
+        const url = baseUrl + endpoint;
         
         console.log('[YAUSMA-DEBUG] Testing superagent directly to:', url);
         

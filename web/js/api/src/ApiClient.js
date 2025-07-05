@@ -10,10 +10,14 @@
 
 /**
  * API Client for handling HTTP requests
- * @param {String} basePath - Base URL for API calls (default: http://localhost:8000)
+ * @param {String} basePath - Base URL for API calls (default: auto-detected)
  */
 function ApiClient(basePath) {
-    this.basePath = (basePath || 'http://localhost:8000').replace(/\/+$/, '');
+    // Auto-detect API base URL based on environment
+    if (!basePath) {
+        basePath = ApiClient.getDefaultBasePath();
+    }
+    this.basePath = basePath.replace(/\/+$/, '');
     this.defaultHeaders = {
         'User-Agent': 'YAUSMA-Client/1.0.0'
     };
@@ -400,6 +404,32 @@ ApiClient.convertToType = function(data, type) {
                 return data;
             }
     }
+};
+
+/**
+ * Gets the default base path for API calls based on environment
+ * @returns {String} The default base path
+ */
+ApiClient.getDefaultBasePath = function() {
+    // Check if running in production (https://yausma.org)
+    if (typeof window !== 'undefined' && window.location) {
+        var hostname = window.location.hostname;
+        var protocol = window.location.protocol;
+        
+        if (hostname === 'yausma.org' || hostname === 'www.yausma.org') {
+            // Production environment
+            return protocol + '//' + hostname + '/api';
+        } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            // Development environment
+            return 'http://localhost:8000';
+        } else {
+            // Other environments (staging, etc.)
+            return protocol + '//' + hostname + '/api';
+        }
+    }
+    
+    // Fallback for non-browser environments
+    return 'http://localhost:8000';
 };
 
 /**
