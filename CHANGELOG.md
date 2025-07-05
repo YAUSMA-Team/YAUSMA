@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2025-07-05
+
+### Bug Fixes
+
+- Fix cargo check workflow file
+- Api calls in stock page are working now
+
+### Features
+
+- Replace mock api with real
+
+### Miscellaneous Tasks
+
+- Cargo check for every branch
+
 ## [1.5.6] - 2025-07-04
 
 ### Miscellaneous Tasks
