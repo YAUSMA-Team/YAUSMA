@@ -137,7 +137,6 @@ class CookieManager {
                 
                 if (cookieName === encodedName) {
                     const value = decodeURIComponent(cookieValue);
-                    console.log(`[CookieManager] Cookie retrieved: ${name}=${value}`);
                     return value;
                 }
             }
@@ -427,7 +426,6 @@ class CookieManager {
     isLoggedIn() {
         const loginState = this.getCookie('yausma_isLoggedIn', 'false');
         const isLoggedIn = loginState === 'true';
-        console.log(`[CookieManager] Login state check: ${isLoggedIn}`);
         return isLoggedIn;
     }
     

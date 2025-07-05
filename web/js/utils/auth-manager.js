@@ -142,7 +142,7 @@ class AuthManager {
      */
     updateNavigation() {
         const isLoggedIn = this.isLoggedIn();
-        console.log(`[AuthManager] Updating navigation for logged in state: ${isLoggedIn}`);
+
         
         // Update main navigation items - hide individual items, not the container
         const mainNav = document.getElementById('mainNavigation') || document.querySelector('.navbar-nav');

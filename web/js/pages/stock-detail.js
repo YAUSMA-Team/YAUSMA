@@ -328,35 +328,82 @@ function loadStockData(symbol) {
     }
 }
 
-// Load data from API
-function loadFromAPI(symbol) {
-    window.dataApi.getMarketOverview(function(error, data, response) {
-        hideLoadingOverlay();
+// Load data from API - exact same call as stocks.js
+async function loadFromAPI(symbol) {
+    try {
+        console.log('=== LOADING STOCK DATA FOR:', symbol, '===');
+        console.log('DataApi client available:', !!window.dataApi);
         
-        if (error) {
-            console.error('API error loading stock data:', error);
-            loadMockStockData(symbol);
-            return;
+        let stocks;
+        
+        // Check if API client is available
+        if (window.dataApi) {
+            // Use real API to fetch market overview - EXACT SAME CALL AS STOCKS.JS
+            stocks = await new Promise((resolve, reject) => {
+                window.dataApi.getMarketOverview((error, data, response) => {
+                    if (error) {
+                        console.error('API error loading stocks:', error);
+                        reject(error);
+                    } else {
+                        console.log('=== RAW API RESPONSE (COMPLETE) ===');
+                        console.log('Response:', response);
+                        console.log('Data:', data);
+                        console.log('Data type:', typeof data);
+                        console.log('Data length:', data ? data.length : 'N/A');
+                        console.log('=== END RAW API RESPONSE ===');
+                        
+                        resolve(data || []);
+                    }
+                });
+            });
+            
+        } else {
+            console.log('API client not available');
+            stocks = [];
         }
         
-        // Find the requested stock in the response
+        console.log('Received stocks:', stocks);
+        console.log('Stocks count:', stocks.length);
+        
+        // Find the requested stock in the complete response
         var stockData = null;
-        if (data && Array.isArray(data)) {
-            stockData = data.find(function(stock) {
+        if (stocks && Array.isArray(stocks)) {
+            stockData = stocks.find(function(stock) {
                 return stock.symbol === symbol;
             });
         }
         
         if (stockData) {
+            console.log('Found stock data for:', symbol);
+            console.log('Stock data:', stockData);
+            
             StockDetailManager.stockData = stockData;
             updateStockDisplay(stockData);
             loadRelatedNews(symbol);
             loadSimilarStocks(stockData.sector);
+            
+            console.log(`=== LOADED ${symbol} STOCK DATA SUCCESSFULLY ===`);
         } else {
             console.warn('Stock not found in API response, using mock data');
+            if (stocks.length > 0) {
+                console.log('Available stocks:', stocks.map(s => s.symbol).join(', '));
+            }
             loadMockStockData(symbol);
         }
-    });
+        
+    } catch (error) {
+        console.error('=== ERROR LOADING STOCK DATA ===');
+        console.error('Error:', error);
+        console.error('Error type:', error.constructor.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('=== END ERROR LOADING STOCK DATA ===');
+        
+        // Fallback to mock data
+        loadMockStockData(symbol);
+    } finally {
+        hideLoadingOverlay();
+    }
 }
 
 // Load mock stock data
@@ -397,9 +444,8 @@ function loadMockStockData(symbol) {
 
 // Update stock display
 function updateStockDisplay(stockData) {
-    // Update page title and breadcrumb
+    // Update page title
     document.getElementById('pageTitle').textContent = `${stockData.symbol} - ${stockData.name} - YAUSMA`;
-    document.getElementById('breadcrumbStock').textContent = stockData.symbol;
     
     // Update stock header
     document.getElementById('stockSymbol').textContent = stockData.symbol;
@@ -820,6 +866,7 @@ function getCompanyName(symbol) {
     
     return names[symbol] || symbol + ' Corporation';
 }
+
 
 // Helper function to escape HTML
 function escapeHtml(text) {

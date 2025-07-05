@@ -1,5 +1,4 @@
 use api::*;
-use fs_extra::dir::{CopyOptions, copy};
 use std::{
     fs::{self},
     process::Command,
