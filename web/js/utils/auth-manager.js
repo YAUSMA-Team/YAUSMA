@@ -39,28 +39,71 @@ class AuthManager {
     }
     
     /**
-     * Simple login function (for now just sets cookie)
-     * @param {string} username - Username (for future API integration)
-     * @param {string} password - Password (for future API integration)
-     * @returns {boolean} Login success
+     * Login function using real API
+     * @param {string} email - User email
+     * @param {string} password - User password (will be hashed)
+     * @param {function} callback - Callback function(success, error)
      */
-    login(username, password) {
-        console.log('[AuthManager] Attempting login...');
+    login(email, password, callback) {
+        console.log('[AuthManager] Attempting API login...');
         
-        // Simple test credentials for now
-        if (username === 'test@test' && password === 'test') {
-            if (window.cookieManager) {
-                const success = window.cookieManager.setLoggedIn(true);
-                if (success) {
-                    console.log('[AuthManager] Login successful');
-                    this.updateNavigation();
-                    return true;
-                }
-            }
+        if (!window.userApi) {
+            const error = 'UserApi not available';
+            console.error('[AuthManager]', error);
+            if (callback) callback(false, error);
+            return;
         }
         
-        console.log('[AuthManager] Login failed');
-        return false;
+        // Hash password using the same method as signup
+        this.hashPassword(password).then((hashedPassword) => {
+            const credentials = new UserCredentials(email, hashedPassword);
+            
+            window.userApi.login(credentials, (error, data, response) => {
+                if (error) {
+                    console.log('[AuthManager] Login failed:', error);
+                    if (callback) callback(false, error);
+                } else {
+                    console.log('[AuthManager] Login successful');
+                    
+                    // Set login state in cookies
+                    if (window.cookieManager) {
+                        window.cookieManager.setLoggedIn(true);
+                        // Store user email for reference
+                        window.cookieManager.setCookie('yausma_user_email', email);
+                    }
+                    
+                    this.updateNavigation();
+                    if (callback) callback(true, null);
+                }
+            });
+        }).catch((hashError) => {
+            console.error('[AuthManager] Password hashing failed:', hashError);
+            if (callback) callback(false, 'Failed to process password');
+        });
+    }
+    
+    /**
+     * Hash password using Web Crypto API (same as signup)
+     * @param {string} password - Plain text password
+     * @returns {Promise<string>} Hashed password
+     */
+    hashPassword(password) {
+        return new Promise((resolve, reject) => {
+            if (!window.crypto || !window.crypto.subtle) {
+                // Fallback for older browsers - just encode as base64
+                resolve(btoa(password));
+                return;
+            }
+            
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            
+            window.crypto.subtle.digest('SHA-256', data).then((hashBuffer) => {
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                resolve(hashHex);
+            }).catch(reject);
+        });
     }
     
     /**

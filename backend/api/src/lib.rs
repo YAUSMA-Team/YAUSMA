@@ -268,6 +268,12 @@ pub async fn launch() -> Result<Rocket<Build>, rocket_cors::Error> {
             "https://www.yausma.org",
             "http://localhost:8080",  // Development web server
             "http://127.0.0.1:8080",  // Development web server
+            "http://localhost:3000",  // Common dev server port
+            "http://127.0.0.1:3000",  // Common dev server port
+            "http://localhost:5000",  // Another common dev port
+            "http://127.0.0.1:5000",  // Another common dev port
+            "http://localhost:8000",  // Backend port (for direct access)
+            "http://127.0.0.1:8000",  // Backend port (for direct access)
         ]))
         .allowed_methods({
             let mut methods = HashSet::new();

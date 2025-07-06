@@ -351,27 +351,21 @@ function handleSigninSubmit(e) {
     // Show loading state
     setFormLoading(true, 'signin');
     
-    // Simple test credentials validation
-    setTimeout(function() {
-        if (email === 'test@test' && password === 'test') {
-            // Login successful
-            if (window.authManager) {
-                if (window.authManager.login(email, password)) {
-                    handleSigninSuccess(email);
-                } else {
-                    setFormLoading(false, 'signin');
-                    showFormError('Login failed. Please try again.', 'signin');
-                }
-            } else {
-                setFormLoading(false, 'signin');
-                showFormError('Authentication system not available.', 'signin');
-            }
-        } else {
-            // Login failed
+    // Use real API login through AuthManager
+    if (window.authManager) {
+        window.authManager.login(email, password, function(success, error) {
             setFormLoading(false, 'signin');
-            showFormError('Invalid credentials. Use "test" for both username and password.', 'signin');
-        }
-    }, 500); // Small delay to show loading state
+            
+            if (success) {
+                handleSigninSuccess(email);
+            } else {
+                handleApiError(error, 'signin');
+            }
+        });
+    } else {
+        setFormLoading(false, 'signin');
+        showFormError('Authentication system not available.', 'signin');
+    }
 }
 
 // Handle sign up form submission
@@ -444,16 +438,35 @@ function hashPassword(password) {
 function handleApiError(error, formType) {
     var message = 'An error occurred. Please try again.';
     
-    if (error.status === 409) {
-        message = 'This email is already registered. Please use a different email or sign in.';
-    } else if (error.status === 404) {
-        message = formType === 'signin' 
-            ? 'Invalid email or password. Please check your credentials.'
-            : 'Invalid request. Please try again.';
-    } else if (error.status === 500) {
-        message = 'Server error. Please try again later.';
+    // Handle different error types
+    if (typeof error === 'string') {
+        message = error;
+    } else if (error && error.status) {
+        // HTTP status code errors
+        if (error.status === 409) {
+            message = 'This email is already registered. Please use a different email or sign in.';
+        } else if (error.status === 404) {
+            message = formType === 'signin' 
+                ? 'Invalid email or password. Please check your credentials.'
+                : 'Invalid request. Please try again.';
+        } else if (error.status === 500) {
+            message = 'Server error. Please try again later.';
+        } else if (error.status === 401) {
+            message = 'Invalid email or password. Please check your credentials.';
+        }
+    } else if (error && error.message) {
+        // Error object with message
+        message = error.message;
+    } else if (error && typeof error === 'object') {
+        // Check for nested error structures
+        if (error.error && error.error.description) {
+            message = error.error.description;
+        } else if (error.responseJSON && error.responseJSON.message) {
+            message = error.responseJSON.message;
+        }
     }
     
+    console.log('[Auth] API Error:', error);
     showFormError(message, formType);
 }
 
