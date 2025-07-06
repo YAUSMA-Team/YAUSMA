@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2025-07-06
+
+### Bug Fixes
+
+- Unsafe hader causes browser to block api requests
+
 ## [1.7.0] - 2025-07-06
 
 ### Bug Fixes
