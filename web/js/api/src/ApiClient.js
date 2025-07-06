@@ -416,19 +416,32 @@ ApiClient.getDefaultBasePath = function() {
         var hostname = window.location.hostname;
         var protocol = window.location.protocol;
         
+        // Debug logging
+        console.log('[ApiClient] Environment detection:', {
+            hostname: hostname,
+            protocol: protocol,
+            href: window.location.href
+        });
+        
         if (hostname === 'yausma.org' || hostname === 'www.yausma.org') {
             // Production environment
-            return protocol + '//' + hostname + '/api';
+            var basePath = protocol + '//' + hostname + '/api';
+            console.log('[ApiClient] Production environment detected, using:', basePath);
+            return basePath;
         } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
             // Development environment
+            console.log('[ApiClient] Development environment detected, using: http://localhost:8000');
             return 'http://localhost:8000';
         } else {
             // Other environments (staging, etc.)
-            return protocol + '//' + hostname + '/api';
+            var basePath = protocol + '//' + hostname + '/api';
+            console.log('[ApiClient] Other environment detected, using:', basePath);
+            return basePath;
         }
     }
     
     // Fallback for non-browser environments
+    console.log('[ApiClient] Fallback environment, using: http://localhost:8000');
     return 'http://localhost:8000';
 };
 
