@@ -422,8 +422,8 @@ ApiClient.getDefaultBasePath = function() {
         });
         
         if (hostname === 'yausma.org' || hostname === 'www.yausma.org') {
-            // Production environment
-            var basePath = protocol + '//' + hostname + '/api';
+            // Production environment - no /api suffix since backend routes already include /api
+            var basePath = protocol + '//' + hostname;
             console.log('[ApiClient] Production environment detected, using:', basePath);
             return basePath;
         } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -431,8 +431,8 @@ ApiClient.getDefaultBasePath = function() {
             console.log('[ApiClient] Development environment detected, using: http://localhost:8000');
             return 'http://localhost:8000';
         } else {
-            // Other environments (staging, etc.)
-            var basePath = protocol + '//' + hostname + '/api';
+            // Other environments (staging, etc.) - no /api suffix since backend routes already include /api
+            var basePath = protocol + '//' + hostname;
             console.log('[ApiClient] Other environment detected, using:', basePath);
             return basePath;
         }
