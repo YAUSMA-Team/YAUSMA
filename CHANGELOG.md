@@ -2,12 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2025-07-06
+
+### Bug Fixes
+
+- Fixed CORS
+
+### Features
+
+- Console logs on hostname
+
 ## [1.6.0] - 2025-07-05
 
 ### Bug Fixes
 
 - Fix cargo check workflow file
 - Api calls in stock page are working now
+- Api not working
 
 ### Features
 
