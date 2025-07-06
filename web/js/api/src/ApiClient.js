@@ -18,9 +18,7 @@ function ApiClient(basePath) {
         basePath = ApiClient.getDefaultBasePath();
     }
     this.basePath = basePath.replace(/\/+$/, '');
-    this.defaultHeaders = {
-        'User-Agent': 'YAUSMA-Client/1.0.0'
-    };
+    this.defaultHeaders = {};
     this.timeout = 60000;
     this.authentications = {};
     this.cache = true;
