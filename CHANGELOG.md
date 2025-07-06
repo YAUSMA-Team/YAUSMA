@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2] - 2025-07-06
+
+### Bug Fixes
+
+- Base path dfined wrongly
+
 ## [1.7.1] - 2025-07-06
 
 ### Bug Fixes

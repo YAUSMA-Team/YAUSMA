@@ -18,7 +18,7 @@ version = "0.5.1"
 [package]
 edition = "2024"
 name = "backend"
-version = "1.7.1"
+version = "1.7.2"
 
 [workspace]
 members = ["api"]
