@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.1] - 2025-07-08
+
+### Bug Fixes
+
+- Mobile not connecting
+
 ## [1.8.0] - 2025-07-06
 
 ### Features
