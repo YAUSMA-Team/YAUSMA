@@ -5,9 +5,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-var client = ApiClient(basePath: "http://192.168.0.58:8000");
 // var client = ApiClient(basePath: "http://192.168.0.58:8000");
-// var client = ApiClient(basePath: "https://yausma.org");
+// var client = ApiClient(basePath: "http://192.168.0.58:8000");
+var client = ApiClient(basePath: "https://yausma.org");
 
 void main() => runApp(
       ChangeNotifierProvider(
